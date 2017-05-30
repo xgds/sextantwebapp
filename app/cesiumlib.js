@@ -1,11 +1,18 @@
 import 'cesium/Source/Widgets/widgets.css';
 import './style.css';
 import buildModuleUrl from 'cesium/Source/Core/buildModuleUrl';
+//import {config} from './../config/config_globals';
+import {config} from './../config/config';
+
+
 buildModuleUrl.setBaseUrl('./');
 // Load all cesium components required
 import {Viewer, EllipsoidTerrainProvider, Cartesian3, CesiumMath, Cartographic, Ellipsoid, Color,
 sampleTerrain, ScreenSpaceEventHandler, ScreenSpaceEventType, Rectangle,
     CreateTileMapServiceImageryProvider, CesiumTerrainProvider} from './demo_code/cesium_imports'
+
+ // TODO why is this on the sextant port?  suspicious.  Sextant is doing the math.  Seems like javascript can do the math too.
+const destination = Cartesian3.fromDegrees(config.siteConfig.centerPoint[0], config.siteConfig.centerPoint[1], config.sextant.port);
 
 class ViewerWrapper{
     constructor(host, port, terrainExaggeration, container) {
@@ -44,10 +51,8 @@ class ViewerWrapper{
         viewer.infoBox.frame.sandbox =
             "allow-same-origin allow-top-navigation allow-pointer-lock allow-popups allow-forms allow-scripts";
         self = this;
-        const idaho_destination = Cartesian3.fromDegrees(-113.5787682, 43.4633101, 5000);
-        const hawaii_destination = Cartesian3.fromDegrees(-155.2118, 19.3647, 5000);
-        const hawaii = viewer.scene.camera.flyTo({
-            destination: hawaii_destination,
+        const flewTo = viewer.scene.camera.flyTo({
+            destination: destination,
             duration: 3,
             complete: function(){
                 //self.addTerrain('tilesets/HI_highqual');
@@ -251,4 +256,4 @@ class ViewerWrapper{
     };
 }
 
-export {ViewerWrapper}
+export {ViewerWrapper, destination}

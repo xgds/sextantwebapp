@@ -1,21 +1,23 @@
-ViewerWrapper = require('./cesiumlib');
+//ViewerWrapper = require('./cesiumlib');
+import {ViewerWrapper, destination} from './cesiumlib';
+import {config} from './../config/config';
 
-var viewerWrapper = new ViewerWrapper('http://localhost', 3001, 1, 'cesiumContainer');
-var viewer = viewerWrapper.viewer;
-var camera = viewer.scence.camera;
+const viewerWrapper = new ViewerWrapper(config.urlPrefix, config.server.port, 1, 'cesiumContainer');
+const viewer = viewerWrapper.viewer;
+const camera = viewer.scence.camera;
 
-hawaii = camera.flyTo({
-    destination: Cartesian3.fromDegrees(-155.2118, 19.3647, 5000),
+const currentSite = camera.flyTo({
+    destination: destination,
     duration: 3,
     complete: function(){
-        viewerWrapper.addImagery('3001', 'CustomMaps/HI_lowqual_relief');
-        viewerWrapper.addTerrain('9090', 'tilesets/HI_highqual');
+        viewerWrapper.addImagery(config.server.port, config.siteConfig.imagery);
+        viewerWrapper.addTerrain(config.terrain.port, config.siteConfig.elevation);
         hoverLatLong()
     }
 });
 
 function zoom(){
-    hawaii = camera.setView({
-        destination: Cartesian3.fromDegrees(-155.2118, 19.3647, 5000),
+	currentSite = camera.setView({
+        destination: destination
     });
 }

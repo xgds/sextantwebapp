@@ -3,8 +3,12 @@ const path = require('path');
 const terrainServer = require('./terrainserver');
 const webpackDevMiddleware = require("webpack-dev-middleware");
 const webpackHotMiddleware = require("webpack-hot-middleware");
+//import {config} from './config/config_globals';
+import {config} from './config/config';
+
+
 let app = express();
-const port = (process.env.PORT || 3001);
+
 
 (function() {
   // Step 1: Create & configure a webpack compiler
@@ -12,15 +16,17 @@ const port = (process.env.PORT || 3001);
   const webpackConfig = require('./webpack.config');
   const compiler = webpack(webpackConfig);
 
-  // Step 2: Attach the dev middleware to the compiler & the server
-  app.use(webpackDevMiddleware(compiler, {
-    noInfo: true, publicPath: webpackConfig.output.publicPath
-  }));
-
-  // Step 3: Attach the hot middleware to the compiler & the server
-  app.use(webpackHotMiddleware(compiler, {
-    log: console.log, path: '/__webpack_hmr', heartbeat: 10 * 1000
-  }));
+//  if (config.development) {
+	  // Step 2: Attach the dev middleware to the compiler & the server
+	  app.use(webpackDevMiddleware(compiler, {
+	    noInfo: true, publicPath: webpackConfig.output.publicPath
+	  }));
+	
+	  // Step 3: Attach the hot middleware to the compiler & the server
+	  app.use(webpackHotMiddleware(compiler, {
+	    log: console.log, path: '/__webpack_hmr', heartbeat: 10 * 1000
+	  }));
+//  }
 })();
 
 // Serve static files from the public folder
@@ -51,10 +57,14 @@ app.use(express.static(cesiumPath));
 
 //require("!style!css!./style.css");
 
-app.get('/Widget', function (req, res) {
- res.send('Hello world');
-});
+//app.get('/Widget', function (req, res) {
+// res.send('Hello world');
+//});
 
+app.set('trust proxy', true);
+app.set('trust proxy', 'loopback');
+
+const port = config.server.port;
 app.listen(port, function () {
-  console.log('Example app listening on port 3001');
+  console.log('Example app listening on port ' + port);
 });

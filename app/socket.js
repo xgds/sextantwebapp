@@ -1,6 +1,9 @@
 import io from 'socket.io-client';
+//import {config} from './../config/config_globals';
+import {config} from './../config/config';
 
-const socket = io('http://localhost:2999');
+
+const socket = io(urlPrefix + ':' + config.socket.port);
 
 class Messenger{
     constructor(socket_ref) {

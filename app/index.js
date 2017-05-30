@@ -2,26 +2,41 @@ import * as _ from 'lodash';
 import 'bootstrap-loader';
 import {ViewerWrapper} from './cesiumlib';
 import {Cartesian3, CesiumMath, Color, CallbackProperty} from './demo_code/cesium_imports'
-import {SSE} from './sseUtils'
+//import {config} from './../config/config_globals';
+import {config} from './../config/config';
 
-const host = 'http://localhost';
-//const host = 'http://18.189.2.237';
-const viewerWrapper = new ViewerWrapper(host, 3001, 1, 'cesiumContainer');
-const sse = new SSE('https://localhost');
+
+//TODO this is defined both in cesium.js and here in index.js.  Why?
+//TODO why is this on the sextant port?  suspicious.  Sextant is doing the math.  Seems like javascript can do the math too.
+const destination = Cartesian3.fromDegrees(config.siteConfig.centerPoint[0], config.siteConfig.centerPoint[1], config.sextant.port);
+
+//TODO there are 3 viewer wrappers and all called cesiumContainer.  maps.js, cesium.js and index.js
+const viewerWrapper = new ViewerWrapper(config.urlPrefix, config.server.port, 1, 'cesiumContainer');
+
+const hasSSE = config.sse;
+// ah well, import has to be outside the if.
+import {SSE} from './sseUtils'
+if (hasSSE != undefined) {
+	const sse = new SSE(config.sse.protocol + '://' + config.sse.name);
+	sse.subscribe('position', logpoint, 'EV2');
+}
+
 const viewer = viewerWrapper.viewer;
 const camera = viewer.scene.camera;
 
+//TODO zoom is already defined in cesium.js
 function zoom(){
 	const hawaii = camera.setView({
-		destination: Cartesian3.fromDegrees(-155.2118, 19.3647, 5000)
+		destination: destination
 	});
 }
 
+//TODO should this be refactored to cesium.js?
 function heading(headingAngle) {
     if (headingAngle != undefined) {
         console.log(headingAngle);
         camera.setView({
-            destination: Cartesian3.fromDegrees(-155.2118, 19.3647, 5000),
+            destination: destination,
             orientation: {
                 heading: CesiumMath.toRadians(headingAngle),
                 pitch: -CesiumMath.toRadians(90),
@@ -30,6 +45,7 @@ function heading(headingAngle) {
         })
     }
 }
+
 function LineString(latlongPoints, styleOptions) {
     viewerWrapper.getRaisedPositions(latlongPoints).then(function (raisedMidPoints) {
         //console.log(raisedMidPoints);
@@ -96,7 +112,6 @@ const gps_tracks = new DynamicLines();
 function logpoint(point){
     console.log(point)
 }
-sse.subscribe('position', logpoint, 'EV2');
 
 function zoomtotracks(){
 	return gps_tracks.zoomTo();
