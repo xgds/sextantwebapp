@@ -61,8 +61,9 @@ app.use(express.static(cesiumPath));
 // res.send('Hello world');
 //});
 
-app.set('trust proxy', true);
-app.set('trust proxy', 'loopback');
+//TODO this seems to work without this but may need it later.
+//app.set('trust proxy', true);
+//app.set('trust proxy', 'loopback');
 
 const port = config.server.port;
 app.listen(port, function () {
