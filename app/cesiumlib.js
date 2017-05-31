@@ -11,7 +11,7 @@ import {Viewer, EllipsoidTerrainProvider, Cartesian3, CesiumMath, Cartographic, 
 		sampleTerrain, ScreenSpaceEventHandler, ScreenSpaceEventType, Rectangle,
 		CreateTileMapServiceImageryProvider, CesiumTerrainProvider} from './demo_code/cesium_imports'
 
-const destination = Cartesian3.fromDegrees(config.siteConfig.centerPoint[0], config.siteConfig.centerPoint[1], config.siteConfig.centerPoint[2]);
+config.destination = Cartesian3.fromDegrees(config.siteConfig.centerPoint[0], config.siteConfig.centerPoint[1], config.siteConfig.centerPoint[2]);
 
 class ViewerWrapper{
     constructor(host, port, terrainExaggeration, container) {
@@ -51,7 +51,7 @@ class ViewerWrapper{
             "allow-same-origin allow-top-navigation allow-pointer-lock allow-popups allow-forms allow-scripts";
         self = this;
         const flewTo = viewer.scene.camera.flyTo({
-            destination: destination,
+            destination: config.destination,
             duration: 3,
             complete: function(){
                 //self.addTerrain('tilesets/HI_highqual');
