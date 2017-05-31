@@ -2,24 +2,23 @@ const path = require('path');
 
 //import buildCartesian from './../app/cesiumutil'
 
-let config = undefined;
 
 const initialize = function() {
-	if (config == undefined ) {
 		// this totally used to work but now dirname is /.  Updated webpack settings.
 		//let defaultConfigPath = path.resolve(__dirname, './config.js');
 		let defaultConfigPath = './config.js';
 		let configPath = (process.env.CONFIG_PATH || defaultConfigPath);
 		console.log('LOADING CONFIG FROM: ' + configPath);
 		
-		config = require(configPath);
+		let result = require(configPath);
 						
-		config.urlPrefix = config.server.protocol + '://' + config.server.name;
-		config.siteConfig = config.sites[config.defaultSite];
-		//config.destination = buildCartesian(config.siteConfig.centerPoint[0], config.siteConfig.centerPoint[1], config.siteConfig.centerPoint[2]);
-	}
+		result.urlPrefix = result.server.protocol + '://' + result.server.name;
+		result.siteConfig = result.sites[result.defaultSite];
+		//result.destination = buildCartesian(result.siteConfig.centerPoint[0], result.siteConfig.centerPoint[1], result.siteConfig.centerPoint[2]);
+		return result;
 }
 
-initialize();
+const config = initialize();
+
 
 export {config}
