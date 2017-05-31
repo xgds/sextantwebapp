@@ -7,6 +7,9 @@ const mainPath = path.resolve(__dirname, 'app', 'index.js');
 
 const config = {
     devtool: "source-map",
+    stats: {
+    	errorDetails: true
+    },
     resolve: {
         modules: [
             path.resolve('./node_modules')
@@ -28,6 +31,11 @@ const config = {
         new webpack.optimize.OccurenceOrderPlugin(),
         new webpack.HotModuleReplacementPlugin(),
         new webpack.NoErrorsPlugin(),
+        new webpack.ContextReplacementPlugin(
+        		  // /config[\/\\]config.js/,
+        		  /\w*\/config.js/,
+        		  path.resolve(__dirname, './config/config.js'),
+        		),
         new webpack.ProvidePlugin({
            $: "jquery",
            jQuery: "jquery"
@@ -58,6 +66,7 @@ const config = {
         ]
     },
     node: {
+    	__dirname: true,
         fs: "empty" //bug fix for cannot resolve module fs error
     }
 };

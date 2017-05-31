@@ -1,17 +1,17 @@
+import {config} from './../config/config_loader';
+
 import 'cesium/Source/Widgets/widgets.css';
 import './style.css';
+
 import buildModuleUrl from 'cesium/Source/Core/buildModuleUrl';
-import {config} from './../config/config_globals';
-
-
 buildModuleUrl.setBaseUrl('./');
+
 // Load all cesium components required
 import {Viewer, EllipsoidTerrainProvider, Cartesian3, CesiumMath, Cartographic, Ellipsoid, Color,
-sampleTerrain, ScreenSpaceEventHandler, ScreenSpaceEventType, Rectangle,
-    CreateTileMapServiceImageryProvider, CesiumTerrainProvider} from './demo_code/cesium_imports'
+		sampleTerrain, ScreenSpaceEventHandler, ScreenSpaceEventType, Rectangle,
+		CreateTileMapServiceImageryProvider, CesiumTerrainProvider} from './demo_code/cesium_imports'
 
- // TODO why is this on the sextant port?  suspicious.  Sextant is doing the math.  Seems like javascript can do the math too.
-const destination = Cartesian3.fromDegrees(config.siteConfig.centerPoint[0], config.siteConfig.centerPoint[1], config.sextant.port);
+const destination = Cartesian3.fromDegrees(config.siteConfig.centerPoint[0], config.siteConfig.centerPoint[1], config.siteConfig.centerPoint[2]);
 
 class ViewerWrapper{
     constructor(host, port, terrainExaggeration, container) {
@@ -255,4 +255,4 @@ class ViewerWrapper{
     };
 }
 
-export {ViewerWrapper, destination}
+export {ViewerWrapper}

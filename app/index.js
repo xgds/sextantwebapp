@@ -1,13 +1,9 @@
 import * as _ from 'lodash';
 import 'bootstrap-loader';
+import {config} from './../config/config_loader';
 import {ViewerWrapper} from './cesiumlib';
 import {Cartesian3, CesiumMath, Color, CallbackProperty} from './demo_code/cesium_imports'
-import {config} from './../config/config_globals';
 
-
-//TODO this is defined both in cesium.js and here in index.js.  Why?
-//TODO why is this on the sextant port?  suspicious.  Sextant is doing the math.  Seems like javascript can do the math too.
-const destination = Cartesian3.fromDegrees(config.siteConfig.centerPoint[0], config.siteConfig.centerPoint[1], config.sextant.port);
 
 //TODO there are 3 viewer wrappers and all called cesiumContainer.  maps.js, cesium.js and index.js
 const viewerWrapper = new ViewerWrapper(config.urlPrefix, config.server.port, 1, 'cesiumContainer');
@@ -26,7 +22,7 @@ const camera = viewer.scene.camera;
 //TODO zoom is already defined in cesium.js
 function zoom(){
 	const hawaii = camera.setView({
-		destination: destination
+		destination: config.destination
 	});
 }
 
@@ -35,7 +31,7 @@ function heading(headingAngle) {
     if (headingAngle != undefined) {
         console.log(headingAngle);
         camera.setView({
-            destination: destination,
+            destination: config.destination,
             orientation: {
                 heading: CesiumMath.toRadians(headingAngle),
                 pitch: -CesiumMath.toRadians(90),

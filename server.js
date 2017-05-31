@@ -3,11 +3,9 @@ const path = require('path');
 const terrainServer = require('./terrainserver');
 const webpackDevMiddleware = require("webpack-dev-middleware");
 const webpackHotMiddleware = require("webpack-hot-middleware");
-import {config} from './config/config_globals';
-
+import {config} from './config/config_loader';
 
 let app = express();
-
 
 (function() {
   // Step 1: Create & configure a webpack compiler
@@ -15,7 +13,7 @@ let app = express();
   const webpackConfig = require('./webpack.config');
   const compiler = webpack(webpackConfig);
 
-//  if (config.development) {
+//  if (config.debug) {
 	  // Step 2: Attach the dev middleware to the compiler & the server
 	  app.use(webpackDevMiddleware(compiler, {
 	    noInfo: true, publicPath: webpackConfig.output.publicPath
@@ -55,10 +53,6 @@ app.use(express.static(cesiumPath));
 //app = terrainServer(app, terrainPath);
 
 //require("!style!css!./style.css");
-
-//app.get('/Widget', function (req, res) {
-// res.send('Hello world');
-//});
 
 //TODO this seems to work without this but may need it later.
 //app.set('trust proxy', true);
