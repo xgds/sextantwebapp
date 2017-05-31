@@ -3,8 +3,7 @@ const path = require('path');
 const terrainServer = require('./terrainserver');
 const webpackDevMiddleware = require("webpack-dev-middleware");
 const webpackHotMiddleware = require("webpack-hot-middleware");
-//import {config} from './config/config_globals';
-import {config} from './config/config';
+import {config} from './config/config_globals';
 
 
 let app = express();

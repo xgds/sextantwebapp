@@ -1,1 +1,1 @@
-default_config.js
+xgds_config.js

@@ -1,6 +1,6 @@
 //ViewerWrapper = require('./cesiumlib');
 import {ViewerWrapper, destination} from './cesiumlib';
-import {config} from './../config/config';
+import {config} from './../config/config_globals';
 
 const viewerWrapper = new ViewerWrapper(config.urlPrefix, config.server.port, 1, 'cesiumContainer');
 const viewer = viewerWrapper.viewer;

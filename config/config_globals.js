@@ -1,25 +1,25 @@
 const path = require('path');
 
-const config = undefined;
+let config = undefined;
 
-const globalConfig = {
-		initialize: function() {
-			if (globalConfig.defaultConfigPath === undefined ) {
-				globalConfig.defaultConfigPath = path.resolve(__dirname, './config.js');
-				globalConfig.configPath = (process.env.CONFIG_PATH || globalConfig.defaultConfigPath);
-				console.log('GLOBAL CONFIG PATH ' + globalConfig.configPath);
-				
-				//config = require(globalConfig.configPath);
-				
-				console.log('REQUIRED CONFIG');
-				console.log(config.server);
-				
-//				config.urlPrefix = config.config.get('server.protocol') + '://' + config.config.get('server.name');
-//				config.siteConfig = config.config.get('sites.' + config.defaultSiteName);
-			}
-		}
+const initialize = function() {
+	if (config === undefined ) {
+		let defaultConfigPath = path.resolve(__dirname, './config.js');
+		let configPath = (process.env.CONFIG_PATH || defaultConfigPath);
+		console.log('GLOBAL CONFIG PATH ' + configPath);
+		
+		config = require(configPath);
+		
+		console.log('REQUIRED CONFIG');
+		console.log(config.server);
+						
+		config.urlPrefix = config.server.protocol + '://' + config.server.name;
+		config.siteConfig = config.sites[config.defaultSite];
+		
+		console.log(config.urlPrefix)
+	}
 }
 
-globalConfig.initialize();
+initialize();
 
 export {config}

@@ -1,8 +1,7 @@
 import 'cesium/Source/Widgets/widgets.css';
 import './style.css';
 import buildModuleUrl from 'cesium/Source/Core/buildModuleUrl';
-//import {config} from './../config/config_globals';
-import {config} from './../config/config';
+import {config} from './../config/config_globals';
 
 
 buildModuleUrl.setBaseUrl('./');

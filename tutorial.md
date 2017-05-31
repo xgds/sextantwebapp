@@ -152,3 +152,8 @@ I guess all javascript we have talked about thus far is kind useless if it is no
 Enabling the interfacing between all the function written and index.html is as simple as including any function you want to export in the module.exports of index.js. Since index.js is the entry point for bundling javascript, then webpack will know that it should expose these functions when it is included in a script tag  in index.html
 
 Then on the html page, you simple call the function by typing sextant.functionname() or instantiate a class with new sextant.Classname().
+
+
+## Configuration
+Configuration files are set up in config.  By default, whatever config/config.js is pointing to will be the config file loaded.  If you need to override without changing this link, you can modify it by setting the environment variable CONFIG_PATH to point to the path to the config file that should be loaded.
+All configuration settings should be set up in the config file.

@@ -2,8 +2,7 @@ import * as _ from 'lodash';
 import 'bootstrap-loader';
 import {ViewerWrapper} from './cesiumlib';
 import {Cartesian3, CesiumMath, Color, CallbackProperty} from './demo_code/cesium_imports'
-//import {config} from './../config/config_globals';
-import {config} from './../config/config';
+import {config} from './../config/config_globals';
 
 
 //TODO this is defined both in cesium.js and here in index.js.  Why?

@@ -5,8 +5,7 @@ import * as _ from 'lodash';
 import 'bootstrap-loader';
 //import * as messenger from './socket.js';
 import {ViewerWrapper} from './cesiumlib';
-//import {config} from './../config/config_globals';
-import {config} from './../config/config';
+import {config} from './../config/config_globals';
 
 
 console.log('creating the wrapper');

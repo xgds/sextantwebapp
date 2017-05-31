@@ -1,15 +1,10 @@
-const config = {
+module.exports = {
 
 	// The server that is running this node app 
     server : { port : 3001, //(process.env.PORT || 3001),
     		   name : 'localhost',
     		   protocol: 'http' },
     		   
-    // This should only exist in xGDS side
-    sse : { port : 443, 
-    	    name : 'localhost',
-    	    protocol : 'https' },
-    
     // If we are using web sockets this should only exist in the default side
     socket : { port : 2999 },
     
@@ -37,9 +32,3 @@ const config = {
     development : true
 
 }
-
-config.urlPrefix = config.server.protocol + '://' + config.server.name;
-
-config.siteConfig = config.sites[config.defaultSite];
-
-export {config}
