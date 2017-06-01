@@ -284,12 +284,13 @@ class ViewerWrapper{
 
 class DynamicLines{
 	
-	constructor(viewerWrapper, latLongPoints, name) {
+	constructor(viewerWrapper, latLongPoints, name, styleOptions) {
 		this.name = name || 'GPS Coordinates';
 		this.viewerWrapper = viewerWrapper;
 		this.points = [];
 		this.pointcounter = 0;
 		this.entity = Object();
+		this.styleOptions = styleOptions || {};
 		if (latLongPoints !== undefined){
 			this.initialize(latLongPoints);
 		}
@@ -299,14 +300,14 @@ class DynamicLines{
         return this.points;
     };
     
-    initialize(latLongPoints, styleOptions) {
+    initialize(latLongPoints) {
     	this.viewerWrapper.getRaisedPositions(latLongPoints).then(function (raisedMidPoints) {
     		//console.log(this.points);
     		this.points = raisedMidPoints;
     		
             const polylineArguments = Object.assign({positions: new CallbackProperty(this.getPoints.bind(this), false),
             										 width: 2,
-            										 material : Color.GREEN}, styleOptions);
+            										 material : Color.GREEN}, this.styleOptions);
             this.entity = this.viewerWrapper.viewer.entities.add({
             	name : this.name,
                 polyline: polylineArguments
@@ -335,13 +336,14 @@ class DynamicLines{
         this.pushPoint(lat, lon);
 		if(this.pointcounter === 2) {
 			console.log(this.points);
+			
+			const polylineArguments = Object.assign({positions: new CallbackProperty(this.getPoints.bind(this), false),
+				 width: 2,
+				 material : Color.GREEN}, this.styleOptions);
+			
 			this.entity = this.viewerWrapper.viewer.entities.add({
 			    name : this.name,
-			    polyline : {
-			        positions : new CallbackProperty(this.getPoints.bind(this), false),
-			        width : 2,
-			        material : Color.GREEN
-			    }
+			    polyline : polylineArguments
 			});
 			//this.zoomTo()
 		}else if(this.pointcounter > 2){

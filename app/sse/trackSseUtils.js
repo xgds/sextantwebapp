@@ -102,10 +102,14 @@ class trackSSE {
 	renderTrack(channel, data){
 		console.log('rendering track for ' + channel);
 		console.log(data);
-		// let color = Cesium.Color.fromCssColorString(color)
+		let styleDict = {};
+		if (data.color !== undefined) {
+			let color = Color.fromCssColorString('#' + data.color)
+			styleDict['material'] = color;
+		}
 		let coords = data.coords;
 		if (coords.length > 0) {
-			this.cTracks[channel] = new DynamicLines(this.viewerWrapper, coords[0]);
+			this.cTracks[channel] = new DynamicLines(this.viewerWrapper, coords[0], channel, styleDict);
 		}
 	};
 	
