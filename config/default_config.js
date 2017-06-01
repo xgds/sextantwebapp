@@ -44,6 +44,9 @@ module.exports = {
              },
     
     // whether or not this is a development server
-    debug : true
+    debug : true,
+    
+    // whether or not to show lat long elevation hovering over mouse move
+    showCoordinates : false
 
 }

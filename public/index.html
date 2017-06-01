@@ -38,7 +38,7 @@
 		</button>
 	</div>
 
-	<button class="btn btn-default" type="button" onclick="zoom()">Zoom</button>
+	<button class="btn btn-default" type="button" onclick="zoom()">Reset View</button>
 	  <button class="btn btn-default" type="button" onclick="setHeading()">Set heading</button>
 	<button class="btn btn-default" type="button" onclick="zoomToTracks()">Zoom to GPS</button>
 	<button class="btn btn-default" type="button" onclick="getwaypoints()">Get waypoints</button>
@@ -101,15 +101,15 @@
 		gpstrack.requestData();
 	}
 	function zoom(){
-		sextant.zoom();
+		sextant.zoom(sextant.camera);
 	}
 
 	function setHeading(){
-		sextant.heading(90);
+		sextant.heading(90, sextant.camera);
 	}
 
 	function zoomToTracks(){
-		sextant.zoomtotracks();
+		sextant.zoomToGPSTracks();
 	}
 	function serialstatus(){
 		console.log('serialstatus0')

@@ -48,7 +48,7 @@ class ViewerWrapper{
 
         });
         viewer.infoBox.frame.sandbox =
-            "allow-same-origin allow-top-navigation allow-pointer-lock allow-popups allow-forms allow-scripts";
+            'allow-same-origin allow-top-navigation allow-pointer-lock allow-popups allow-forms allow-scripts';
         self = this;
         const flewTo = viewer.scene.camera.flyTo({
             destination: config.destination,
@@ -59,14 +59,17 @@ class ViewerWrapper{
                 //  'https://s3-us-west-2.amazonaws.com/sextantdata'
                 // console.log('zoomed');
                 //self.addImagery('CustomMaps/HI_air_imagery_relief_100');
-                self.addLatLongHover();
+            	
+            	self.addLatLongHover();
             }
         });
 
         const handler = new ScreenSpaceEventHandler(viewer.scene.canvas);
         handler.setInputAction(function(movement) {
-            document.getElementById('hovercoord').innerHTML = this.globalpoint['latitude'].toString() + "</br>" +
-                this.globalpoint['longitude'].toString();
+            document.getElementById('hovercoord').innerHTML = this.globalpoint['latitude'].toString() + '</br>' 
+            												+ this.globalpoint['longitude'].toString() + '</br>'
+            												+ this.globalpoint['altitude'].toString();
+
         }.bind(this), ScreenSpaceEventType.LEFT_DOWN);
 
         this.viewer = viewer;
@@ -101,15 +104,15 @@ class ViewerWrapper{
                 const heightString = carto_WGS84.height.toFixed(4)/self.terrainExaggeration;
 
                 entity.position = cartesian;
-                entity.label.show = true;
-                entity.label.text = '(' + longitudeString + ', ' + latitudeString + ', ' + heightString + ')';
+            	entity.label.show = true;
+            	entity.label.text = '(' + longitudeString + ', ' + latitudeString + ', ' + heightString + ')';
 
                 const object = {
-                    "name": 'GeoPoint',
-                    "arguments": {
-                        "type": 'LAT_LONG',
-                        "latitude": CesiumMath.toDegrees(cartographic.latitude),
-                        "longitude": CesiumMath.toDegrees(cartographic.longitude)
+                    'name': 'GeoPoint',
+                    'arguments': {
+                        'type': 'LAT_LONG',
+                        'latitude': CesiumMath.toDegrees(cartographic.latitude),
+                        'longitude': CesiumMath.toDegrees(cartographic.longitude)
                     }
                 };
 
@@ -119,7 +122,7 @@ class ViewerWrapper{
     };
 
     addImagery(folder_location, image_address){
-        if(typeof image_address === "undefined") {
+        if(typeof image_address === 'undefined') {
             image_address = this.serveraddress();
         }
         this.layerList[folder_location] = this.layers.addImageryProvider(new CreateTileMapServiceImageryProvider({
@@ -128,7 +131,7 @@ class ViewerWrapper{
     };
 
     addTerrain(folder_location, image_address) {
-        if(typeof image_address === "undefined") {
+        if(typeof image_address === 'undefined') {
             image_address = this.serveraddress();
         }
         const new_terrain_provider = new CesiumTerrainProvider({
@@ -159,7 +162,7 @@ class ViewerWrapper{
             console.log(ul_col);
             console.log(lr_row);
 
-            // Remove all "old" entities
+            // Remove all 'old' entities
             console.log('made it until the loop');
             let col = ul_col-1;
             let i = -1;
@@ -216,16 +219,20 @@ class ViewerWrapper{
                 const cartographic = Cartographic.fromCartesian(cartesian);
                 const longitudeString = CesiumMath.toDegrees(cartographic.longitude).toFixed(4);
                 const latitudeString = CesiumMath.toDegrees(cartographic.latitude).toFixed(4);
-                this.globalpoint = {
-                    "latitude":CesiumMath.toDegrees(cartographic.latitude),
-                    "longitude":CesiumMath.toDegrees(cartographic.longitude)
-                };
                 const carto_WGS84 = Ellipsoid.WGS84.cartesianToCartographic(cartesian);
                 const heightString = carto_WGS84.height.toFixed(4)/self.terrainExaggeration;
 
+                this.globalpoint = {
+                    'latitude':CesiumMath.toDegrees(cartographic.latitude),
+                    'longitude':CesiumMath.toDegrees(cartographic.longitude),
+                    'altitude': heightString
+                };
+
                 entity.position = cartesian;
-                entity.label.show = true;
-                entity.label.text = '(' + longitudeString + ', ' + latitudeString + ', ' + heightString + ')';
+                if (config.showCoordinates) {
+                	entity.label.show = true;
+                	entity.label.text = '(' + longitudeString + ', ' + latitudeString + ', ' + heightString + ')';
+                }
             }
         }.bind(this), ScreenSpaceEventType.MOUSE_MOVE);
     };
@@ -255,4 +262,112 @@ class ViewerWrapper{
     };
 }
 
-export {ViewerWrapper}
+class DynamicLines{
+	
+	constructor(viewerWrapper, latLongPoints) {
+		this.viewerWrapper = viewerWrapper;
+		this.points = [];
+		this.pointcounter = 0;
+		this.entity = Object();
+		if (latLongPoints !== undefined){
+			this.initialize(latLongPoints);
+		}
+	};
+    
+	getPoints(){
+        return this.points;
+    };
+    
+    initialize(latLongPoints, styleOptions) {
+    	this.points = this.viewerWrapper.getRaisedPositions(latlongPoints);
+
+    	//console.log(this.points);
+        const polylinePositon = {
+            positions: this.points
+        };
+        const polylineArguments = Object.assign({}, polylinePositon, styleOptions);
+        const entity = this.viewerWrapper.viewer.entities.add({
+            polyline: polylineArguments
+        });
+        this.viewerWrapper.viewer.zoomTo(entity);
+    };
+
+    pushPoint(lat, lon){
+        console.log(lat.toString()+','+lon.toString());
+        this. viewerWrapper.getRaisedPositions({latitude: [lat], longitude: [lon]}).then(function(raisedMidPoints){
+            this.points.push(raisedMidPoints[0]);
+        }.bind(this));
+    };
+    
+    // gps_mesh is undefined, this makes no sense.
+//    addMesh(){
+//        gps_mesh.send('');
+//    };
+    
+	addPoint(lat, lon){
+        console.log('adding point');
+		this.pointcounter+=1;
+        this.pushPoint(lat, lon);
+		if(this.pointcounter === 2) {
+			console.log(this.points);
+			this.entity = this.viewerWrapper.viewer.entities.add({
+			    name : 'GPS coordinates',
+			    polyline : {
+			        positions : new CallbackProperty(this.getPoints.bind(this), false),
+			        width : 2,
+			        material : Color.GREEN
+			    }
+			});
+			//this.zoomTo()
+		}else if(this.pointcounter > 2){
+			lascoords = _.takeRight(this.points,2);
+			console.log(lascoords[0]===lon);
+			console.log(lascoords[1]===lat);
+			if(lascoords[0]!==lon) {
+				this.pushPoint(lon, lat);
+				//this.zoomTo()
+			}
+		}
+	};
+	
+	zoomTo(){
+		this.viewerWrapper.viewer.zoomTo(this.entity);
+	}
+};
+
+const zoom = function(camera){
+	const zoomto = camera.setView({
+		destination: config.destination
+	});
+};
+
+const heading = function(headingAngle, camera) {
+    if (headingAngle != undefined) {
+        console.log(headingAngle);
+        camera.setView({
+            destination: config.destination,
+            orientation: {
+                heading: CesiumMath.toRadians(headingAngle),
+                pitch: -CesiumMath.toRadians(90),
+                roll: 0.0
+            }
+        })
+    }
+};
+
+
+const buildLineString = function(latlongPoints, styleOptions, viewerWrapper) {
+    viewerWrapper.getRaisedPositions(latlongPoints).then(function (raisedMidPoints) {
+        //console.log(raisedMidPoints);
+        const polylinePositon = {
+            positions: raisedMidPoints
+        };
+        const polylineArguments = Object.assign({}, polylinePositon, styleOptions);
+        const entity = viewer.entities.add({
+            polyline: polylineArguments
+        });
+        viewerWrapper.viewer.zoomTo(entity);
+    });
+};
+
+export {ViewerWrapper, DynamicLines, zoom, heading, buildLineString}

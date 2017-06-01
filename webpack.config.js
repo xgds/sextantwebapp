@@ -24,7 +24,7 @@ const config = {
         publicPath: '/build/',
         filename: 'bundle.js',
         libraryTarget: "var",
-        library: 'sextant',
+        library: 'sextant', // the name of the library we refer to
         sourcePrefix: '' // required for cesium
     },
     plugins: [

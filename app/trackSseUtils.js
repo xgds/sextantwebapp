@@ -15,6 +15,7 @@
 // __END_LICENSE__
 
 const moment = require('moment');
+import {DynamicLines} from './cesiumlib';
 import {SSE} from './sseUtils'
 import {config} from './../config/config_loader';
 
@@ -23,9 +24,11 @@ const sse = new SSE(hostname);
 
 class trackSSE {
 	
-	constructor() {
+	constructor(viewerWrapper) {
+		this.viewerWrapper = viewerWrapper;
 		this.positions = {};
 		this.tracks =  {};
+		this.cTracks =  {};
 		this.STALE_TIMEOUT= 5000;
 		this.getCurrentPositions();
 		this.allChannels(this.subscribe, this);
@@ -96,9 +99,9 @@ class trackSSE {
 	};
 	
 	renderTrack(channel, data){
-		console.log('rendering track');
-		console.log(channel);
+		console.log('rendering track for ' + channel);
 		console.log(data);
+		this.cTracks[channel] = new DynamicLines(this.viewerWrapper, data);
 	};
 	
 	updateTrack(channel, position) {

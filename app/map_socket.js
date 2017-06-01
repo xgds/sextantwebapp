@@ -2,7 +2,8 @@
  * Created by johan on 5/24/2017.
  */
 import * as messenger from './socket.js';
-import viewerWrapper from './index.js';
+import { viewerWrapper, addGPSLocation } from './index.js';
+import buildLineString from './cesiumlib.js';
 
 gpsmesh = messenger.addChannel({
     name: 'gpsmesh',
@@ -50,7 +51,7 @@ gpstrack = messenger.addChannel({
     onrecieve: function(data){
         console.log('got gps data');
         console.log(data);
-        getLocation(data);
+        addGPSLocation(data);
     }
 });
 
@@ -66,7 +67,7 @@ waypointrequest = messenger.addChannel({
             width: 2,
             material: Color.RED
         };
-        LineString(midPoints, styleOptions)
+        buildLineString(midPoints, styleOptions, viewerWrapper)
     }
 });
 console.log(messenger);
@@ -83,7 +84,7 @@ getpextant = messenger.addChannel({
             width: 2,
             material: Color.ORANGE
         };
-        LineString(midPoints, styleOptions)
+        buildLineString(midPoints, styleOptions, viewerWrapper)
     }
 });
 
