@@ -242,14 +242,20 @@ class ViewerWrapper{
     	if (latLongCoords.length == 0){
     		return;
     	}
-    	if (!('latitude' in latLongCoords[0])){
-    		return this.getRaisedPositionsFromArray(latLongCoords);
-    	}
     	const cartographicArray = [];
-        for (i in latLongCoords['latitude']) {
-            let cartographicPoint = Cartographic.fromDegrees(latLongCoords['longitude'][i], latLongCoords['latitude'][i]);
+    	if (Array.isArray(latLongCoords)) {
+        	if (!('latitude' in latLongCoords[0])){
+        		return this.getRaisedPositionsFromArray(latLongCoords);
+        	}
+        	latLongCoords.forEach(function(p) {
+                let cartographicPoint = Cartographic.fromDegrees(p.longitude, p.latitude);
+                cartographicArray.push(cartographicPoint);
+            });
+    	} else {
+    		let cartographicPoint = Cartographic.fromDegrees(latLongCoords.longitude, latLongCoords.latitude);
             cartographicArray.push(cartographicPoint);
-        }
+    	}
+    	
         return this.getHeights(cartographicArray);
     };
     
@@ -275,7 +281,6 @@ class ViewerWrapper{
 	                    raisedPositionsCartograhpic[i].height *= terrainExaggeration;
 	                });
 	                let inter = ellipsoid.cartographicArrayToCartesianArray(raisedPositionsCartograhpic);
-	                console.log(inter[0]);
 	                resolve(inter);
 	            });
 	    }.bind(this));
@@ -319,7 +324,7 @@ class DynamicLines{
     };
 
     pushPoint(lat, lon){
-        console.log(lat.toString()+','+lon.toString());
+    	console.log('in push point ' + lon + ": " + lat);
         this. viewerWrapper.getRaisedPositions({latitude: [lat], longitude: [lon]}).then(function(raisedMidPoints){
             this.points.push(raisedMidPoints[0]);
         }.bind(this));
@@ -331,30 +336,28 @@ class DynamicLines{
 //    };
     
 	addPoint(lat, lon){
-        console.log('adding point');
-		this.pointcounter+=1;
         this.pushPoint(lat, lon);
-		if(this.pointcounter === 2) {
-			console.log(this.points);
-			
-			const polylineArguments = Object.assign({positions: new CallbackProperty(this.getPoints.bind(this), false),
-				 width: 2,
-				 material : Color.GREEN}, this.styleOptions);
-			
-			this.entity = this.viewerWrapper.viewer.entities.add({
-			    name : this.name,
-			    polyline : polylineArguments
-			});
-			//this.zoomTo()
-		}else if(this.pointcounter > 2){
-			lascoords = _.takeRight(this.points,2);
-			console.log(lascoords[0]===lon);
-			console.log(lascoords[1]===lat);
-			if(lascoords[0]!==lon) {
-				this.pushPoint(lon, lat);
-				//this.zoomTo()
+		if(this.points.length === 2) {
+			if (this.entity === undefined) {
+				console.log('BUILDING NEW ENTITY from addPoint);
+				const polylineArguments = Object.assign({positions: new CallbackProperty(this.getPoints.bind(this), false),
+					 width: 2,
+					 material : Color.GREEN}, this.styleOptions);
+				
+				this.entity = this.viewerWrapper.viewer.entities.add({
+				    name : this.name,
+				    polyline : polylineArguments
+				});
 			}
-		}
+		} 
+		/* 
+		 *  The below makes no sense.  this.pushPoint adds the current lat and lon to the points, so we have already added it above. 
+		  else if(this.points.length > 2){
+			let lastcoords = _.takeRight(this.points,2);
+			if(lastcoords[0]!==lon) {
+				this.pushPoint(lon, lat);
+			}
+		} */
 	};
 	
 	zoomTo(){

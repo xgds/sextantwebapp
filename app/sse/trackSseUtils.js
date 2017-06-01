@@ -100,8 +100,6 @@ class trackSSE {
 	};
 	
 	renderTrack(channel, data){
-		console.log('rendering track for ' + channel);
-		console.log(data);
 		let styleDict = {};
 		if (data.color !== undefined) {
 			let color = Color.fromCssColorString('#' + data.color)
@@ -114,7 +112,13 @@ class trackSSE {
 	};
 	
 	updateTrack(channel, position) {
-		
+		if (!(channel in this.cTracks)){
+			//TODO render the track ... this should never happen
+		} else {
+			// append the point to the track
+			let track = this.cTracks[channel];
+			track.addPoint(position.lat, position.lon);
+		}
 	};
 	
 	convertTrackNameToChannel(track_name){
