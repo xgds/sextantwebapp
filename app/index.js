@@ -9,7 +9,7 @@ const viewerWrapper = new ViewerWrapper(config.urlPrefix, config.server.port, 1,
 
 // Set up for SSE or GPS input
 const hasSSE = config.sse;
-import {trackSSE} from './trackSseUtils'
+import {trackSSE} from './sse/trackSseUtils'
 if (hasSSE != undefined) {
 	const tsse = new trackSSE(viewerWrapper);
 } else {

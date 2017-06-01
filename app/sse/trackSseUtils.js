@@ -15,10 +15,10 @@
 // __END_LICENSE__
 
 const moment = require('moment');
-import {Color} from './cesium_util/cesium_imports'
-import {DynamicLines} from './cesium_util/cesiumlib';
+import {Color} from './../cesium_util/cesium_imports'
+import {DynamicLines} from './../cesium_util/cesiumlib';
 import {SSE} from './sseUtils'
-import {config} from './../config/config_loader';
+import {config} from './../../config/config_loader';
 
 const hostname = config.sse.protocol + '://' + config.sse.name;
 const sse = new SSE(hostname);

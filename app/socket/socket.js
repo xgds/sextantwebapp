@@ -1,5 +1,5 @@
 import io from 'socket.io-client';
-import {config} from './../config/config_loader';
+import {config} from './../../config/config_loader';
 
 
 const socket = io(urlPrefix + ':' + config.socket.port);
