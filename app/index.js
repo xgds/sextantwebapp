@@ -1,8 +1,8 @@
 import * as _ from 'lodash';
 import 'bootstrap-loader';
 import {config} from './../config/config_loader';
-import {ViewerWrapper, zoom, heading, DynamicLines} from './cesiumlib';
-import {Cartesian3, CesiumMath, Color, CallbackProperty} from './demo_code/cesium_imports'
+import {ViewerWrapper, zoom, heading, DynamicLines} from './cesium_util/cesiumlib';
+import {Cartesian3, CesiumMath, Color, CallbackProperty} from './cesium_util/cesium_imports'
 
 // Configure the Cesium viewer
 const viewerWrapper = new ViewerWrapper(config.urlPrefix, config.server.port, 1, 'cesiumContainer');

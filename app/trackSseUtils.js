@@ -15,7 +15,8 @@
 // __END_LICENSE__
 
 const moment = require('moment');
-import {DynamicLines} from './cesiumlib';
+import {Color} from './cesium_util/cesium_imports'
+import {DynamicLines} from './cesium_util/cesiumlib';
 import {SSE} from './sseUtils'
 import {config} from './../config/config_loader';
 
@@ -86,7 +87,7 @@ class trackSSE {
 	
 	modifyPosition(channel, data, disconnected){
 		this.positions[channel] = data;
-		console.log(data);
+		//console.log(data);
 	};
 	
 	updatePosition(channel, data){
@@ -101,7 +102,11 @@ class trackSSE {
 	renderTrack(channel, data){
 		console.log('rendering track for ' + channel);
 		console.log(data);
-		this.cTracks[channel] = new DynamicLines(this.viewerWrapper, data);
+		// let color = Cesium.Color.fromCssColorString(color)
+		let coords = data.coords;
+		if (coords.length > 0) {
+			this.cTracks[channel] = new DynamicLines(this.viewerWrapper, coords[0]);
+		}
 	};
 	
 	updateTrack(channel, position) {

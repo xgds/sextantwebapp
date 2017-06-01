@@ -1,4 +1,4 @@
-import {config} from './../config/config_loader';
+import {config} from './../../config/config_loader';
 
 import 'cesium/Source/Widgets/widgets.css';
 import './style.css';
@@ -9,7 +9,7 @@ buildModuleUrl.setBaseUrl('./');
 // Load all cesium components required
 import {Viewer, EllipsoidTerrainProvider, Cartesian3, CesiumMath, Cartographic, Ellipsoid, Color,
 		sampleTerrain, ScreenSpaceEventHandler, ScreenSpaceEventType, Rectangle,
-		CreateTileMapServiceImageryProvider, CesiumTerrainProvider} from './demo_code/cesium_imports'
+		CreateTileMapServiceImageryProvider, CesiumTerrainProvider, CallbackProperty} from './cesium_imports'
 
 config.destination = Cartesian3.fromDegrees(config.siteConfig.centerPoint[0], config.siteConfig.centerPoint[1], config.siteConfig.centerPoint[2]);
 
@@ -47,21 +47,21 @@ class ViewerWrapper{
             //imageryProvider : imageryProvider
 
         });
-        viewer.infoBox.frame.sandbox =
-            'allow-same-origin allow-top-navigation allow-pointer-lock allow-popups allow-forms allow-scripts';
-        self = this;
+        viewer.infoBox.frame.sandbox = 
+        	'allow-same-origin allow-top-navigation allow-pointer-lock allow-popups allow-forms allow-scripts';
+        
         const flewTo = viewer.scene.camera.flyTo({
             destination: config.destination,
             duration: 3,
             complete: function(){
-                //self.addTerrain('tilesets/HI_highqual');
-                //self.addImagery('CustomMaps/MU_Pan_Sharp_contrast');
+                //this.addTerrain('tilesets/HI_highqual');
+                //this.addImagery('CustomMaps/MU_Pan_Sharp_contrast');
                 //  'https://s3-us-west-2.amazonaws.com/sextantdata'
-                // console.log('zoomed');
-                //self.addImagery('CustomMaps/HI_air_imagery_relief_100');
+                // this.log('zoomed');
+                //this.addImagery('CustomMaps/HI_air_imagery_relief_100');
             	
-            	self.addLatLongHover();
-            }
+            	this.addLatLongHover();
+            }.bind(this)
         });
 
         const handler = new ScreenSpaceEventHandler(viewer.scene.canvas);
@@ -92,7 +92,6 @@ class ViewerWrapper{
 
         const scene = viewer.scene;
         const handler = new ScreenSpaceEventHandler(scene.canvas);
-        const self = this;
         handler.setInputAction(function(movement) {
             const ray = viewer.camera.getPickRay(movement.endPosition);
             const cartesian= viewer.scene.globe.pick(ray, viewer.scene);
@@ -101,7 +100,7 @@ class ViewerWrapper{
                 const longitudeString = CesiumMath.toDegrees(cartographic.longitude).toFixed(4);
                 const latitudeString = CesiumMath.toDegrees(cartographic.latitude).toFixed(4);
                 const carto_WGS84 = Ellipsoid.WGS84.cartesianToCartographic(cartesian);
-                const heightString = carto_WGS84.height.toFixed(4)/self.terrainExaggeration;
+                const heightString = carto_WGS84.height.toFixed(4)/this.terrainExaggeration;
 
                 entity.position = cartesian;
             	entity.label.show = true;
@@ -211,7 +210,6 @@ class ViewerWrapper{
 
         const scene = viewer.scene;
         const handler = new ScreenSpaceEventHandler(scene.canvas);
-        self = this;
         handler.setInputAction(function(movement) {
             const ray = viewer.camera.getPickRay(movement.endPosition);
             const cartesian= viewer.scene.globe.pick(ray, viewer.scene);
@@ -220,7 +218,7 @@ class ViewerWrapper{
                 const longitudeString = CesiumMath.toDegrees(cartographic.longitude).toFixed(4);
                 const latitudeString = CesiumMath.toDegrees(cartographic.latitude).toFixed(4);
                 const carto_WGS84 = Ellipsoid.WGS84.cartesianToCartographic(cartesian);
-                const heightString = carto_WGS84.height.toFixed(4)/self.terrainExaggeration;
+                const heightString = carto_WGS84.height.toFixed(4)/this.terrainExaggeration;
 
                 this.globalpoint = {
                     'latitude':CesiumMath.toDegrees(cartographic.latitude),
@@ -238,33 +236,56 @@ class ViewerWrapper{
     };
 
     // returns positions projected on the terrain in Cartesian3, required for entity creation
+    // expecting data in dictionaries containing latitude and longitude as keys
     getRaisedPositions(latLongCoords) {
         //console.log(latLongCoords);
-        return new Promise(function(resolve, reject) {
-            const cartographicArray = [];
-            for (i in latLongCoords['latitude']) {
-                cartographicPoint = Cartographic.fromDegrees(latLongCoords['longitude'][i], latLongCoords['latitude'][i]);
-                cartographicArray.push(cartographicPoint);
-            }
-            //console.log(cartographicArray);
-            self = this;
-            const ellipsoid = this.viewer.scene.globe.ellipsoid;
-            sampleTerrain(this.viewer.terrainProvider, 18, cartographicArray)
-                .then(function (raisedPositionsCartograhpic) {
-                    raisedPositionsCartograhpic.forEach(function (coord, i) {
-                        raisedPositionsCartograhpic[i].height *= self.terrainExaggeration;
-                    });
-                    let inter = ellipsoid.cartographicArrayToCartesianArray(raisedPositionsCartograhpic);
-                    //console.log(inter[0]);
-                    resolve(ellipsoid.cartographicArrayToCartesianArray(raisedPositionsCartograhpic));
-                });
-        }.bind(this));
+    	if (latLongCoords.length == 0){
+    		return;
+    	}
+    	if (!('latitude' in latLongCoords[0])){
+    		return this.getRaisedPositionsFromArray(latLongCoords);
+    	}
+    	const cartographicArray = [];
+        for (i in latLongCoords['latitude']) {
+            let cartographicPoint = Cartographic.fromDegrees(latLongCoords['longitude'][i], latLongCoords['latitude'][i]);
+            cartographicArray.push(cartographicPoint);
+        }
+        return this.getHeights(cartographicArray);
+    };
+    
+    // returns positions projected on the terrain in Cartesian3, required for entity creation
+    // expecting data in array of [[latitude, longitude],[latitude,longitude]]
+    getRaisedPositionsFromArray(latLongCoords) {
+    	const cartographicArray = [];
+        latLongCoords.forEach(function(p) {
+            let cartographicPoint = Cartographic.fromDegrees(p[0], p[1]);
+            cartographicArray.push(cartographicPoint);
+        });
+        return this.getHeights(cartographicArray);
+    };
+    
+    getHeights(cartographicArray) {
+    	return new Promise(function(resolve, reject) {
+	        const ellipsoid = this.viewer.scene.globe.ellipsoid;
+	        const terrainExaggeration = this.terrainExaggeration;
+	        // 18 is the level of detail
+	        sampleTerrain(this.viewer.terrainProvider, 18, cartographicArray)
+	            .then(function (raisedPositionsCartograhpic) {
+	                raisedPositionsCartograhpic.forEach(function (coord, i) {
+	                    raisedPositionsCartograhpic[i].height *= terrainExaggeration;
+	                });
+	                let inter = ellipsoid.cartographicArrayToCartesianArray(raisedPositionsCartograhpic);
+	                console.log(inter[0]);
+	                resolve(inter);
+	            });
+	    }.bind(this));
     };
 }
 
 class DynamicLines{
 	
-	constructor(viewerWrapper, latLongPoints) {
+	constructor(viewerWrapper, latLongPoints, name) {
+		this.name = name || 'GPS Coordinates';
 		this.viewerWrapper = viewerWrapper;
 		this.points = [];
 		this.pointcounter = 0;
@@ -279,17 +300,21 @@ class DynamicLines{
     };
     
     initialize(latLongPoints, styleOptions) {
-    	this.points = this.viewerWrapper.getRaisedPositions(latlongPoints);
+    	this.viewerWrapper.getRaisedPositions(latLongPoints).then(function (raisedMidPoints) {
+    		//console.log(this.points);
+    		this.points = raisedMidPoints;
+    		
+            const polylineArguments = Object.assign({positions: new CallbackProperty(this.getPoints.bind(this), false),
+            										 width: 2,
+            										 material : Color.GREEN}, styleOptions);
+            this.entity = this.viewerWrapper.viewer.entities.add({
+            	name : this.name,
+                polyline: polylineArguments
+            });
+            this.viewerWrapper.viewer.zoomTo(this.entity);
+        }.bind(this));
 
-    	//console.log(this.points);
-        const polylinePositon = {
-            positions: this.points
-        };
-        const polylineArguments = Object.assign({}, polylinePositon, styleOptions);
-        const entity = this.viewerWrapper.viewer.entities.add({
-            polyline: polylineArguments
-        });
-        this.viewerWrapper.viewer.zoomTo(entity);
+    	
     };
 
     pushPoint(lat, lon){
@@ -311,7 +336,7 @@ class DynamicLines{
 		if(this.pointcounter === 2) {
 			console.log(this.points);
 			this.entity = this.viewerWrapper.viewer.entities.add({
-			    name : 'GPS coordinates',
+			    name : this.name,
 			    polyline : {
 			        positions : new CallbackProperty(this.getPoints.bind(this), false),
 			        width : 2,
