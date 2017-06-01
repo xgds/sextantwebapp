@@ -14,7 +14,8 @@
 //specific language governing permissions and limitations under the License.
 // __END_LICENSE__
 
-import 'moment'
+//import 'moment'
+const moment = require('moment');
 
 class SSE{
     constructor(host){
@@ -22,12 +23,13 @@ class SSE{
         this.activeChannels = undefined;
         this.lastHeartbeat = undefined;
         this.heartbeat()
-    }
+    };
 
     heartbeat(){
-        setInterval(this.checkHeartbeat, 11000);
-        this.subscribe('heartbeat', this.connectedCallback, 'sse');
-    }
+    	let context = this;
+        setInterval(function() {context.checkHeartbeat();}, 11000);
+        this.subscribe('heartbeat', this.connectedCallback, this, 'sse');
+    };
 
     checkHeartbeat() {
         let connected = false;
@@ -38,13 +40,13 @@ class SSE{
             }
         }
         if (!connected) {
-            SSE.disconnectedCallback();
+            this.disconnectedCallback();
         }
-    }
+    };
 
-    connectedCallback(event){
+    connectedCallback(event, context){
         try {
-            this.lastHeartbeat = moment(JSON.parse(event.data).timestamp);
+        	context.lastHeartbeat = moment(JSON.parse(event.data).timestamp);
             const cdiv = $("#connected_div");
             if (cdiv.hasClass('alert-danger')){
                 cdiv.removeClass('alert-danger');
@@ -56,9 +58,9 @@ class SSE{
         } catch(err){
             // in case there is no such page
         }
-    }
+    };
 
-    static disconnectedCallback(event){
+    disconnectedCallback(){
         try {
             const cdiv = $("#connected_div");
             if (cdiv.hasClass('alert-success')){
@@ -71,18 +73,21 @@ class SSE{
         } catch(err){
             // in case there is no such page
         }
-    }
+    };
+    
     parseEventChannel(event){
         return this.parseChannel(event.target.url);
-    }
-    static parseChannel(fullUrl){
+    };
+    
+    parseChannel(fullUrl){
         const splits = fullUrl.split('=');
         if (splits.length > 1){
             return splits[splits.length-1];
         }
         return 'sse';
-    }
-    getChannel() {
+    };
+    
+    getChannels() {
         // get the active channels over AJAX
         if (this.activeChannels === undefined){
             $.ajax({
@@ -95,25 +100,26 @@ class SSE{
             });
         }
         return this.activeChannels;
-    }
+    };
 
     sourceAddress(channel){
         return this.host + "/sse/stream?channel=" + channel
-    }
+    };
 
-    subscribe(event_type, callback, channel = undefined) {
+    subscribe(event_type, callback, context, channel = undefined) {
         if (channel !== undefined) {
             const address = this.sourceAddress(channel);
             const source = new EventSource(address);
-            source.addEventListener(event_type, callback, false);
+            source.addEventListener(event_type, function(event) { callback(event, context); }, false);
             return source;
         } else {
             for (let channel of this.getChannels()){
                 let source = new EventSource("/sse/stream?channel=" + channel);
-                source.addEventListener(event_type, callback, false);
+                source.addEventListener(event_type, function(event) { callback(event, context); }, false);
             }
         }
-    }
+    };
+    
 }
 
 export {SSE}

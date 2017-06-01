@@ -9,11 +9,10 @@ import {Cartesian3, CesiumMath, Color, CallbackProperty} from './demo_code/cesiu
 const viewerWrapper = new ViewerWrapper(config.urlPrefix, config.server.port, 1, 'cesiumContainer');
 
 const hasSSE = config.sse;
-// ah well, import has to be outside the if.
 import {SSE} from './sseUtils'
+import {trackSSE} from './trackSseUtils'
 if (hasSSE != undefined) {
-	const sse = new SSE(config.sse.protocol + '://' + config.sse.name);
-	sse.subscribe('position', logpoint, 'EV2');
+	const tsse = new trackSSE();
 }
 
 const viewer = viewerWrapper.viewer;
@@ -59,8 +58,23 @@ function DynamicLines(){
 	this.points = [];
 	this.pointcounter = 0;
 	this.entity = Object();
-    this.getPoints = function(){
+    
+	this.getPoints = function(){
         return this.points;
+    };
+    
+    this.initialize = function(latLongPoints, styleOptions) {
+    	this.points = viewerWrapper.getRaisedPositions(latlongPoints);
+
+    	//console.log(raisedMidPoints);
+        const polylinePositon = {
+            positions: this.points
+        };
+        const polylineArguments = Object.assign({}, polylinePositon, styleOptions);
+        const entity = viewer.entities.add({
+            polyline: polylineArguments
+        });
+        viewer.zoomTo(entity);
     };
 
     this.pushPoint = function(lat, lon){
@@ -69,9 +83,11 @@ function DynamicLines(){
             this.points.push(raisedMidPoints[0]);
         }.bind(this));
     };
+    
     this.addMesh = function(){
         gps_mesh.send('')
     };
+    
 	this.addPoint = function(lat, lon){
         console.log('adding point');
 		this.pointcounter+=1;
@@ -97,16 +113,14 @@ function DynamicLines(){
 			}
 		}
 	};
+	
 	this.zoomTo = function(){
 		viewer.zoomTo(this.entity);
 	}
-}
+};
 
 
 const gps_tracks = new DynamicLines();
-function logpoint(point){
-    console.log(point)
-}
 
 function zoomtotracks(){
 	return gps_tracks.zoomTo();
