@@ -339,7 +339,7 @@ class DynamicLines{
         this.pushPoint(lat, lon);
 		if(this.points.length === 2) {
 			if (this.entity === undefined) {
-				console.log('BUILDING NEW ENTITY from addPoint);
+				console.log('BUILDING NEW ENTITY from addPoint');
 				const polylineArguments = Object.assign({positions: new CallbackProperty(this.getPoints.bind(this), false),
 					 width: 2,
 					 material : Color.GREEN}, this.styleOptions);
@@ -386,17 +386,19 @@ const heading = function(headingAngle, camera) {
 };
 
 
-const buildLineString = function(latlongPoints, styleOptions, viewerWrapper) {
+const buildLineString = function(latlongPoints, styleOptions, viewerWrapper, callback) {
     viewerWrapper.getRaisedPositions(latlongPoints).then(function (raisedMidPoints) {
-        //console.log(raisedMidPoints);
         const polylinePositon = {
             positions: raisedMidPoints
         };
         const polylineArguments = Object.assign({}, polylinePositon, styleOptions);
-        const entity = viewer.entities.add({
+        const entity = viewerWrapper.viewer.entities.add({
             polyline: polylineArguments
         });
-        viewerWrapper.viewer.zoomTo(entity);
+        //viewerWrapper.viewer.zoomTo(entity);
+        if (callback !== undefined){
+        	callback(entity);
+        }
     });
 };
 

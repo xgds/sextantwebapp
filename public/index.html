@@ -39,7 +39,7 @@
 	</div>
 
 	<button class="btn btn-default" type="button" onclick="zoom()">Reset View</button>
-	  <button class="btn btn-default" type="button" onclick="setHeading()">Set heading</button>
+	<button class="btn btn-default" type="button" onclick="setHeading()">Set heading</button>
 	<button class="btn btn-default" type="button" onclick="zoomToTracks()">Zoom to GPS</button>
 	<button class="btn btn-default" type="button" onclick="getwaypoints()">Get waypoints</button>
 	<button type="button" class="btn btn-default" onclick="drawpextant()">Pextant draw</button>
@@ -56,17 +56,21 @@
 	  <button type="button" class="btn btn-default" onclick="calibrate()">Calibrate</button>
 	  <div id="hovercoord"></div>
 	  Coordinates
-      <div>
-          More stuff:
-          <button onclick="sextant_api()">Call sextant for realz</button>
-      </div>
     <div id="coords">
-
     </div>
   </div>
-	<div id='credits' >
-
-	</div>
+  
+  <div>
+  xGDS stuff:
+  	<button class="btn btn-default" type="button" onclick="reloadPlan()">Reload Plan</button>
+  
+  </div>
+  <div>
+          More stuff:
+          <button onclick="sextant_api()">Call sextant for realz</button>
+  
+  </div>
+  <div id="credits"></div>
  </div>
 
 <script src="./build/bundle.js"></script>
@@ -147,6 +151,10 @@
 
 		sextant.calibrate.connect();
 		sextant.calibrate.send(JSON.stringify(sextant.globalpoint()));
+	}
+	
+	function reloadPlan() {
+		sextant.reloadPlan();
 	}
 
 </script>

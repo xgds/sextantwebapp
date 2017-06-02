@@ -9,11 +9,20 @@ const viewerWrapper = new ViewerWrapper(config.urlPrefix, config.server.port, 1,
 
 // Set up for SSE or GPS input
 const hasSSE = config.sse;
-import {trackSSE} from './sse/trackSseUtils'
+import {TrackSSE} from './sse/trackSseUtils'
+import {PlanManager} from './plan/plan'
+let tsse = undefined;
+let planManager = undefined;
 if (hasSSE != undefined) {
-	const tsse = new trackSSE(viewerWrapper);
+	tsse = new TrackSSE(viewerWrapper);
+	planManager = new PlanManager(viewerWrapper);
 } else {
 	const gps_tracks = new DynamicLines(viewerWrapper);
+}
+
+//xGDS utility functions
+function reloadPlan() {
+	planManager.fetchXGDSPlan();
 }
 
 //GPS utility functions
@@ -39,7 +48,8 @@ module.exports = {
 	'addGPSLocation': addGPSLocation,
     'zoom': zoom,
     'heading': heading,
-    'zoomToGPSTracks': zoomToGPSTracks
+    'zoomToGPSTracks': zoomToGPSTracks,
+    'reloadPlan': reloadPlan
 };
 
 if (module.hot) {

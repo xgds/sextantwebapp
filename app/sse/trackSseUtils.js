@@ -23,7 +23,7 @@ import {config} from './../../config/config_loader';
 const hostname = config.sse.protocol + '://' + config.sse.name;
 const sse = new SSE(hostname);
 
-class trackSSE {
+class TrackSSE {
 	
 	constructor(viewerWrapper) {
 		this.viewerWrapper = viewerWrapper;
@@ -169,4 +169,4 @@ class trackSSE {
 	};
 }
 
-export {trackSSE}
+export {TrackSSE}
