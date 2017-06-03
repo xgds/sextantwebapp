@@ -150,8 +150,8 @@ class ViewerWrapper{
     };
 
     addMesh(upperLeft, lowerRight, dem){
-        console.log('draping mesh');
-        console.log(dem[0]);
+//        console.log('draping mesh');
+//        console.log(dem[0]);
         if (upperLeft != this.mesh_upper_left) {
             this.mesh_upper_left = upperLeft;
 
@@ -163,11 +163,11 @@ class ViewerWrapper{
             const latstep = (lat_north - lat_south) / lat_spacing;
 
             const [ul_col, ul_row, lr_col, lr_row] = [upperLeft.col, upperLeft.row, lowerRight.col, lowerRight.row];
-            console.log(ul_col);
-            console.log(lr_row);
+//            console.log(ul_col);
+//            console.log(lr_row);
 
             // Remove all 'old' entities
-            console.log('made it until the loop');
+//            console.log('made it until the loop');
             let col = ul_col-1;
             let i = -1;
             for (let lon = lon_west; lon < lon_east; lon += lonstep) {
@@ -181,7 +181,7 @@ class ViewerWrapper{
                     row -=1;
                     let hackyhash = row.toString()+col.toString();
                     if(!this.mesh_rowcol.includes(hackyhash)) {
-                        console.log(dem[j][i]);
+//                        console.log(dem[j][i]);
                         let entity = this.viewer.entities.add({
                             rectangle: {
                                 coordinates: Rectangle.fromDegrees(lon, lat, lon + lonstep, lat + latstep),
@@ -196,7 +196,7 @@ class ViewerWrapper{
                         }
                         this.mesh_rowcol.push(hackyhash);
                     }else{
-                        console.log('already included');
+//                        console.log('already included');
                     }
                 }
             }
@@ -296,6 +296,7 @@ class DynamicLines{
 	
 	constructor(viewerWrapper, latLongPoints, name, styleOptions) {
 		this.name = name || 'GPS Coordinates';
+		this.freeze = false;
 		this.viewerWrapper = viewerWrapper;
 		this.points = [];
 		this.pointcounter = 0;
@@ -332,8 +333,19 @@ class DynamicLines{
     	
     };
 
+    clearPoints(keepTwo=true) {
+    	this.freeze = true;
+    	if (keepTwo){
+    		if (this.points.length > 2){
+    			this.points.splice(0, this.points.length - 2);
+    		}
+    	} else {
+    		this.points = [];
+    	}
+    	this.freeze = false;
+    };
+    
     pushPoint(lat, lon){
-    	console.log('in push point ' + lon + ": " + lat);
         this. viewerWrapper.getRaisedPositions({latitude: [lat], longitude: [lon]}).then(function(raisedMidPoints){
             this.points.push(raisedMidPoints[0]);
         }.bind(this));
@@ -345,10 +357,12 @@ class DynamicLines{
 //    };
     
 	addPoint(lat, lon){
+		if (this.freeze) {
+			return; // drop
+		}
         this.pushPoint(lat, lon);
 		if(this.points.length === 2) {
 			if (this.entity === undefined) {
-				console.log('BUILDING NEW ENTITY from addPoint');
 				const polylineArguments = Object.assign({positions: new CallbackProperty(this.getPoints.bind(this), false),
 					 width: 2,
 					 material : Color.GREEN}, this.styleOptions);
@@ -382,7 +396,7 @@ const zoom = function(camera){
 
 const heading = function(headingAngle, camera) {
     if (headingAngle != undefined) {
-        console.log(headingAngle);
+//        console.log(headingAngle);
         camera.setView({
             destination: config.destination,
             orientation: {
@@ -437,15 +451,14 @@ const buildLineString = function(latlongPoints, styleOptions, viewerWrapper, cal
 const buildCylinder = function(position, height, radius, label, styleOptions, viewerWrapper, callback) {
 	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
 		let options = {
-				//position: raisedPoint[0],
 				length: height,
 				topRadius: radius,
 				bottomRadius: radius,
-				material : Color.RED
-//				label: {
-//					text: label,
-//					verticalOrigin: VerticalOrigin.TOP
-//				}
+				material : Color.RED,
+				label: {
+					text: label,
+					verticalOrigin: VerticalOrigin.TOP
+				}
 		};
 
 		options = Object.assign(options, styleOptions);

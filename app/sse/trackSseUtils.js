@@ -99,6 +99,18 @@ class TrackSSE {
 		}
 	};
 	
+	clearTracks() {
+		let keys = Object.keys(this.tracks);
+		keys.forEach(function(key){
+			let track = this.tracks[key];
+			if (track.coords.length > 2){
+				track.coords.splice(0, track.coords.length - 2);
+			}
+			let ctrack = this.cTracks[key];
+			ctrack.clearPoints();
+		}, this);
+	};
+	
 	renderTrack(channel, data){
 		let styleDict = {};
 		if (data.color !== undefined) {
@@ -116,8 +128,10 @@ class TrackSSE {
 			//TODO render the track ... this should never happen
 		} else {
 			// append the point to the track
-			let track = this.cTracks[channel];
-			track.addPoint(position.lat, position.lon);
+			let ctrack = this.cTracks[channel];
+			ctrack.addPoint(position.lat, position.lon);
+			let track = this.tracks[channel];
+			track.coords.push([position.lon, position.lat]);
 		}
 	};
 	
@@ -160,7 +174,7 @@ class TrackSSE {
             dataType: 'json',
             success: $.proxy(function(data) {
             	if (data != null && data.length == 1){
-                    this.tracks[channel] = data;
+                    this.tracks[channel] = data[0];
                     this.renderTrack(channel, data[0]);
             	}
             }, this)
