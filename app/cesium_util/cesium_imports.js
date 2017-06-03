@@ -18,9 +18,12 @@ import ColorGeometryInstanceAttribute from 'cesium/Source/Core/ColorGeometryInst
 import GeometryInstance from 'cesium/Source/Core/GeometryInstance';
 import Rectangle from 'cesium/Source/Core/Rectangle';
 import RectangleGeometry from 'cesium/Source/Core/RectangleGeometry';
+import CylinderGeometry from 'cesium/Source/Core/CylinderGeometry';
+import CylinderGraphics from 'cesium/Source/DataSources/CylinderGraphics';
 import EntityCollection from 'cesium/Source/DataSources/EntityCollection';
 import CreateTileMapServiceImageryProvider from 'cesium/Source/Scene/createTileMapServiceImageryProvider';
 import GroundPrimitive from 'cesium/Source/Scene/GroundPrimitive';
+import Primitive from 'cesium/Source/Scene/Primitive';
 import CesiumTerrainProvider from 'cesium/Source/Core/CesiumTerrainProvider';
 import BingMapsApi from 'cesium/Source/Core/BingMapsApi';
 import VerticalOrigin from 'cesium/Source/Scene/VerticalOrigin';
@@ -31,4 +34,5 @@ BingMapsApi.defaultKey = global.config.bing_key;
 export {Viewer, EllipsoidTerrainProvider, Ellipsoid, Cartographic, Transforms, PointPrimitiveCollection, sampleTerrain,
 ScreenSpaceEventHandler, ScreenSpaceEventType, Cartesian3, CesiumMath, Color, CallbackProperty,
     ColorGeometryInstanceAttribute, GeometryInstance, Rectangle, RectangleGeometry, EntityCollection,
-    CreateTileMapServiceImageryProvider, GroundPrimitive, CesiumTerrainProvider, VerticalOrigin, PinBuilder}
+    CreateTileMapServiceImageryProvider, GroundPrimitive, CesiumTerrainProvider, VerticalOrigin, PinBuilder,
+    CylinderGeometry, CylinderGraphics, Primitive}

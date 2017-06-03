@@ -16,7 +16,7 @@
 
 const moment = require('moment');
 import {Color} from './../cesium_util/cesium_imports'
-import {DynamicLines, buildLineString, buildPin} from './../cesium_util/cesiumlib';
+import {DynamicLines, buildLineString, buildCylinder} from './../cesium_util/cesiumlib';
 import {config} from './../../config/config_loader';
 
 const hostname = config.sse.protocol + '://' + config.sse.name;
@@ -28,7 +28,8 @@ class PlanManager {
 		this.viewerWrapper = viewerWrapper;
 		this.elements = {};
 		this.segmentStyle = {'material':Color.ORANGE};
-		this.stationImageUrl = hostname + '/wristApp/icons/placemark_circle.png';
+		this.stationImageUrl = hostname + '/wristApp/icons/station_circle.png';
+		this.stationCylinderStyle = {'material': this.stationImageUrl};
 		this.fetchXGDSPlan();
 	};
 	
@@ -108,10 +109,16 @@ class PlanManager {
 	renderStation(station){
 		//TODO pins = bad. Need better geometry -- cylindar for stations and circle or hollow cylindar for the tolerance 
 		if (!_.isEmpty(station.geometry.coordinates)) {
-			buildPin({longitude:station.geometry.coordinates[0], latitude:station.geometry.coordinates[1]}, 
-					  station.name, this.stationImageUrl, this.viewerWrapper, function(entity){
+//			buildPin({longitude:station.geometry.coordinates[0], latitude:station.geometry.coordinates[1]}, 
+//					  station.name, this.stationImageUrl, this.viewerWrapper, function(entity){
+//				this.elements[station.id] = entity;
+//			}.bind(this));
+			
+			buildCylinder({longitude:station.geometry.coordinates[0], latitude:station.geometry.coordinates[1]},
+						10.0, 3.0, station.name, this.stationCylinderStyle, this.viewerWrapper, function(entity){
 				this.elements[station.id] = entity;
 			}.bind(this));
+
 		}
 	}
 	

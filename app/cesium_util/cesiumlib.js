@@ -9,7 +9,8 @@ buildModuleUrl.setBaseUrl('./');
 // Load all cesium components required
 import {Viewer, EllipsoidTerrainProvider, Cartesian3, CesiumMath, Cartographic, Ellipsoid, Color,
 		sampleTerrain, ScreenSpaceEventHandler, ScreenSpaceEventType, Rectangle,
-		CreateTileMapServiceImageryProvider, CesiumTerrainProvider, CallbackProperty, VerticalOrigin, PinBuilder} from './cesium_imports'
+		CreateTileMapServiceImageryProvider, CesiumTerrainProvider, CallbackProperty, VerticalOrigin, 
+		PinBuilder} from './cesium_imports'
 
 if (!('destination' in config)) {
 	config.destination = Cartesian3.fromDegrees(config.siteConfig.centerPoint[0], config.siteConfig.centerPoint[1], config.siteConfig.centerPoint[2]);
@@ -395,14 +396,13 @@ const heading = function(headingAngle, camera) {
 
 
 // TODO we could use this for notes on map but not good for stations.
-const buildPin = function(position, pinName, url, viewerWrapper, callback) {
+const buildPin = function(position, label, url, viewerWrapper, callback) {
 	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
 		let stationPin = pinBuilder.fromUrl(url, Color.SALMON, 48);
 		let options = {
-				//name: pinName,
 		        position: raisedPoint[0],
 		        label: {
-		            text: pinName,
+		            text: label,
 		            verticalOrigin: VerticalOrigin.TOP
 		        },
 		        billboard: {
@@ -433,4 +433,33 @@ const buildLineString = function(latlongPoints, styleOptions, viewerWrapper, cal
     });
 };
 
-export {ViewerWrapper, DynamicLines, zoom, heading, buildLineString, buildPin}
+
+const buildCylinder = function(position, height, radius, label, styleOptions, viewerWrapper, callback) {
+	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
+		let options = {
+				//position: raisedPoint[0],
+				length: height,
+				topRadius: radius,
+				bottomRadius: radius,
+				material : Color.RED
+//				label: {
+//					text: label,
+//					verticalOrigin: VerticalOrigin.TOP
+//				}
+		};
+
+		options = Object.assign(options, styleOptions);
+		
+		let entity = viewerWrapper.viewer.entities.add({
+			position: raisedPoint[0],
+			cylinder: options
+		})
+
+
+		if (callback !== undefined){
+			callback(entity);
+		}
+	});
+
+};
+export {ViewerWrapper, DynamicLines, zoom, heading, buildLineString, buildPin, buildCylinder}
