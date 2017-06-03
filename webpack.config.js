@@ -16,7 +16,7 @@ const config = {
         ]
     },
     entry: [
-        'webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000',
+        'webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000',  // this keeps erroring not sure what it is
         mainPath
     ],
     output: {
@@ -32,7 +32,6 @@ const config = {
         new webpack.HotModuleReplacementPlugin(),
         new webpack.NoErrorsPlugin(),
         new webpack.ContextReplacementPlugin(
-        		  // /config[\/\\]config.js/,
         		  /\w*\/config.js/,
         		  path.resolve(__dirname, './config/config.js'),
         		),

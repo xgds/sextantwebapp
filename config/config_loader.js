@@ -16,6 +16,7 @@
 const path = require('path');
 
 const initialize = function() {
+	if (global.config === undefined){
 		let defaultConfigPath = './config.js';
 		let configPath = (process.env.CONFIG_PATH || defaultConfigPath);
 		console.log('LOADING CONFIG FROM: ' + configPath);
@@ -25,8 +26,11 @@ const initialize = function() {
 		result.urlPrefix = result.server.protocol + '://' + result.server.name;
 		result.siteConfig = result.sites[result.defaultSite];
 		return result;
+	}
+	return global.config;
 }
 
-const config = initialize();
+global.config = initialize();
+const config = global.config;
 
 export {config}

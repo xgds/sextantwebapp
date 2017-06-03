@@ -9,9 +9,13 @@ buildModuleUrl.setBaseUrl('./');
 // Load all cesium components required
 import {Viewer, EllipsoidTerrainProvider, Cartesian3, CesiumMath, Cartographic, Ellipsoid, Color,
 		sampleTerrain, ScreenSpaceEventHandler, ScreenSpaceEventType, Rectangle,
-		CreateTileMapServiceImageryProvider, CesiumTerrainProvider, CallbackProperty} from './cesium_imports'
+		CreateTileMapServiceImageryProvider, CesiumTerrainProvider, CallbackProperty, VerticalOrigin, PinBuilder} from './cesium_imports'
 
-config.destination = Cartesian3.fromDegrees(config.siteConfig.centerPoint[0], config.siteConfig.centerPoint[1], config.siteConfig.centerPoint[2]);
+if (!('destination' in config)) {
+	config.destination = Cartesian3.fromDegrees(config.siteConfig.centerPoint[0], config.siteConfig.centerPoint[1], config.siteConfig.centerPoint[2]);
+}
+
+const pinBuilder = new PinBuilder();
 
 class ViewerWrapper{
     constructor(host, port, terrainExaggeration, container) {
@@ -294,13 +298,17 @@ class DynamicLines{
 		this.viewerWrapper = viewerWrapper;
 		this.points = [];
 		this.pointcounter = 0;
-		this.entity = Object();
+		this.entity = undefined;
 		this.styleOptions = styleOptions || {};
 		if (latLongPoints !== undefined){
 			this.initialize(latLongPoints);
 		}
 	};
     
+	getEntity() {
+		return this.entity;
+	};
+	
 	getPoints(){
         return this.points;
     };
@@ -312,14 +320,14 @@ class DynamicLines{
     		
             const polylineArguments = Object.assign({positions: new CallbackProperty(this.getPoints.bind(this), false),
             										 width: 2,
-            										 material : Color.GREEN}, this.styleOptions);
+            										 material : Color.GREEN}, 
+            										 this.styleOptions);
             this.entity = this.viewerWrapper.viewer.entities.add({
             	name : this.name,
                 polyline: polylineArguments
             });
-            this.viewerWrapper.viewer.zoomTo(this.entity);
-        }.bind(this));
 
+    	}.bind(this));
     	
     };
 
@@ -386,6 +394,29 @@ const heading = function(headingAngle, camera) {
 };
 
 
+// TODO we could use this for notes on map but not good for stations.
+const buildPin = function(position, pinName, url, viewerWrapper, callback) {
+	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
+		let stationPin = pinBuilder.fromUrl(url, Color.SALMON, 48);
+		let options = {
+				//name: pinName,
+		        position: raisedPoint[0],
+		        label: {
+		            text: pinName,
+		            verticalOrigin: VerticalOrigin.TOP
+		        },
+		        billboard: {
+		            image: stationPin,
+		            verticalOrigin: VerticalOrigin.CENTER
+		        }
+		}
+		let entity = viewerWrapper.viewer.entities.add(options);
+        if (callback !== undefined){
+        	callback(entity);
+        }
+	});
+};
+
 const buildLineString = function(latlongPoints, styleOptions, viewerWrapper, callback) {
     viewerWrapper.getRaisedPositions(latlongPoints).then(function (raisedMidPoints) {
         const polylinePositon = {
@@ -395,11 +426,11 @@ const buildLineString = function(latlongPoints, styleOptions, viewerWrapper, cal
         const entity = viewerWrapper.viewer.entities.add({
             polyline: polylineArguments
         });
-        //viewerWrapper.viewer.zoomTo(entity);
+
         if (callback !== undefined){
         	callback(entity);
         }
     });
 };
 
-export {ViewerWrapper, DynamicLines, zoom, heading, buildLineString}
+export {ViewerWrapper, DynamicLines, zoom, heading, buildLineString, buildPin}

@@ -53,7 +53,9 @@ module.exports = {
     debug : true,
     
     // whether or not to show lat long elevation hovering over mouse move
-    showCoordinates : false
+    showCoordinates : false,
 
+    // TODO override with your key.
+    bing_key : 'Ak71PK14Ypz2_IuQ2-TGbV-OVYLKeg_KEXFFYiNmEny6aFJVYxUg_pUxZfhaQ2vy'
 
 }

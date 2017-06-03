@@ -22,10 +22,13 @@ import EntityCollection from 'cesium/Source/DataSources/EntityCollection';
 import CreateTileMapServiceImageryProvider from 'cesium/Source/Scene/createTileMapServiceImageryProvider';
 import GroundPrimitive from 'cesium/Source/Scene/GroundPrimitive';
 import CesiumTerrainProvider from 'cesium/Source/Core/CesiumTerrainProvider';
-import BingMapsApi from 'cesium/Source/Core/BingMapsApi'
-BingMapsApi.defaultKey = 'Ak71PK14Ypz2_IuQ2-TGbV-OVYLKeg_KEXFFYiNmEny6aFJVYxUg_pUxZfhaQ2vy';
+import BingMapsApi from 'cesium/Source/Core/BingMapsApi';
+import VerticalOrigin from 'cesium/Source/Scene/VerticalOrigin';
+import PinBuilder from 'cesium/Source/Core/PinBuilder';
+
+BingMapsApi.defaultKey = global.config.bing_key;
 
 export {Viewer, EllipsoidTerrainProvider, Ellipsoid, Cartographic, Transforms, PointPrimitiveCollection, sampleTerrain,
 ScreenSpaceEventHandler, ScreenSpaceEventType, Cartesian3, CesiumMath, Color, CallbackProperty,
     ColorGeometryInstanceAttribute, GeometryInstance, Rectangle, RectangleGeometry, EntityCollection,
-    CreateTileMapServiceImageryProvider, GroundPrimitive, CesiumTerrainProvider}
+    CreateTileMapServiceImageryProvider, GroundPrimitive, CesiumTerrainProvider, VerticalOrigin, PinBuilder}

@@ -16,7 +16,7 @@
 
 const moment = require('moment');
 import {Color} from './../cesium_util/cesium_imports'
-import {DynamicLines, buildLineString} from './../cesium_util/cesiumlib';
+import {DynamicLines, buildLineString, buildPin} from './../cesium_util/cesiumlib';
 import {config} from './../../config/config_loader';
 
 const hostname = config.sse.protocol + '://' + config.sse.name;
@@ -27,7 +27,8 @@ class PlanManager {
 		this.plan = undefined;
 		this.viewerWrapper = viewerWrapper;
 		this.elements = {};
-		this.segmentStyle = {'material':Color.ORANGE}
+		this.segmentStyle = {'material':Color.ORANGE};
+		this.stationImageUrl = hostname + '/wristApp/icons/placemark_circle.png';
 		this.fetchXGDSPlan();
 	};
 	
@@ -91,22 +92,27 @@ class PlanManager {
 	};
 	
 	renderSegment(segment, lastStation, nextStation) {
-		let context = this;
 		if (!_.isEmpty(segment.geometry.coordinates)) {
 			buildLineString(segment.geometry.coordinates, this.segmentStyle, this.viewerWrapper, function(entity){
-				context.elements[segment.id] = entity;
-				}, this);
+				this.elements[segment.id] = entity;
+			}.bind(this));
 		} else {
 			// no sextant path, just show straight line ...
 			let stationCoordinates = [lastStation.geometry.coordinates, nextStation.geometry.coordinates];
 			buildLineString(stationCoordinates, this.segmentStyle, this.viewerWrapper, function(entity){
-				context.elements[segment.id] = entity;
-			}, this);
+				this.elements[segment.id] = entity;
+			}.bind(this));
 		}
 	};
 	
 	renderStation(station){
-		return undefined;
+		//TODO pins = bad. Need better geometry -- cylindar for stations and circle or hollow cylindar for the tolerance 
+		if (!_.isEmpty(station.geometry.coordinates)) {
+			buildPin({longitude:station.geometry.coordinates[0], latitude:station.geometry.coordinates[1]}, 
+					  station.name, this.stationImageUrl, this.viewerWrapper, function(entity){
+				this.elements[station.id] = entity;
+			}.bind(this));
+		}
 	}
 	
 }
