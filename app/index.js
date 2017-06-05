@@ -1,4 +1,5 @@
 import * as _ from 'lodash';
+import * as $ from 'jquery';
 import 'bootstrap-loader';
 import {config} from './../config/config_loader';
 import {ViewerWrapper, zoom, heading, DynamicLines} from './cesium_util/cesiumlib';
@@ -54,7 +55,8 @@ module.exports = {
     //'zoomToGPSTracks': zoomToGPSTracks,
     //'reloadPlan': reloadPlan,
     'planManager': planManager,
-    'gps_tracks': gps_tracks
+    'gps_tracks': gps_tracks,
+    '$':$
 };
 
 if (module.hot) {

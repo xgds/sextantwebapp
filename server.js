@@ -46,6 +46,9 @@ app.get('/CustomMaps/:tileset/:z/:x/:y.png', function (req, res) {
 const cesiumPath = path.resolve(__dirname, 'node_modules', 'cesium', 'Build','Cesium');
 app.use(express.static(cesiumPath));
 
+const jqueryPath = path.resolve(__dirname, 'node_modules', 'jquery', 'dist');
+app.use('/jquery', express.static(jqueryPath));
+
 // Host terrain tiles
 // TODO: move terrain folder in here?
 //const terrainPath = 'https://s3-us-west-2.amazonaws.com/sextantdata';

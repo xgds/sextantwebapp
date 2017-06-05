@@ -69,14 +69,14 @@ class ViewerWrapper{
             }.bind(this)
         });
 
-        const handler = new ScreenSpaceEventHandler(viewer.scene.canvas);
-        handler.setInputAction(function(movement) {
+        this.hoverCoordHandler = new ScreenSpaceEventHandler(viewer.scene.canvas);
+        this.hoverCoordHandler.setInputAction(function(movement) {
             document.getElementById('hovercoord').innerHTML = this.globalpoint['latitude'].toString() + '</br>' 
             												+ this.globalpoint['longitude'].toString() + '</br>'
             												+ this.globalpoint['altitude'].toString();
 
         }.bind(this), ScreenSpaceEventType.LEFT_DOWN);
-
+        
         this.viewer = viewer;
         this.scene = viewer.scene;
         this.camera = viewer.scene.camera;
@@ -410,7 +410,13 @@ const heading = function(headingAngle, camera) {
 
 
 // TODO we could use this for notes on map but not good for stations.
-const buildPin = function(position, label, url, viewerWrapper, callback) {
+// example usage:
+//buildPin({longitude:station.geometry.coordinates[0], latitude:station.geometry.coordinates[1]}, 
+//station.name, this.stationImageUrl, this.viewerWrapper, function(entity){
+//this.elements[station.id] = entity;
+//}.bind(this));
+
+const buildPin = function(position, label, url, id, viewerWrapper, callback) {
 	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
 		let stationPin = pinBuilder.fromUrl(url, Color.SALMON, 48);
 		let options = {
@@ -422,7 +428,8 @@ const buildPin = function(position, label, url, viewerWrapper, callback) {
 		        billboard: {
 		            image: stationPin,
 		            verticalOrigin: VerticalOrigin.CENTER
-		        }
+		        },
+		        id: id
 		}
 		let entity = viewerWrapper.viewer.entities.add(options);
         if (callback !== undefined){
@@ -431,14 +438,15 @@ const buildPin = function(position, label, url, viewerWrapper, callback) {
 	});
 };
 
-const buildLineString = function(latlongPoints, styleOptions, viewerWrapper, callback) {
+const buildLineString = function(latlongPoints, styleOptions, id, viewerWrapper, callback) {
     viewerWrapper.getRaisedPositions(latlongPoints).then(function (raisedMidPoints) {
         const polylinePositon = {
             positions: raisedMidPoints
         };
         const polylineArguments = Object.assign({}, polylinePositon, styleOptions);
         const entity = viewerWrapper.viewer.entities.add({
-            polyline: polylineArguments
+            polyline: polylineArguments,
+            id: id
         });
 
         if (callback !== undefined){
@@ -448,7 +456,7 @@ const buildLineString = function(latlongPoints, styleOptions, viewerWrapper, cal
 };
 
 
-const buildCylinder = function(position, height, radius, label, styleOptions, viewerWrapper, callback) {
+const buildCylinder = function(position, height, radius, label, styleOptions, id, viewerWrapper, callback) {
 	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
 		let options = {
 				length: height,
@@ -465,7 +473,8 @@ const buildCylinder = function(position, height, radius, label, styleOptions, vi
 		
 		let entity = viewerWrapper.viewer.entities.add({
 			position: raisedPoint[0],
-			cylinder: options
+			cylinder: options,
+			id: id
 		})
 
 
@@ -475,4 +484,6 @@ const buildCylinder = function(position, height, radius, label, styleOptions, vi
 	});
 
 };
+
+
 export {ViewerWrapper, DynamicLines, zoom, heading, buildLineString, buildPin, buildCylinder}

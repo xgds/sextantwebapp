@@ -61,13 +61,17 @@
   </div>
   
   <div>
-  xGDS stuff:
+  <strong>xGDS stuff:</strong><br/>
   	<button class="btn btn-default" type="button" onclick="reloadPlan()">Reload Plan</button></br>
+  	<button class="btn btn-default" type="button" onclick="sendPlanToSextant()">Send To Sextant</button></br>
   	<button class="btn btn-default" type="button" onclick="clearTracks()">Clear Tracks</button>
+  	<label class="btn btn-primary">
+    	<input type="checkbox" id="editButton" autocomplete="off" onclick="toggleEditMode();"> Edit Plan
+  	</label>
   
   
   </div>
-  <div>
+  <div style="display:none;"><!--  aha because I hid your button -->
           More stuff:
           <button onclick="sextant_api()">Call sextant for realz</button>
   
@@ -75,6 +79,7 @@
   <div id="credits"></div>
  </div>
 
+<script src="/wristApp/jquery/jquery.min.js"></script>
 <script src="./build/bundle.js"></script>
 <script src="./sextant_caller.js"></script>
 </body>

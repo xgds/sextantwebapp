@@ -2,6 +2,7 @@
 		sextant.heading(event.alpha);
 	}, true);*/
 
+	// now you can use the plan maanger to send points to sextant
 	function sextant_api() {
         json_data = {
             waypoints: [
@@ -28,6 +29,7 @@
 		gpstrack.connect('COM6');
 		gpstrack.requestData();
 	}
+	
 	function zoom(){
 		sextant.zoom(sextant.camera);
 	}
@@ -46,19 +48,23 @@
 		sextant.serialrequest.connect();
 		sextant.serialrequest.requestData();
 	}
+	
 	function getwaypoints(){
 		console.log('getting waypoints');
 		sextant.getwaypoints.connect();
 		sextant.getwaypoints.requestData();
 	}
+	
 	function drawpextant(){
 		sextant.getwaypoints.send("bla")
 	}
+	
 	function getpextant(){
 		console.log('getting waypoints');
 		sextant.getpextant.connect();
 		sextant.getpextant.requestData();
 	}
+	
 	function getpextantFromHere(){
 		console.log('pextant from here');
 		console.log(sextant.globalpoint());
@@ -89,4 +95,16 @@
 		if (sextant.tsse !== undefined){
 			sextant.tsse.clearTracks();
 		}
+	}
+	
+	function sendPlanToSextant() {
+		if (sextant.planManager !== undefined){
+			sextant.planManager.sendPlanToSextant();
+		}
+	}
+	
+	function toggleEditMode(){
+		let button = $("#editButton");
+		let state = button.prop('checked');
+		window.editMode = state;
 	}
