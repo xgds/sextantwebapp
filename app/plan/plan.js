@@ -103,7 +103,7 @@ class PlanManager {
 		}, this);
 		keys = Object.keys(this.stationElements);
 		keys.forEach(function(key){
-			this.viewerWrapper.viewer.entities.remove(this.segmentElements[key]);
+			this.viewerWrapper.viewer.entities.remove(this.stationElements[key]);
 		}, this);
 		if (removePlan){
 			this.plan = undefined;
