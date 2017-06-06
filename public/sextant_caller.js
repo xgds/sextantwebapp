@@ -99,7 +99,7 @@
 	
 	function sendPlanToSextant() {
 		if (sextant.planManager !== undefined){
-			sextant.planManager.sendPlanToSextant(true);
+			sextant.planManager.invokePextant();
 		}
 	}
 	

@@ -34,6 +34,7 @@ class PlanManager {
 		this.fetchXGDSPlan();
 		global.editMode = false;
 		this.setupEditing();
+		this.initializedPextant = false;
 	};
 	
 	toggleNavigation(value){
@@ -218,7 +219,8 @@ class PlanManager {
             success: $.proxy(function(data) {
             	console.log('DATA LOADED IN SEXTANT');
             	if (solve){
-            		this.calculateNewPath();
+            		console.log('CALLING SOLVER');
+            		this.calculateNewPath(true);
             	}
             }),
             error: $.proxy(function(data){
@@ -231,11 +233,14 @@ class PlanManager {
 		}
 	};
 	
-	calculateNewPath() {
+	calculateNewPath(justSentPlan=false) {
 		// you must have already sent the waypoints to sextant
 		let sextantUrl = config.sextant.protocol + '://' + config.server.name + '/' + config.sextant.nginx_prefix + '/solve';
-		let data = JSON.stringify({'xp_json' : this.plan,
-								   'return': 'segmented'});
+		let dict = {'return': 'segmented'};
+		if (!justSentPlan){
+			dict['xp_json'] = this.plan;
+		}
+		let data = JSON.stringify(dict);
 		$.ajax({
             url: sextantUrl,
             data: data,
@@ -272,6 +277,15 @@ class PlanManager {
           });
 		
 	};
+	
+	invokePextant() {
+		if (!this.initializedPextant){
+			this.sendPlanToSextant(true);
+			this.initializedPextant = true;
+		} else {
+			this.calculateNewPath(false);
+		}
+	}
 	
 	updatePathFromSextant(segmentCoordinates){
 		let sequence = this.plan.sequence;
