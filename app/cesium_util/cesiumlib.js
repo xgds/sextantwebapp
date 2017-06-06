@@ -86,6 +86,15 @@ class ViewerWrapper{
     serveraddress(port){
         return this.host + ':' + this.port;
     };
+    
+    toLongLatHeight(cartesian) {
+    	const cartographic = Cartographic.fromCartesian(cartesian);
+        const longitude = CesiumMath.toDegrees(cartographic.longitude);
+        const latitude = CesiumMath.toDegrees(cartographic.latitude);
+        const carto_WGS84 = Ellipsoid.WGS84.cartesianToCartographic(cartesian);
+        const height = carto_WGS84.height/this.terrainExaggeration;
+        return [longitude, latitude, height];
+    };
 
     addGeoPoint(vizsocket){
         const viewer = this.viewer;
@@ -101,11 +110,10 @@ class ViewerWrapper{
             const ray = viewer.camera.getPickRay(movement.endPosition);
             const cartesian= viewer.scene.globe.pick(ray, viewer.scene);
             if (cartesian) {
-                const cartographic = Cartographic.fromCartesian(cartesian);
-                const longitudeString = CesiumMath.toDegrees(cartographic.longitude).toFixed(4);
-                const latitudeString = CesiumMath.toDegrees(cartographic.latitude).toFixed(4);
-                const carto_WGS84 = Ellipsoid.WGS84.cartesianToCartographic(cartesian);
-                const heightString = carto_WGS84.height.toFixed(4)/this.terrainExaggeration;
+            	const longLatHeight = this.toLongLatHeight(cartesian);
+                const longitudeString = longLatHeight[0].toFixed(4);
+                const latitudeString = longLatHeight[1].toFixed(4);
+                const heightString = longLatHeight[2].toFixed(4)
 
                 entity.position = cartesian;
             	entity.label.show = true;
@@ -115,8 +123,8 @@ class ViewerWrapper{
                     'name': 'GeoPoint',
                     'arguments': {
                         'type': 'LAT_LONG',
-                        'latitude': CesiumMath.toDegrees(cartographic.latitude),
-                        'longitude': CesiumMath.toDegrees(cartographic.longitude)
+                        'latitude': longLatHeight[1],
+                        'longitude': longLatHeight[0]
                     }
                 };
 

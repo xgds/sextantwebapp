@@ -76,7 +76,9 @@ class PlanManager {
 					if (global.editMode && this.selectedStation !== undefined){
 						// update the actual segment with the new position
 						let stationId = this.selectedStation.id;
-						this.updateStationPosition(stationId, this.selectedStation.position);
+						let llh = this.viewerWrapper.toLongLatHeight(this.selectedStation.position._value);
+						let newPosition = [llh[0], llh[1]];
+						this.updateStationPosition(stationId, newPosition);
 						this.toggleNavigation(true);
 						this.selectedStation = undefined;
 					}
