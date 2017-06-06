@@ -190,24 +190,7 @@ class PlanManager {
 			return;
 		}
 		let sextantUrl = config.sextant.protocol + '://' + config.server.name + '/' + config.sextant.nginx_prefix + '/setwaypoints';
-//		let sequence = this.plan.sequence;
-//		let waypoints = [];
 		if (!_.isEmpty(this.plan.sequence)){
-//			for (let i=0; i<sequence.length; i++){
-//				let element = sequence[i];
-//				if (element.type == 'Station'){
-//					waypoints.push([element.geometry.coordinates[1], element.geometry.coordinates[0]]);
-//				}
-//			}
-			//$.post(sextantUrl, {waypoints: waypoints, time: moment.utc().format()}).done(function(data){
-//			$.post(sextantUrl, {'xp_json': this.plan}).done(function(data){
-//						console.log('data loaded in sextant');
-//				console.log(data);
-//				if (solve){
-//					this.calculateNewPath();
-//				}
-//			}.bind(this))
-			
 			let data = JSON.stringify({'xp_json':this.plan});
 			$.ajax({
             url: sextantUrl,
@@ -262,6 +245,7 @@ class PlanManager {
                 		segmentCoordinates.push(zipped);
             		});
             		if (!_.isEmpty(segmentCoordinates)) {
+            			console.log('GOT GREAT RESULTS FROM SOLVER! RENDERING!');
             			this.updatePathFromSextant(segmentCoordinates);
             		} else {
             			//TODO alert the user
@@ -289,11 +273,13 @@ class PlanManager {
 	
 	updatePathFromSextant(segmentCoordinates){
 		let sequence = this.plan.sequence;
+		let lastIndex = 0;
 		if (!_.isEmpty(sequence)){
 			for (let i=0; i<sequence.length; i++){
 				let pe = sequence[i];
 				if (pe.type == 'Segment'){
-					pe.geometry.coordinates = segmentCoordinates[i];
+					pe.geometry.coordinates = segmentCoordinates[lastIndex];
+					lastIndex++;
 				}
 			}
 		}
