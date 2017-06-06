@@ -26,7 +26,8 @@ module.exports = {
     		   port : 2999 },
     
     // How we talk to the python sextant service
-    sextant : { protocol : 'http',
+    sextant : { protocol : 'https',
+    		    nginx_prefix: 'pextant',
     	        port : 5000 },
     
     // Where we get the terrain data from, this was only from default side.

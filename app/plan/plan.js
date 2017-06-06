@@ -184,36 +184,65 @@ class PlanManager {
 		}
 	};
 	
-	sendPlanToSextant(){
+	sendPlanToSextant(solve=false){
 		if (this.plan === undefined){
 			return;
 		}
-		let sextantUrl = config.sextant.protocol + '://' + config.server.name + ':' + config.sextant.port + '/setwaypoints';
-		let sequence = this.plan.sequence;
-		let waypoints = [];
-		if (!_.isEmpty(sequence)){
-			for (let i=0; i<sequence.length; i++){
-				let element = sequence[i];
-				if (element.type == 'Station'){
-					waypoints.push([element.geometry.coordinates[1], element.geometry.coordinates[0]]);
-				}
-			}
-			$.post(sextantUrl, {waypoints: waypoints, time: moment.utc().format()}).done(function(data){
-				console.log('data loaded in sextant');
-				console.log(data);
-			})
+		let sextantUrl = config.sextant.protocol + '://' + config.server.name + '/' + config.sextant.nginx_prefix + '/setwaypoints';
+//		let sequence = this.plan.sequence;
+//		let waypoints = [];
+		if (!_.isEmpty(this.plan.sequence)){
+//			for (let i=0; i<sequence.length; i++){
+//				let element = sequence[i];
+//				if (element.type == 'Station'){
+//					waypoints.push([element.geometry.coordinates[1], element.geometry.coordinates[0]]);
+//				}
+//			}
+			//$.post(sextantUrl, {waypoints: waypoints, time: moment.utc().format()}).done(function(data){
+//			$.post(sextantUrl, {'xp_json': this.plan}).done(function(data){
+//						console.log('data loaded in sextant');
+//				console.log(data);
+//				if (solve){
+//					this.calculateNewPath();
+//				}
+//			}.bind(this))
+			
+			let data = JSON.stringify({'xp_json':this.plan});
+			$.ajax({
+            url: sextantUrl,
+            data: data,
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json',
+            context: this,
+            success: $.proxy(function(data) {
+            	console.log('DATA LOADED IN SEXTANT');
+            	if (solve){
+            		this.calculateNewPath();
+            	}
+            }),
+            error: $.proxy(function(data){
+            	console.log('FAILED TO LOAD TO SEXTANT');
+            })
+            });
+			
+			
+			
 		}
 	};
 	
 	calculateNewPath() {
 		// you must have already sent the waypoints to sextant
-		let sextantUrl = config.sextant.protocol + '://' + config.server.name + ':' + config.sextant.port + '/solve';
-		let data = {'xp_json' : this.plan,
-					'return': 'segmented'}
+		let sextantUrl = config.sextant.protocol + '://' + config.server.name + '/' + config.sextant.nginx_prefix + '/solve';
+		let data = JSON.stringify({'xp_json' : this.plan,
+								   'return': 'segmented'});
 		$.ajax({
             url: sextantUrl,
             data: data,
+            type: 'POST',
             dataType: 'json',
+            contentType: 'application/json',
+            context: this,
             success: $.proxy(function(data) {
             	if (data != null){
             		// should be a list of latitudes, longitudes
@@ -237,6 +266,8 @@ class PlanManager {
             }, this),
             error: $.proxy(function(data) {
             	//TODO handle error case
+            	console.log(data);
+            	console.log('NO PATH FOUND FROM SEXTANT');
             }, this)
           });
 		
