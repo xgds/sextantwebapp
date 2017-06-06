@@ -34,11 +34,11 @@ const config = {
         new webpack.ContextReplacementPlugin(
         		  /\w*\/config.js/,
         		  path.resolve(__dirname, './config/config.js'),
-        		),
-        new webpack.ProvidePlugin({
-           $: "jquery",
-           jQuery: "jquery"
-       })
+        		)
+//        new webpack.ProvidePlugin({
+//           $: "jquery",
+//           jQuery: "jquery"
+//       })
     ],
 
     module: {

@@ -30,7 +30,11 @@ class TrackSSE {
 		this.positions = {};
 		this.tracks =  {};
 		this.cTracks =  {};
+		this.cStopped =  {};
+		this.cPosition =  {};
+		this.isStopped = {};
 		this.STALE_TIMEOUT= 5000;
+		this.stoppedCylinderStyle = {material: Color.GRAY};
 		this.getCurrentPositions();
 		this.allChannels(this.subscribe, this);
 		let context = this;
@@ -143,6 +147,45 @@ class TrackSSE {
 		return track_name;
 	};
 	
+	renderPosition(channel, data, stopped){
+		//TODO untested, work in progress
+		if (!_.isEmpty(data)) {
+			if (stopped) {
+				if (!(channel in this.cStopped)) {
+					buildCylinder({longitude:data[0], latitude:data[1]},
+							5.0, 2.5, 8, channel, this.stoppedCylinderStyle, channel+'_STOPPED', this.viewerWrapper, function(entity){
+						this.cStopped[channel] = entity;
+					}.bind(this));
+				} else {
+					//update its position
+					this.cStopped[channel].position = this.viewerWrapper.getRaisedPositions(data);
+				}
+				if (channel in this.cPosition){
+					this.viewerWrapper.viewer.entities.remove(this.cPosition[channel]);
+					this.isStopped[channel] = true;
+				}
+			} else {
+				if (!(channel in this.cPosition)) {
+					buildArrow({longitude:data[0], latitude:data[1]},
+						5.0, channel, {}, channel+'_POSITION', this.viewerWrapper, function(entity){
+							this.cPosition[channel] = entity;
+						}.bind(this));
+					// TODO also build active cylinder
+				} else {
+					// update its position
+					this.cPosition[channel].position = this.viewerWrapper.getRaisedPositions(data);
+				}
+				
+				if(channel in this.isStopped){
+					if (this.isStopped[channel]){
+						this.viewerWrapper.viewer.entities.remove(this.cStopped[channel]);
+						this.isStopped[channel] = false;
+					}
+				}
+			}
+			}
+		};
+	
 	getCurrentPositions() {
 		let trackPKUrl = hostname + '/track/position/active/json'
 		$.ajax({
@@ -155,6 +198,7 @@ class TrackSSE {
             			let channel = this.convertTrackNameToChannel(track_name);
             			if (!(channel in this.positions)){
             				this.createPosition(channel, data[track_name], true);
+            				//this.renderPosition(channel, data[track_name], true);
             			}
             		}
             	}

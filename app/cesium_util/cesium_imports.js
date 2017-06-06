@@ -10,6 +10,7 @@ import PointPrimitiveCollection from 'cesium/Source/Scene/PointPrimitiveCollecti
 import sampleTerrain from 'cesium/Source/Core/sampleTerrain';
 import ScreenSpaceEventHandler from 'cesium/Source/Core/ScreenSpaceEventHandler';
 import ScreenSpaceEventType from 'cesium/Source/Core/ScreenSpaceEventType';
+import Cartesian2 from 'cesium/Source/Core/Cartesian2';
 import Cartesian3 from 'cesium/Source/Core/Cartesian3';
 import CesiumMath from 'cesium/Source/Core/Math';
 import Color from 'cesium/Source/Core/Color';

@@ -59,8 +59,8 @@ class PlanManager {
 					}
 				}
 			}
-
 		}.bind(this), ScreenSpaceEventType.LEFT_DOWN);
+		
 		this.editStationHandler.setInputAction(
 				function(movement) {
 					if (global.editMode && (this.selectedStation !== undefined)) {
@@ -82,7 +82,6 @@ class PlanManager {
 						this.toggleNavigation(true);
 						this.selectedStation = undefined;
 					}
-
 				}.bind(this),
 				ScreenSpaceEventType.LEFT_UP
 		);
@@ -92,7 +91,6 @@ class PlanManager {
 	updateStationPosition(id, position){
 		this.plan.sequence.forEach(function(element){
 			if (element.id == id){
-				//TODO verify
 				element.geometry.coordinates = position;
 			}
 		});
@@ -180,7 +178,7 @@ class PlanManager {
 		if (!_.isEmpty(station.geometry.coordinates)) {
 			
 			buildCylinder({longitude:station.geometry.coordinates[0], latitude:station.geometry.coordinates[1]},
-						10.0, 3.0, station.name, this.stationCylinderStyle, station.id, this.viewerWrapper, function(entity){
+						10.0, 3.0, 128, station.name, this.stationCylinderStyle, station.id, this.viewerWrapper, function(entity){
 				this.stationElements[station.id] = entity;
 			}.bind(this));
 

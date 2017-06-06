@@ -7,7 +7,7 @@ import buildModuleUrl from 'cesium/Source/Core/buildModuleUrl';
 buildModuleUrl.setBaseUrl('./');
 
 // Load all cesium components required
-import {Viewer, EllipsoidTerrainProvider, Cartesian3, CesiumMath, Cartographic, Ellipsoid, Color,
+import {Viewer, EllipsoidTerrainProvider, Cartesian3, Cartesian2, CesiumMath, Cartographic, Ellipsoid, Color,
 		sampleTerrain, ScreenSpaceEventHandler, ScreenSpaceEventType, Rectangle,
 		CreateTileMapServiceImageryProvider, CesiumTerrainProvider, CallbackProperty, VerticalOrigin, 
 		PinBuilder} from './cesium_imports'
@@ -92,7 +92,7 @@ class ViewerWrapper{
         const longitude = CesiumMath.toDegrees(cartographic.longitude);
         const latitude = CesiumMath.toDegrees(cartographic.latitude);
         const carto_WGS84 = Ellipsoid.WGS84.cartesianToCartographic(cartesian);
-        const height = carto_WGS84.height/this.terrainExaggeration;
+        const height = carto_WGS84.height/this.terrainExaggeration;  //TODO need to look up the height from the terrain
         return [longitude, latitude, height];
     };
 
@@ -464,13 +464,13 @@ const buildLineString = function(latlongPoints, styleOptions, id, viewerWrapper,
 };
 
 
-const buildCylinder = function(position, height, radius, label, styleOptions, id, viewerWrapper, callback) {
+const buildCylinder = function(position, height, radius, slices, label, styleOptions, id, viewerWrapper, callback) {
 	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
 		let options = {
 				length: height,
 				topRadius: radius,
 				bottomRadius: radius,
-				material : Color.RED,
+				slices: slices,
 				label: {
 					text: label,
 					verticalOrigin: VerticalOrigin.TOP
@@ -492,6 +492,38 @@ const buildCylinder = function(position, height, radius, label, styleOptions, id
 	});
 
 };
+
+const computeStar = function(arms, rOuter, rInner) {
+    let angle = Math.PI / arms;
+    let length = 2 * arms;
+    let positions = new Array(length);
+    for (let i = 0; i < length; i++) {
+        let r = (i % 2) === 0 ? rOuter : rInner;
+        positions[i] = new Cartesian2(Math.cos(i * angle) * r, Math.sin(i * angle) * r);
+    }
+    return positions;
+};
+
+const buildArrow = function(position, height, label, styleOptions, id, viewerWrapper, callback) {
+	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
+		let positions = computeStar(3, 6, 3);
+		let options =  {
+		    positions : positions,
+		    extrudedHeight : height,
+		    material : Cesium.Color.RED
+		  };
+		options = Object.assign(options, styleOptions);
+		const entity = viewerWrapper.viewer.entities.add({
+	        polyline: polylineArguments,
+	        id: id,
+	        position: raisedPoint[0]
+	    });
+	
+	    if (callback !== undefined){
+	    	callback(entity);
+	    }
+	});
+}
 
 
 export {ViewerWrapper, DynamicLines, zoom, heading, buildLineString, buildPin, buildCylinder}
