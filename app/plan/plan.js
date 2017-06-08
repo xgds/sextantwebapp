@@ -30,7 +30,7 @@ class PlanManager {
 		this.stationElements = {};
 		this.segmentStyle = {'material':Color.ORANGE};
 		this.stationImageUrl = hostname + '/' + config.server.nginx_prefix + '/icons/station_circle.png';
-		this.stationCylinderStyle = {'material': this.stationImageUrl};
+		this.stationCylinderStyle = {'material': this.stationImageUrl, 'translucent': true, 'color': Color.TRANSPARENT};
 		this.fetchXGDSPlan();
 		global.editMode = false;
 		this.setupEditing();

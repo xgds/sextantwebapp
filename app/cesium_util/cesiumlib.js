@@ -8,7 +8,7 @@ buildModuleUrl.setBaseUrl('./');
 
 // Load all cesium components required
 import {Viewer, EllipsoidTerrainProvider, Cartesian3, Cartesian2, PolygonGeometry, PolygonHierarchy, CesiumMath, Cartographic, Ellipsoid, Color,
-		sampleTerrain, ScreenSpaceEventHandler, ScreenSpaceEventType, Rectangle, LabelStyle,
+		sampleTerrain, ScreenSpaceEventHandler, ScreenSpaceEventType, Rectangle, RectangleGeometry, LabelStyle,
 		CreateTileMapServiceImageryProvider, CesiumTerrainProvider, CallbackProperty, VerticalOrigin, HorizontalOrigin, Matrix4,
 		PinBuilder, Transforms, HeadingPitchRoll, ColorGeometryInstanceAttribute, GeometryInstance, Primitive} from './cesium_imports'
 
@@ -511,6 +511,30 @@ const computeStar = function(arms, rOuter, rInner) {
     return positions;
 };
 
+const buildRectangle = function(position, width, height, label, color, id, viewerWrapper, callback) {
+	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
+		let rectangleInstance = new GeometryInstance({
+			  geometry : new RectangleGeometry({
+			    rectangle : Rectangle.fromDegrees(-140.0, 30.0, -100.0, 40.0)
+			  }),
+			  id : id,
+			  attributes : {
+			    color : new ColorGeometryInstanceAttribute(0.0, 1.0, 1.0, 0.5)
+			  }
+			});
+		
+		let primitive = new Primitive({
+			  geometryInstances : [rectangleInstance]
+			});
+		
+		viewerWrapper.viewer.scene.primitives.add(primitive);
+		
+		if (callback !== undefined){
+	    	callback(primitive);
+	    }
+	});
+}
+
 const getArrowPoints = function(height) {
 	let positions = [];
 	positions.push(new Cartesian2(0, 0));
@@ -534,6 +558,7 @@ const getArrowPoints3 = function(height) {
 const buildArrow = function(position, heading, height, label, color, id, viewerWrapper, callback) {
 	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
 		//let positions = getArrowPoints(); //computeStar(3, 6, 3);
+		
 		let options =  {
 		    polygonHierarchy : new PolygonHierarchy(Cartesian3.fromDegreesArray([0, 0.2, -1, -0.15, 0, 1, 1, -0.15, 0,2])),
 			//polygonHierarchy : new PolygonHierarchy(getArrowPoints3()),
@@ -582,4 +607,4 @@ const updatePositionHeading = function(primitive, position, heading, viewerWrapp
 };
 
 
-export {ViewerWrapper, DynamicLines, zoom, heading, buildLineString, buildPin, buildCylinder, buildArrow, updatePositionHeading}
+export {ViewerWrapper, DynamicLines, zoom, heading, buildLineString, buildPin, buildCylinder, buildArrow, buildRectangle, updatePositionHeading}

@@ -16,7 +16,7 @@
 
 const moment = require('moment');
 import {Color} from './../cesium_util/cesium_imports'
-import {DynamicLines, buildCylinder, buildArrow, updatePositionHeading} from './../cesium_util/cesiumlib';
+import {DynamicLines, buildCylinder, buildArrow, updatePositionHeading, buildRectangle} from './../cesium_util/cesiumlib';
 import {SSE} from './sseUtils'
 import {config} from './../../config/config_loader';
 
@@ -167,6 +167,11 @@ class TrackSSE {
 //				}
 			} else {
 				if (!(channel in this.cPosition)) {
+					buildRectangle({longitude:data[0], latitude:data[1]}, 10,
+							5.0, channel, Color.GREEN, channel+'_rectangle', this.viewerWrapper, function(primitive){
+								this.testRectangle = primitive;
+							}.bind(this));
+
 					buildArrow({longitude:data[0], latitude:data[1]}, 0.0,
 						5.0, channel, Color.GREEN, channel+'_POSITION', this.viewerWrapper, function(entity){
 							this.cPosition[channel] = entity;
