@@ -8,7 +8,7 @@ buildModuleUrl.setBaseUrl('./');
 
 // Load all cesium components required
 import {Viewer, EllipsoidTerrainProvider, Cartesian3, Cartesian2, PolygonGeometry, PolygonHierarchy, CesiumMath, Cartographic, Ellipsoid, Color,
-		sampleTerrain, ScreenSpaceEventHandler, ScreenSpaceEventType, Rectangle, RectangleGeometry, LabelStyle,
+		sampleTerrain, ScreenSpaceEventHandler, ScreenSpaceEventType, Rectangle, RectangleGeometry, LabelStyle, CzmlDataSource,
 		CreateTileMapServiceImageryProvider, CesiumTerrainProvider, CallbackProperty, VerticalOrigin, HorizontalOrigin, Matrix4,
 		PinBuilder, Transforms, HeadingPitchRoll, ColorGeometryInstanceAttribute, GeometryInstance, Primitive} from './cesium_imports'
 
@@ -554,10 +554,49 @@ const getArrowPoints3 = function(height) {
 	return positions;
 }
 
+const czml = [{
+    "id" : "document",
+    "name" : "CZML Geometries: Polygon",
+    "version" : "1.0"
+},  {
+    "id" : "orangePolygon",
+    "name" : "Orange polygon with per-position heights and outline",
+    "polygon" : {
+        "positions" : {
+            "cartographicDegrees" : [
+                -108.0, 25.0, 100000,
+                -100.0, 25.0, 100000,
+                -100.0, 30.0, 100000,
+                -108.0, 30.0, 300000
+            ]
+        },
+        "material" : {
+            "solidColor" : {
+                "color" : {
+                    "rgba" : [255, 100, 0, 100]
+                }
+            }
+        },
+        "extrudedHeight" : 0,
+        "perPositionHeight" : true,
+        "outline" : true,
+        "outlineColor" : {
+            "rgba" : [0, 0, 0, 255]
+        }
+    }
+}];
+
+
 const buildArrow = function(position, heading, height, label, color, id, viewerWrapper, callback) {
 	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
 		//let positions = getArrowPoints(); //computeStar(3, 6, 3);
 		
+		// THIS STUFF WORKS
+		let dataSourcePromise = CzmlDataSource.load(czml);
+		viewerWrapper.viewer.dataSources.add(dataSourcePromise);
+		viewerWrapper.viewer.zoomTo(dataSourcePromise);
+		
+		// THIS STUFF DOESN'T
 		const options =  {
 		    polygonHierarchy : new PolygonHierarchy(Cartesian3.fromDegreesArray([0, 0.2, -1, -0.15, 0, 1, 1, -0.15, 0,2])),
 			//polygonHierarchy : new PolygonHierarchy(getArrowPoints3()),
