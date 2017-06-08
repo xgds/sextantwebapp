@@ -470,26 +470,27 @@ const buildCylinder = function(position, height, radius, slices, label, styleOpt
 				length: height,
 				topRadius: radius,
 				bottomRadius: radius,
-				slices: slices,
-				label: {
-					text: label,
-					verticalOrigin: VerticalOrigin.TOP,
-			        horizontalOrigin: HorizontalOrigin.RIGHT,
-			        font: '20px Helvetica',
-			        fillColor: Color.WHITE,
-			        outlineWidth: 1,
-			        style: LabelStyle.FILL
-				}
+				slices: slices
 		};
 
 		options = Object.assign(options, styleOptions);
 		
-		let entity = viewerWrapper.viewer.entities.add({
-			position: raisedPoint[0],
-			cylinder: options,
-			id: id
-		})
-
+		let entityOptions = {
+				position: raisedPoint[0],
+				cylinder: options,
+				id: id,
+			};
+		
+		if (label !== undefined && !_.isEmpty(label)){
+			entityOptions['label'] = {
+				text: label,
+				verticalOrigin: VerticalOrigin.TOP,
+		        horizontalOrigin: HorizontalOrigin.RIGHT,
+		        fillColor: Color.YELLOW,
+		        outlineWidth: 3.0
+			}
+		}
+		let entity = viewerWrapper.viewer.entities.add(entityOptions);
 
 		if (callback !== undefined){
 			callback(entity);
@@ -601,6 +602,16 @@ const buildArrow = function(position, heading, height, label, color, id, viewerW
 			const hpr = new HeadingPitchRoll(heading, 0.0, 0.0);
 			const transform = Transforms.headingPitchRollToFixedFrame(raisedPoint[0], hpr);
 			entity.orientation = transform;
+			
+			if (label !== undefined && !_.isEmpty(label)){
+				entity.label = {
+					text: label,
+					verticalOrigin: VerticalOrigin.TOP,
+			        horizontalOrigin: HorizontalOrigin.RIGHT,
+			        fillColor: Color.YELLOW,
+			        outlineWidth: 3.0
+				}
+			}
 
 			viewerWrapper.viewer.entities.add(entity);
 			
