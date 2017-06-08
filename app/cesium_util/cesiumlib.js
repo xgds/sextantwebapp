@@ -546,11 +546,11 @@ const getArrowPoints = function(height) {
 
 const getArrowPoints3 = function(height) {
 	let positions = [];
-	positions.push(new Cartesian3(0, 0, 0));
-	positions.push(new Cartesian3(-100, -30, 0));
-	positions.push(new Cartesian3(0, 100, 0));
-	positions.push(new Cartesian3(100, -30, 0));
-	positions.push(new Cartesian3(0, 0, 0));
+	positions.push(new Cartesian3(0, 0, 100000));
+	positions.push(new Cartesian3(-100, -30, 100000));
+	positions.push(new Cartesian3(0, 100, 100000));
+	positions.push(new Cartesian3(100, -30, 100000));
+	positions.push(new Cartesian3(0, 0, 100000));
 	return positions;
 }
 
@@ -563,26 +563,21 @@ const czml = [{
     "name" : "Orange polygon with per-position heights and outline",
     "polygon" : {
         "positions" : {
-            "cartographicDegrees" : [
-                -108.0, 25.0, 100000,
-                -100.0, 25.0, 100000,
-                -100.0, 30.0, 100000,
-                -108.0, 30.0, 300000
+            "cartesian" : [0, 0, 100000,
+                                     -10, -3, 100000,
+                                     0, 10, 100000,
+                                     10, -3, 100000,
+                                     0, 0, 100000
             ]
         },
         "material" : {
             "solidColor" : {
                 "color" : {
-                    "rgba" : [255, 100, 0, 100]
+                    "rgba" : [255, 100, 0, 128]
                 }
             }
         },
-        "extrudedHeight" : 0,
-        "perPositionHeight" : true,
-        "outline" : true,
-        "outlineColor" : {
-            "rgba" : [0, 0, 0, 255]
-        }
+        "extrudedHeight" : 50
     }
 }];
 
@@ -591,10 +586,36 @@ const buildArrow = function(position, heading, height, label, color, id, viewerW
 	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
 		//let positions = getArrowPoints(); //computeStar(3, 6, 3);
 		
+		
 		// THIS STUFF WORKS
-		let dataSourcePromise = CzmlDataSource.load(czml);
-		viewerWrapper.viewer.dataSources.add(dataSourcePromise);
-		viewerWrapper.viewer.zoomTo(dataSourcePromise);
+		let dataSourcePromise = CzmlDataSource.load(czml).then(function(loadedData){
+			
+			let entity = loadedData.entities.values[0];
+			console.log(raisedPoint[0]);
+			//entity.position = raisedPoint[0]; // doesn't work
+			
+			if (heading == undefined || _.isEmpty(heading)) {
+				heading = 0;
+			}
+			
+			const hpr = new HeadingPitchRoll(heading, 0.0, 0.0);
+			const transform = Transforms.headingPitchRollToFixedFrame(raisedPoint[0], hpr);
+			entity.orientation = transform;
+
+			viewerWrapper.viewer.entities.add(entity);
+			
+			//viewerWrapper.viewer.dataSources.add(loadedData);
+			viewerWrapper.viewer.zoomTo(entity);
+			
+			if (callback !== undefined){
+		    	callback(entity);
+		    }
+
+			
+
+		});
+		
+		return;
 		
 		// THIS STUFF DOESN'T
 		const options =  {
