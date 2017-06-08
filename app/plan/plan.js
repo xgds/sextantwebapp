@@ -146,6 +146,7 @@ class PlanManager {
 		if (!_.isEmpty(sequence)){
 			let lastStation = sequence[0];
 			let nextStation = undefined;
+			let stationIndex = 0;
 			for (let i=0; i<sequence.length; i++){
 				let pe = sequence[i];
 				if (pe.type == 'Segment'){
@@ -153,15 +154,24 @@ class PlanManager {
 					this.renderSegment(pe, lastStation, nextStation);
 					lastStation = nextStation;
 				} else {
+					if (pe.name === undefined || _.isEmpty(pe.name)){
+						if (stationIndex == 0){
+							pe.name = 'Start';
+						} else if (i == sequence.length-1){
+							pe.name = 'End';
+						} else {
+							pe.name = stationIndex.toString();
+						}
+					}
 					this.renderStation(pe);
+					stationIndex++;
 				}
-				
 			}
 		}
 	};
 	
 	renderSegment(segment, lastStation, nextStation) {
-		if (!_.isEmpty(segment.geometry.coordinates)) {
+		if (!_.isEmpty(segment.geometry) && !_.isEmpty(segment.geometry.coordinates)) {
 			buildLineString(segment.geometry.coordinates, this.segmentStyle, segment.id, this.viewerWrapper, function(entity){
 				this.segmentElements[segment.id] = entity;
 			}.bind(this));

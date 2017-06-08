@@ -513,7 +513,7 @@ const computeStar = function(arms, rOuter, rInner) {
 
 const buildRectangle = function(position, width, height, label, color, id, viewerWrapper, callback) {
 	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
-		let rectangleInstance = new GeometryInstance({
+		const rectangleInstance = new GeometryInstance({
 			  geometry : new RectangleGeometry({
 			    rectangle : Rectangle.fromDegrees(-140.0, 30.0, -100.0, 40.0)
 			  }),
@@ -523,11 +523,10 @@ const buildRectangle = function(position, width, height, label, color, id, viewe
 			  }
 			});
 		
-		let primitive = new Primitive({
-			  geometryInstances : [rectangleInstance]
-			});
-		
-		viewerWrapper.viewer.scene.primitives.add(primitive);
+		const primitive = viewerWrapper.viewer.scene.primitives.add(new Primitive({
+			  geometryInstances : [rectangleInstance],
+			  debugShowBoundingVolume: true
+			}));
 		
 		if (callback !== undefined){
 	    	callback(primitive);
@@ -559,21 +558,21 @@ const buildArrow = function(position, heading, height, label, color, id, viewerW
 	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
 		//let positions = getArrowPoints(); //computeStar(3, 6, 3);
 		
-		let options =  {
+		const options =  {
 		    polygonHierarchy : new PolygonHierarchy(Cartesian3.fromDegreesArray([0, 0.2, -1, -0.15, 0, 1, 1, -0.15, 0,2])),
 			//polygonHierarchy : new PolygonHierarchy(getArrowPoints3()),
 		    extrudedHeight : height
 		  };
 		
-		let hpr = new HeadingPitchRoll(heading, 0.0, 0.0);
-		let transform = Transforms.headingPitchRollToFixedFrame(raisedPoint[0], hpr);
+		const hpr = new HeadingPitchRoll(heading, 0.0, 0.0);
+		const transform = Transforms.headingPitchRollToFixedFrame(raisedPoint[0], hpr);
 //		let scale = Matrix4.fromUniformScale(100.0);
 //		let updatedTransform = Matrix4.multiply(transform, scale);
 		//let updatedTransform = Matrix4.multiplyByScalar(transform, 100.0, new Matrix4());
 
-		let pg = new PolygonGeometry(options);
+		const pg = new PolygonGeometry(options);
 		
-		let geometryOptions = {
+		const geometryOptions = {
 				geometry: pg,
 				attributes: {
 					color: ColorGeometryInstanceAttribute.fromColor(color),
@@ -581,13 +580,13 @@ const buildArrow = function(position, heading, height, label, color, id, viewerW
 				id: id
 //				modelMatrix: updatedTransform
 		}
-		let instance = new GeometryInstance(geometryOptions);
-		const primitive = new Primitive({
+		const instance = new GeometryInstance(geometryOptions);
+		
+		const primitive = viewerWrapper.scene.primitives.add(new Primitive({
 			debugShowBoundingVolume: true,
-	        geometryInstances: instance,
+	        geometryInstances: [instance],
 	        modelMatrix: transform
-	    });
-		viewerWrapper.scene.primitives.add(primitive);
+	    }));
 	
 	    if (callback !== undefined){
 	    	callback(primitive);
