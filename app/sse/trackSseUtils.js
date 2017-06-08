@@ -167,11 +167,6 @@ class TrackSSE {
 //				}
 			} else {
 				if (!(channel in this.cPosition)) {
-					buildRectangle({longitude:data[0], latitude:data[1]}, 10,
-							5.0, channel, Color.GREEN, channel+'_rectangle', this.viewerWrapper, function(primitive){
-								this.testRectangle = primitive;
-							}.bind(this));
-
 					buildArrow({longitude:data[0], latitude:data[1]}, 0.0,
 						5.0, channel, Color.GREEN, channel+'_POSITION', this.viewerWrapper, function(entity){
 							this.cPosition[channel] = entity;

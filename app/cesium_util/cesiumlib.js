@@ -499,19 +499,8 @@ const buildCylinder = function(position, height, radius, slices, label, styleOpt
 
 };
 
-const computeStar = function(arms, rOuter, rInner) {
-    let angle = Math.PI / arms;
-    let length = 2 * arms;
-    let positions = new Array(length);
-    for (let i = 0; i < length; i++) {
-        let r = (i % 2) === 0 ? rOuter : rInner;
-        let x = Math.cos(i * angle) * r;
-        let y = Math.sin(i * angle) * r;
-        positions[i] = new Cartesian2(x, y);
-    }
-    return positions;
-};
 
+//TODO this was a debugging function, if you ever need to build a rectangle have to use the parameters
 const buildRectangle = function(position, width, height, label, color, id, viewerWrapper, callback) {
 	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
 		const rectangleInstance = new GeometryInstance({
@@ -556,8 +545,7 @@ const getArrowPoints3 = function(height) {
 }
 
 const czml = [{
-    "id" : "document",
-    "name" : "CZML Geometries: Polygon",
+    "id" : "arrow",
     "version" : "1.0"
 },  {
     "id" : "orangePolygon",
@@ -585,15 +573,12 @@ const czml = [{
 
 const buildArrow = function(position, heading, height, label, color, id, viewerWrapper, callback) {
 	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
-		//let positions = getArrowPoints(); //computeStar(3, 6, 3);
-		
 		
 		// THIS STUFF WORKS
 		let dataSourcePromise = CzmlDataSource.load(czml).then(function(loadedData){
 			
 			let entity = loadedData.entities.values[0];
-			console.log(raisedPoint[0]);
-			//entity.position = raisedPoint[0]; // doesn't work
+			entity.id = id;
 			
 			if (heading == undefined || _.isEmpty(heading)) {
 				heading = 0;
@@ -601,7 +586,7 @@ const buildArrow = function(position, heading, height, label, color, id, viewerW
 			
 			const hpr = new HeadingPitchRoll(heading, 0.0, 0.0);
 			const transform = Transforms.headingPitchRollToFixedFrame(raisedPoint[0], hpr);
-			entity.orientation = transform;
+			entity.orientation = transform;  // this doesn't work, nor does using position. endlessly baffling.
 			
 			if (label !== undefined && !_.isEmpty(label)){
 				entity.label = {
@@ -614,8 +599,6 @@ const buildArrow = function(position, heading, height, label, color, id, viewerW
 			}
 
 			viewerWrapper.viewer.entities.add(entity);
-			
-			//viewerWrapper.viewer.dataSources.add(loadedData);
 			viewerWrapper.viewer.zoomTo(entity);
 			
 			if (callback !== undefined){
@@ -637,9 +620,6 @@ const buildArrow = function(position, heading, height, label, color, id, viewerW
 		
 		const hpr = new HeadingPitchRoll(heading, 0.0, 0.0);
 		const transform = Transforms.headingPitchRollToFixedFrame(raisedPoint[0], hpr);
-//		let scale = Matrix4.fromUniformScale(100.0);
-//		let updatedTransform = Matrix4.multiply(transform, scale);
-		//let updatedTransform = Matrix4.multiplyByScalar(transform, 100.0, new Matrix4());
 
 		const pg = new PolygonGeometry(options);
 		
@@ -665,13 +645,18 @@ const buildArrow = function(position, heading, height, label, color, id, viewerW
 	});
 }
 
-const updatePositionHeading = function(primitive, position, heading, viewerWrapper, callback){
+const updatePositionHeading = function(entity, position, heading, viewerWrapper, callback){
 	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
-		let hpr = new HeadingPitchRoll(heading, 0.0, 0.0);
-        Transforms.headingPitchRollToFixedFrame(raisedPoint[0], hpr, Ellipsoid.WGS84, Transforms.eastNorthUpToFixedFrame, primitive.modelMatrix);
+		if (heading == undefined || _.isEmpty(heading)) {
+			heading = 0;
+		}
+
+		const hpr = new HeadingPitchRoll(heading, 0.0, 0.0);
+		const transform = Transforms.headingPitchRollToFixedFrame(raisedPoint[0], hpr);
+		entity.orientation = transform;  // this doesn't work, nor does using position. endlessly baffling.
 
 		if (callback !== undefined){
-	    	callback(primitive);
+	    	callback(entity);
 	    }
 	});
 };
