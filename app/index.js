@@ -10,13 +10,14 @@ import {Cartesian3, CesiumMath, Color, CallbackProperty} from './cesium_util/ces
 const viewerWrapper = new ViewerWrapper(config.urlPrefix, config.server.port, 1, 'cesiumContainer');
 
 // Set up for SSE or GPS input
-const hasSSE = config.sse;
+const hasSSE = ('sse' in config);
 import {TrackSSE} from './sse/trackSseUtils'
 import {PlanManager} from './plan/plan'
 let gps_tracks = undefined;
 let tsse = undefined;
 let planManager = undefined;
-if (hasSSE != undefined) {
+
+if (hasSSE) {
 	tsse = new TrackSSE(viewerWrapper);
 	planManager = new PlanManager(viewerWrapper);
 } else {

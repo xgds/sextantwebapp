@@ -1,1 +1,0 @@
-xgds_config.js

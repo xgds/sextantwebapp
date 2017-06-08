@@ -545,11 +545,12 @@ const getArrowPoints3 = function(height) {
 }
 
 const czml = [{
-    "id" : "arrow",
+	"id" : "document",
+    "name" : "arrow czml",
     "version" : "1.0"
 },  {
-    "id" : "orangePolygon",
-    "name" : "Orange polygon with per-position heights and outline",
+    "id" : "arrow",
+    "name" : "arrow",
     "polygon" : {
         "positions" : {
             "cartesian" : [0, 0, 100000,
@@ -578,7 +579,7 @@ const buildArrow = function(position, heading, height, label, color, id, viewerW
 		let dataSourcePromise = CzmlDataSource.load(czml).then(function(loadedData){
 			
 			let entity = loadedData.entities.values[0];
-			entity.id = id;
+			//entity.id = id;
 			
 			if (heading == undefined || _.isEmpty(heading)) {
 				heading = 0;
@@ -652,7 +653,7 @@ const updatePositionHeading = function(entity, position, heading, viewerWrapper,
 		}
 
 		const hpr = new HeadingPitchRoll(heading, 0.0, 0.0);
-		const transform = Transforms.headingPitchRollToFixedFrame(raisedPoint[0], hpr);
+		const transform = Transforms.headingPitchRollToFixedFrame(raisedPoint[0], hpr, result=entity.orientation);
 		entity.orientation = transform;  // this doesn't work, nor does using position. endlessly baffling.
 
 		if (callback !== undefined){

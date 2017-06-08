@@ -32,9 +32,14 @@ const config = {
         new webpack.HotModuleReplacementPlugin(),
         new webpack.NoErrorsPlugin(),
         new webpack.ContextReplacementPlugin(
-        		  /\w*\/config.js/,
-        		  path.resolve(__dirname, './config/config.js'),
-        		)
+        		  /\w*\/xgds_config.js/,
+        		  path.resolve(__dirname, './config/xgds_config.js'),
+        		),
+        new webpack.ContextReplacementPlugin(
+      		  /\w*\/default_config.js/,
+      		  path.resolve(__dirname, './config/default_config.js'),
+      		)
+
 //        new webpack.ProvidePlugin({
 //           $: "jquery",
 //           jQuery: "jquery"

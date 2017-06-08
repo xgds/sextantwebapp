@@ -1,30 +1,36 @@
-// __BEGIN_LICENSE__
+//__BEGIN_LICENSE__
 //Copyright (c) 2015, United States Government, as represented by the 
 //Administrator of the National Aeronautics and Space Administration. 
 //All rights reserved.
-//
+
 //The xGDS platform is licensed under the Apache License, Version 2.0 
 //(the "License"); you may not use this file except in compliance with the License. 
 //You may obtain a copy of the License at 
 //http://www.apache.org/licenses/LICENSE-2.0.
-//
+
 //Unless required by applicable law or agreed to in writing, software distributed 
 //under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 //CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 //specific language governing permissions and limitations under the License.
-// __END_LICENSE__
+//__END_LICENSE__
+
+import {config} from './../../config/config_loader';
+const hasSSE = ('sse' in config);
 
 const moment = require('moment');
 import {Color} from './../cesium_util/cesium_imports'
 import {DynamicLines, buildCylinder, buildArrow, updatePositionHeading, buildRectangle} from './../cesium_util/cesiumlib';
 import {SSE} from './sseUtils'
-import {config} from './../../config/config_loader';
 
 const hostname = config.sse.protocol + '://' + config.sse.name;
-const sse = new SSE(hostname);
+let sse = undefined;
+
+if (hasSSE){
+	sse = new SSE(hostname);
+}
 
 class TrackSSE {
-	
+
 	constructor(viewerWrapper) {
 		this.viewerWrapper = viewerWrapper;
 		this.positions = {};
@@ -50,7 +56,7 @@ class TrackSSE {
 			}
 		}
 	};
-	
+
 	checkStale(channel, context) {
 		let connected = false
 		if (context.positions[channel] != undefined){
@@ -64,22 +70,22 @@ class TrackSSE {
 			context.showDisconnected(channel);
 		}
 	};
-	
+
 	showDisconnected(channel) {
-//		console.log(channel + ' DISCONNECTED');
+		//		console.log(channel + ' DISCONNECTED');
 	};
-	
+
 	subscribe(channel, context) {
 		sse.subscribe('position', context.handlePositionEvent, context, channel);
 	};
-	
+
 	handlePositionEvent(event, context){
 		let data = JSON.parse(event.data);
 		let channel = sse.parseEventChannel(event);
 		context.updatePosition(channel, data);
 		context.updateTrack(channel, data);
 	};
-	
+
 	createPosition(channel, data, nonSse){
 		if (nonSse == undefined){
 			nonSse = false;
@@ -89,12 +95,12 @@ class TrackSSE {
 		this.renderPosition(channel, [data.lon, data.lat], nonSse);
 		this.getTrack(channel, data);
 	};
-	
+
 	modifyPosition(channel, data, disconnected){
 		this.positions[channel] = data;
 		this.renderPosition(channel, [data.lon, data.lat], disconnected);
 	};
-	
+
 	updatePosition(channel, data){
 		if (!(channel in this.positions)){
 			this.createPosition(channel, data);
@@ -103,7 +109,7 @@ class TrackSSE {
 			this.updateTrack(channel, data);
 		}
 	};
-	
+
 	clearTracks() {
 		let keys = Object.keys(this.tracks);
 		keys.forEach(function(key){
@@ -115,7 +121,7 @@ class TrackSSE {
 			ctrack.clearPoints();
 		}, this);
 	};
-	
+
 	renderTrack(channel, data){
 		let styleDict = {};
 		if (data.color !== undefined) {
@@ -127,7 +133,7 @@ class TrackSSE {
 			this.cTracks[channel] = new DynamicLines(this.viewerWrapper, coords[0], channel, styleDict);
 		}
 	};
-	
+
 	updateTrack(channel, position) {
 		if (!(channel in this.cTracks)){
 			//TODO render the track ... this should never happen
@@ -139,7 +145,7 @@ class TrackSSE {
 			track.coords.push([position.lon, position.lat]);
 		}
 	};
-	
+
 	convertTrackNameToChannel(track_name){
 		let splits = track_name.split('_');
 		if (splits.length > 1){
@@ -147,30 +153,30 @@ class TrackSSE {
 		}
 		return track_name;
 	};
-	
+
 	renderPosition(channel, data, stopped){
 		return;
 		if (!_.isEmpty(data)) {
 			if (stopped) {
-//				if (!(channel in this.cStopped)) {
-//					buildCylinder({longitude:data[0], latitude:data[1]},
-//							5.0, 2.5, 8, channel, this.stoppedCylinderStyle, channel+'_STOPPED', this.viewerWrapper, function(entity){
-//						this.cStopped[channel] = entity;
-//					}.bind(this));
-//				} else {
-//					//update its position
-//					this.cStopped[channel].position = this.viewerWrapper.getRaisedPositions([data]);
-//				}
-//				if (channel in this.cPosition){
-//					this.viewerWrapper.viewer.scene.primitives.remove(this.cPosition[channel]);
-//					this.isStopped[channel] = true;
-//				}
+				//				if (!(channel in this.cStopped)) {
+				//					buildCylinder({longitude:data[0], latitude:data[1]},
+				//							5.0, 2.5, 8, channel, this.stoppedCylinderStyle, channel+'_STOPPED', this.viewerWrapper, function(entity){
+				//						this.cStopped[channel] = entity;
+				//					}.bind(this));
+				//				} else {
+				//					//update its position
+				//					this.cStopped[channel].position = this.viewerWrapper.getRaisedPositions([data]);
+				//				}
+				//				if (channel in this.cPosition){
+				//					this.viewerWrapper.viewer.scene.primitives.remove(this.cPosition[channel]);
+				//					this.isStopped[channel] = true;
+				//				}
 			} else {
 				if (!(channel in this.cPosition)) {
 					buildArrow({longitude:data[0], latitude:data[1]}, 0.0,
-						5.0, channel, Color.GREEN, channel+'_POSITION', this.viewerWrapper, function(entity){
-							this.cPosition[channel] = entity;
-						}.bind(this));
+							5.0, channel, Color.GREEN, channel+'_POSITION', this.viewerWrapper, function(entity){
+						this.cPosition[channel] = entity;
+					}.bind(this));
 					// TODO also build active cylinder
 				} else {
 					if (this.isStopped[channel]){
@@ -181,7 +187,7 @@ class TrackSSE {
 					//updatePositionHeading(this.cPosition[channel],{longitude:data[0], latitude:data[1]}, 1.0, this.viewerWrapper);
 					//this.cPosition[channel].position = this.viewerWrapper.getRaisedPositions([data]);
 				}
-				
+
 				if(channel in this.isStopped){
 					if (this.isStopped[channel]){
 						this.viewerWrapper.viewer.entities.remove(this.cStopped[channel]);
@@ -189,46 +195,46 @@ class TrackSSE {
 					}
 				}
 			}
-			}
-		};
-	
+		}
+	};
+
 	getCurrentPositions() {
 		let trackPKUrl = hostname + '/track/position/active/json'
 		$.ajax({
-            url: trackPKUrl,
-            dataType: 'json',
-            success: $.proxy(function(data) {
-            	if (data != null){
-            		// should return dictionary of channel: position
-            		for (let track_name in data){
-            			let channel = this.convertTrackNameToChannel(track_name);
-            			if (!(channel in this.positions)){
-            				this.createPosition(channel, data[track_name], true);
-            			}
-            		}
-            	}
-            }, this)
-          });
+			url: trackPKUrl,
+			dataType: 'json',
+			success: $.proxy(function(data) {
+				if (data != null){
+					// should return dictionary of channel: position
+					for (let track_name in data){
+						let channel = this.convertTrackNameToChannel(track_name);
+						if (!(channel in this.positions)){
+							this.createPosition(channel, data[track_name], true);
+						}
+					}
+				}
+			}, this)
+		});
 	};
-	
+
 	getTrack(channel, data) {
 		// first check if we already got it
 		if (!_.isEmpty(this.tracks[channel])){
 			return;
 		}
-		
+
 		let trackUrl =  hostname + '/xgds_map_server/mapJson/basaltApp.BasaltTrack/pk:' + data.track_pk
 		$.ajax({
-            url: trackUrl,
-            dataType: 'json',
-            success: $.proxy(function(data) {
-            	if (data != null && data.length == 1){
-                    this.tracks[channel] = data[0];
-                    this.renderTrack(channel, data[0]);
-            	}
-            }, this)
-          });
-		
+			url: trackUrl,
+			dataType: 'json',
+			success: $.proxy(function(data) {
+				if (data != null && data.length == 1){
+					this.tracks[channel] = data[0];
+					this.renderTrack(channel, data[0]);
+				}
+			}, this)
+		});
+
 	};
 }
 

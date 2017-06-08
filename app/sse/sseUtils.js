@@ -14,8 +14,10 @@
 //specific language governing permissions and limitations under the License.
 // __END_LICENSE__
 
-//import 'moment'
+import {config} from './../../config/config_loader';
+
 const moment = require('moment');
+
 
 class SSE{
     constructor(host){
