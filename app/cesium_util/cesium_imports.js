@@ -14,6 +14,8 @@ import Cartesian2 from 'cesium/Source/Core/Cartesian2';
 import Cartesian3 from 'cesium/Source/Core/Cartesian3';
 import CesiumMath from 'cesium/Source/Core/Math';
 import Color from 'cesium/Source/Core/Color';
+import Matrix4 from 'cesium/Source/Core/Matrix4';
+import HeadingPitchRoll from 'cesium/Source/Core/HeadingPitchRoll';
 import CallbackProperty from 'cesium/Source/DataSources/CallbackProperty';
 import ColorGeometryInstanceAttribute from 'cesium/Source/Core/ColorGeometryInstanceAttribute';
 import GeometryInstance from 'cesium/Source/Core/GeometryInstance';
@@ -24,17 +26,21 @@ import CylinderGraphics from 'cesium/Source/DataSources/CylinderGraphics';
 import EntityCollection from 'cesium/Source/DataSources/EntityCollection';
 import CreateTileMapServiceImageryProvider from 'cesium/Source/Scene/createTileMapServiceImageryProvider';
 import GroundPrimitive from 'cesium/Source/Scene/GroundPrimitive';
+import PolygonHierarchy from 'cesium/Source/Core/PolygonHierarchy';
+import PolygonGeometry from 'cesium/Source/Core/PolygonGeometry';
 import Primitive from 'cesium/Source/Scene/Primitive';
 import CesiumTerrainProvider from 'cesium/Source/Core/CesiumTerrainProvider';
 import BingMapsApi from 'cesium/Source/Core/BingMapsApi';
 import VerticalOrigin from 'cesium/Source/Scene/VerticalOrigin';
+import HorizontalOrigin from 'cesium/Source/Scene/HorizontalOrigin';
+import LabelStyle from 'cesium/Source/Scene/LabelStyle';
 import PinBuilder from 'cesium/Source/Core/PinBuilder';
 import defined from 'cesium/Source/Core/defined';
 
 BingMapsApi.defaultKey = global.config.bing_key;
 
 export {Viewer, EllipsoidTerrainProvider, Ellipsoid, Cartographic, Transforms, PointPrimitiveCollection, sampleTerrain,
-ScreenSpaceEventHandler, ScreenSpaceEventType, Cartesian3, CesiumMath, Color, CallbackProperty,
+ScreenSpaceEventHandler, ScreenSpaceEventType, Cartesian3, Cartesian2, CesiumMath, Color, CallbackProperty,
     ColorGeometryInstanceAttribute, GeometryInstance, Rectangle, RectangleGeometry, EntityCollection,
-    CreateTileMapServiceImageryProvider, GroundPrimitive, CesiumTerrainProvider, VerticalOrigin, PinBuilder,
-    CylinderGeometry, CylinderGraphics, Primitive, defined}
+    CreateTileMapServiceImageryProvider, GroundPrimitive, CesiumTerrainProvider, VerticalOrigin, PinBuilder, HorizontalOrigin,
+    CylinderGeometry, CylinderGraphics, Primitive, defined, PolygonHierarchy, PolygonGeometry, HeadingPitchRoll, Matrix4, LabelStyle}

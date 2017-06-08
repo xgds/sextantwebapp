@@ -7,10 +7,10 @@ import buildModuleUrl from 'cesium/Source/Core/buildModuleUrl';
 buildModuleUrl.setBaseUrl('./');
 
 // Load all cesium components required
-import {Viewer, EllipsoidTerrainProvider, Cartesian3, Cartesian2, CesiumMath, Cartographic, Ellipsoid, Color,
-		sampleTerrain, ScreenSpaceEventHandler, ScreenSpaceEventType, Rectangle,
-		CreateTileMapServiceImageryProvider, CesiumTerrainProvider, CallbackProperty, VerticalOrigin, 
-		PinBuilder} from './cesium_imports'
+import {Viewer, EllipsoidTerrainProvider, Cartesian3, Cartesian2, PolygonGeometry, PolygonHierarchy, CesiumMath, Cartographic, Ellipsoid, Color,
+		sampleTerrain, ScreenSpaceEventHandler, ScreenSpaceEventType, Rectangle, LabelStyle,
+		CreateTileMapServiceImageryProvider, CesiumTerrainProvider, CallbackProperty, VerticalOrigin, HorizontalOrigin, Matrix4,
+		PinBuilder, Transforms, HeadingPitchRoll, ColorGeometryInstanceAttribute, GeometryInstance, Primitive} from './cesium_imports'
 
 if (!('destination' in config)) {
 	config.destination = Cartesian3.fromDegrees(config.siteConfig.centerPoint[0], config.siteConfig.centerPoint[1], config.siteConfig.centerPoint[2]);
@@ -473,7 +473,12 @@ const buildCylinder = function(position, height, radius, slices, label, styleOpt
 				slices: slices,
 				label: {
 					text: label,
-					verticalOrigin: VerticalOrigin.TOP
+					verticalOrigin: VerticalOrigin.TOP,
+			        horizontalOrigin: HorizontalOrigin.RIGHT,
+			        font: '20px Helvetica',
+			        fillColor: Color.WHITE,
+			        outlineWidth: 1,
+			        style: LabelStyle.FILL
 				}
 		};
 
@@ -499,31 +504,82 @@ const computeStar = function(arms, rOuter, rInner) {
     let positions = new Array(length);
     for (let i = 0; i < length; i++) {
         let r = (i % 2) === 0 ? rOuter : rInner;
-        positions[i] = new Cartesian2(Math.cos(i * angle) * r, Math.sin(i * angle) * r);
+        let x = Math.cos(i * angle) * r;
+        let y = Math.sin(i * angle) * r;
+        positions[i] = new Cartesian2(x, y);
     }
     return positions;
 };
 
-const buildArrow = function(position, height, label, styleOptions, id, viewerWrapper, callback) {
+const getArrowPoints = function(height) {
+	let positions = [];
+	positions.push(new Cartesian2(0, 0));
+	positions.push(new Cartesian2(-1, -0.3));
+	positions.push(new Cartesian2(0, 1));
+	positions.push(new Cartesian2(1, -0.3));
+	positions.push(new Cartesian2(0, 0));
+	return positions;
+}
+
+const getArrowPoints3 = function(height) {
+	let positions = [];
+	positions.push(new Cartesian3(0, 0, 0));
+	positions.push(new Cartesian3(-100, -30, 0));
+	positions.push(new Cartesian3(0, 100, 0));
+	positions.push(new Cartesian3(100, -30, 0));
+	positions.push(new Cartesian3(0, 0, 0));
+	return positions;
+}
+
+const buildArrow = function(position, heading, height, label, color, id, viewerWrapper, callback) {
 	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
-		let positions = computeStar(3, 6, 3);
+		//let positions = getArrowPoints(); //computeStar(3, 6, 3);
 		let options =  {
-		    positions : positions,
-		    extrudedHeight : height,
-		    material : Cesium.Color.RED
+		    polygonHierarchy : new PolygonHierarchy(Cartesian3.fromDegreesArray([0, 0.2, -1, -0.15, 0, 1, 1, -0.15, 0,2])),
+			//polygonHierarchy : new PolygonHierarchy(getArrowPoints3()),
+		    extrudedHeight : height
 		  };
-		options = Object.assign(options, styleOptions);
-		const entity = viewerWrapper.viewer.entities.add({
-	        polyline: polylineArguments,
-	        id: id,
-	        position: raisedPoint[0]
+		
+		let hpr = new HeadingPitchRoll(heading, 0.0, 0.0);
+		let transform = Transforms.headingPitchRollToFixedFrame(raisedPoint[0], hpr);
+//		let scale = Matrix4.fromUniformScale(100.0);
+//		let updatedTransform = Matrix4.multiply(transform, scale);
+		//let updatedTransform = Matrix4.multiplyByScalar(transform, 100.0, new Matrix4());
+
+		let pg = new PolygonGeometry(options);
+		
+		let geometryOptions = {
+				geometry: pg,
+				attributes: {
+					color: ColorGeometryInstanceAttribute.fromColor(color),
+				},
+				id: id
+//				modelMatrix: updatedTransform
+		}
+		let instance = new GeometryInstance(geometryOptions);
+		const primitive = new Primitive({
+			debugShowBoundingVolume: true,
+	        geometryInstances: instance,
+	        modelMatrix: transform
 	    });
+		viewerWrapper.scene.primitives.add(primitive);
 	
 	    if (callback !== undefined){
-	    	callback(entity);
+	    	callback(primitive);
 	    }
 	});
 }
 
+const updatePositionHeading = function(primitive, position, heading, viewerWrapper, callback){
+	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
+		let hpr = new HeadingPitchRoll(heading, 0.0, 0.0);
+        Transforms.headingPitchRollToFixedFrame(raisedPoint[0], hpr, Ellipsoid.WGS84, Transforms.eastNorthUpToFixedFrame, primitive.modelMatrix);
 
-export {ViewerWrapper, DynamicLines, zoom, heading, buildLineString, buildPin, buildCylinder}
+		if (callback !== undefined){
+	    	callback(primitive);
+	    }
+	});
+};
+
+
+export {ViewerWrapper, DynamicLines, zoom, heading, buildLineString, buildPin, buildCylinder, buildArrow, updatePositionHeading}
