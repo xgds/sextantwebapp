@@ -288,7 +288,13 @@ class PlanManager {
 			for (let i=0; i<sequence.length; i++){
 				let pe = sequence[i];
 				if (pe.type == 'Segment'){
-					pe.geometry.coordinates = segmentCoordinates[lastIndex];
+					if ('geometry' in pe){
+						pe.geometry.coordinates = segmentCoordinates[lastIndex];
+					} else {
+						pe['geometry'] = {'coordinates': segmentCoordinates[lastIndex],
+								 		  'type': 'LineString'};
+						
+					}
 					lastIndex++;
 				}
 			}
