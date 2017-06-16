@@ -18,13 +18,13 @@ module.exports = {
 	// The server that is running this node app 
     server : { port : 3001,
     		   cesium_port: undefined,
-    		   name : 'localhost',
-    		   protocol: 'http',
+    		   name : '192.168.0.15', //TODO REPLACE THIS WITH YOUR IP ADDRESS 
+    		   protocol: 'https',
     		   nginx_prefix: 'wristApp'},
     		   
     // This should only exist in xGDS side
     sse : { port : 443, 
-    	    name : 'localhost',
+    	    name : '192.168.0.15', // TODO REPLACE THIS WITH YOUR IP ADDRESS
     	    protocol : 'https',
     	    ev_channels: ['EV1', 'EV2']},
     

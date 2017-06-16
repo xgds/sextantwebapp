@@ -16,7 +16,8 @@
 module.exports = {
 
 	// The server that is running this node app 
-    server : { port : 3001, //(process.env.PORT || 3001),
+    server : { port : 3001, 
+    		   cesium_port: 3001,
     		   name : 'localhost',
     		   protocol: 'http',
     		   nginx_prefix: 'wristApp'},

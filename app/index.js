@@ -7,7 +7,7 @@ import {Cartesian3, CesiumMath, Color, CallbackProperty} from './cesium_util/ces
 
 
 // Configure the Cesium viewer
-const viewerWrapper = new ViewerWrapper(config.urlPrefix, config.server.port, 1, 'cesiumContainer');
+const viewerWrapper = new ViewerWrapper(config.urlPrefix, config.server.cesium_port, config.server.nginx_prefix, 1, 'cesiumContainer');
 
 // Set up for SSE or GPS input
 const hasSSE = ('sse' in config);
@@ -24,11 +24,6 @@ if (hasSSE) {
 	gps_tracks = new DynamicLines(viewerWrapper);
 }
 
-//xGDS utility functions
-//function reloadPlan() {
-//	planManager.fetchXGDSPlan();
-//}
-//
 ////GPS utility functions
 //function zoomToGPSTracks(){
 //	return gps_tracks.zoomTo();

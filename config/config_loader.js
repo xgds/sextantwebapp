@@ -17,7 +17,6 @@ const path = require('path');
 
 const initialize = function() {
 	if (global.config === undefined){
-		//let defaultConfigPath = path.join('.', 'config.js'); // no good, this strips off the ./
 		let defaultConfigPath = './xgds_config.js'; 
 		let configPath = (process.env.CONFIG_PATH || defaultConfigPath);
 		console.log('LOADING CONFIG FROM: ' + configPath);

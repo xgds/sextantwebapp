@@ -156,4 +156,13 @@ Then on the html page, you simple call the function by typing sextant.functionna
 
 ## Configuration
 Configuration files are set up in config.  By default, whatever config/config.js is pointing to will be the config file loaded.  If you need to override without changing this link, you can modify it by setting the environment variable CONFIG_PATH to point to the path to the config file that should be loaded.
-All configuration settings should be set up in the config file.
+All configuration settings should be set up in the config file.  When the node application starts, it will print out what config file it loaded.
+
+To set an environment variable in unix (docker), do:
+export CONFIG_PATH=./filename.js
+You'll want to put that file in the config directory so that webpack will find it.
+
+To unset it, do:
+unset CONFIG_PATH
+
+If you want this defaulted in your environment, add that line to the .bashrc file in your home directory.

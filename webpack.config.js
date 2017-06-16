@@ -31,15 +31,9 @@ const config = {
         new webpack.optimize.OccurenceOrderPlugin(),
         new webpack.HotModuleReplacementPlugin(),
         new webpack.NoErrorsPlugin(),
-        new webpack.ContextReplacementPlugin(
-        		  /\w*\/xgds_config.js/,
-        		  path.resolve(__dirname, './config/xgds_config.js'),
-        		),
-        new webpack.ContextReplacementPlugin(
-      		  /\w*\/default_config.js/,
-      		  path.resolve(__dirname, './config/default_config.js'),
-      		)
-
+        new webpack.DefinePlugin({
+            'process.env.CONFIG_PATH': JSON.stringify(process.env.CONFIG_PATH || undefined)
+        })
 //        new webpack.ProvidePlugin({
 //           $: "jquery",
 //           jQuery: "jquery"

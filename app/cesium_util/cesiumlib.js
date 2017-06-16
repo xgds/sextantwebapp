@@ -19,10 +19,11 @@ if (!('destination' in config)) {
 const pinBuilder = new PinBuilder();
 
 class ViewerWrapper{
-    constructor(host, port, terrainExaggeration, container) {
+    constructor(host, port, url_prefix, terrainExaggeration, container) {
         this.container = container;
         this.host = host;
         this.port = port;
+        this.urlPrefix = url_prefix;
         this.layerList = {};
         this.terrainList = {};
         this.terrainExaggeration = terrainExaggeration;
@@ -39,7 +40,7 @@ class ViewerWrapper{
         this.layerList['default'] = 'Assets/Textures/NaturalEarthII';
 
         const imageryProvider = CreateTileMapServiceImageryProvider({
-            url : this.serveraddress(this.port) + '/' + this.layerList['default'],
+            url : this.serveraddress() + '/' + this.layerList['default'],
             fileExtension : 'jpg'
         });
 
@@ -83,8 +84,16 @@ class ViewerWrapper{
         this.layers = viewer.scene.imageryLayers;
     }
 
-    serveraddress(port){
-        return this.host + ':' + this.port;
+    serveraddress(){
+    	let result = this.host;
+    	if (this.port !== undefined){
+    		result +=  ':' + this.port;
+    	}
+    	if (this.urlPrefix !== undefined) {
+    		result += '/' + this.urlPrefix;
+    	}
+    	console.log('server address:' + result);
+    	return result;
     };
     
     toLongLatHeight(cartesian) {
