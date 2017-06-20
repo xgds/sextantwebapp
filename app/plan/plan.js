@@ -15,7 +15,7 @@
 // __END_LICENSE__
 
 const moment = require('moment');
-import {Color, defined, ScreenSpaceEventHandler, ScreenSpaceEventType} from './../cesium_util/cesium_imports'
+import {Color, defined, ScreenSpaceEventHandler, ScreenSpaceEventType, ImageMaterialProperty} from './../cesium_util/cesium_imports'
 import {DynamicLines, buildLineString, buildCylinder} from './../cesium_util/cesiumlib';
 import {config} from './../../config/config_loader';
 
@@ -30,7 +30,7 @@ class PlanManager {
 		this.stationElements = {};
 		this.segmentStyle = {'material':Color.ORANGE};
 		this.stationImageUrl = hostname + '/' + config.server.nginx_prefix + '/icons/station_circle.png';
-		this.stationCylinderStyle = {'material': this.stationImageUrl, 'translucent': true, 'color': Color.TRANSPARENT};
+		this.stationCylinderStyle = {'material': new ImageMaterialProperty({'image':this.stationImageUrl, 'transparent':true}), 'translucent': true, 'color': new Color(1.0, 1.0, 1.0, 0.5)};
 		this.fetchXGDSPlan();
 		global.editMode = false;
 		this.setupEditing();

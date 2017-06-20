@@ -19,12 +19,14 @@ module.exports = {
     server : { port : 3001,
     		   cesium_port: undefined,
     		   name : '192.168.0.15', //TODO REPLACE THIS WITH YOUR IP ADDRESS 
+    		   //name : 'tamar-docker.xgds.org', //TODO REPLACE THIS WITH YOUR SSL-CERT NAME
     		   protocol: 'https',
     		   nginx_prefix: 'wristApp'},
     		   
     // This should only exist in xGDS side
     sse : { port : 443, 
-    	    name : '192.168.0.15', // TODO REPLACE THIS WITH YOUR IP ADDRESS
+    		name : '192.168.0.15', //TODO REPLACE THIS WITH YOUR IP ADDRESS 
+		   //name : 'tamar-docker.xgds.org', //TODO REPLACE THIS WITH YOUR SSL-CERT NAME
     	    protocol : 'https',
     	    ev_channels: ['EV1', 'EV2']},
     

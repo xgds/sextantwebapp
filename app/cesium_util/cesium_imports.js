@@ -17,6 +17,7 @@ import Color from 'cesium/Source/Core/Color';
 import Matrix4 from 'cesium/Source/Core/Matrix4';
 import HeadingPitchRoll from 'cesium/Source/Core/HeadingPitchRoll';
 import CallbackProperty from 'cesium/Source/DataSources/CallbackProperty';
+import ImageMaterialProperty from 'cesium/Source/DataSources/ImageMaterialProperty';
 import ColorGeometryInstanceAttribute from 'cesium/Source/Core/ColorGeometryInstanceAttribute';
 import GeometryInstance from 'cesium/Source/Core/GeometryInstance';
 import Rectangle from 'cesium/Source/Core/Rectangle';
@@ -41,7 +42,7 @@ import CzmlDataSource from 'cesium/Source/DataSources/CzmlDataSource';
 BingMapsApi.defaultKey = global.config.bing_key;
 
 export {Viewer, EllipsoidTerrainProvider, Ellipsoid, Cartographic, Transforms, PointPrimitiveCollection, sampleTerrain,
-ScreenSpaceEventHandler, ScreenSpaceEventType, Cartesian3, Cartesian2, CesiumMath, Color, CallbackProperty,
+ScreenSpaceEventHandler, ScreenSpaceEventType, Cartesian3, Cartesian2, CesiumMath, Color, CallbackProperty, ImageMaterialProperty,
     ColorGeometryInstanceAttribute, GeometryInstance, Rectangle, RectangleGeometry, EntityCollection, CzmlDataSource,
     CreateTileMapServiceImageryProvider, GroundPrimitive, CesiumTerrainProvider, VerticalOrigin, PinBuilder, HorizontalOrigin,
     CylinderGeometry, CylinderGraphics, Primitive, defined, PolygonHierarchy, PolygonGeometry, HeadingPitchRoll, Matrix4, LabelStyle}
