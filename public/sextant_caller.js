@@ -120,7 +120,8 @@
 	}
 	
 	function toggleEditMode(){
-		let button = $("#editButton");
-		let state = button.prop('checked');
-		window.editMode = state;
+		//let button = $("#editButton");
+		//let state = button.prop('checked');
+		//window.editMode = state;
+                window.editMode ^= true;
 	}

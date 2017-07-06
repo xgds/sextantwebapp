@@ -1,34 +1,167 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
 
-    <title>SEXTANT</title>
+<link rel="stylesheet" type="text/css" href="font-awesome/css/font-awesome.min.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+
+<title>SEXTANT</title>
 </head>
-
 <body>
+     
+    
+    <style>
+       
+        html, body, #cesiumContainer {
+          width: 100%; 
+          height: 100%; 
+          margin: 0; 
+          padding: 0; 
+          overflow: hidden;
+    }
+        
+        .menu-icon {
+            position:absolute;
+            top:20px;
+            left:20px;
+            background-color:white;
+            height:40px;
+            width:40px;
+            border:1px solid black;
+            border-radius:2px;
+            cursor: pointer;
+            z-index:2;
+            
+       
+        }      
+        .menu-icon:hover {
+            background-color:#5f6f81; 
+        }
+        .menu-icon:before {
+            display: inline-block;
+            width: 30px;
+            height: 3px;
+            content: "";
+            margin-left: 4px;
+            margin-top: 22px;
+            background: #5993cd;
+            box-shadow: 0 3px white, 
+            0 -6px #5993cd, 
+            0 -9px white, 
+            0 -12px #5993cd;
+    }
 
-<div class="" style="width:100vw;">
-  <div style="width:100vw;" id="cesiumContainer"></div>
-  
-  <div style="display:none;">
-  <strong>xGDS stuff:</strong><br/>
-  	<button class="btn btn-default" type="button" onclick="reloadPlan()">Reload Plan</button></br>
-  	<button class="btn btn-default" type="button" onclick="sendPlanToSextant()">Calculate Path</button></br>
-  	<button class="btn btn-default" type="button" onclick="clearTracks()">Clear Tracks</button>
-  	<label class="btn btn-primary">
-    	<input type="checkbox" id="editButton" autocomplete="off" onclick="toggleEditMode();"> Edit Plan
-  	</label>
-  
-  </div>
-  <div style="display:none;"><!--  aha because I hid your button -->
-          More stuff:
-          <button onclick="sextant_api()">Call sextant for realz</button>
-  
-  </div>
-  <div id="credits"></div>
- </div>
+        .menu-icon:hover::before {
+            background: white;
+            box-shadow: 0 3px #5f6f81, 
+            0 -6px white, 
+            0 -9px #5f6f81, 
+            0 -12px white;
+    }
+        .menu-web {
+            position:absolute;
+            top:80px;
+            left:20px;
+            width:auto;
+            background-color:white;
+            display: none;
+            z-index:2;
+            overflow: scroll;
+          
+            border:2px solid black;
+            border-radius:15px;
+              
+        }  
+        
+        .menu-web > ul> li a {
+            display:block;
+            padding: 14px 16px;
+            color: #5f6f81;
+            font-family: arial, sans-serif;
+            text-align: left;
+            text-decoration: none;
+            border-right: 1px solid #c6d0da;
+        }
+        
+        .menu-web > ul> li a:hover {
+            color: white;
+            background-color: #5f6f81;
+        }
+        .menu-web >ul {
+            list-style-type: auto;
+        }
+        
+        .list-mark {
+        position: relative;
+        display: inline-block;
+        vertical-align: top;
+        margin-top: 3px;
+        margin-left: 6px;
+        width: 12px;
+        height: 12px;
+        border: 2px solid #c4cbd2;
+        border-radius: 12px;
+    }
+
+    .list-mark.checked {
+        border: 2px solid #c4cbd2;
+        background: #39ca74;
+    }
+    
+    #containerConnected_div {
+        position: absolute;
+        top:20px;
+        right:30px;
+        width:30px;
+        height:15px;
+        background-color:white;
+        z-index:2;
+        //border:1px solid black;
+        border-radius:12px;
+    }
+
+        
+    </style>
+    
+    
+    <div class="menu">
+        <a class="menu-icon" onClick="$('.menu-web').toggle();"></a>
+        <div class="menu-web">
+            <ul>
+                <li><a href="#" onclick="reloadPlan()">Reload Plan</a></li>
+                <li><a href="#" onclick="sendPlanToSextant()">Calculate Path</a></li>
+                <li><a href="#" onclick="clearTracks()">Clear Track</a></li>
+                <li><a href="#" onclick="$('.list-mark').toggleClass('checked'); toggleEditMode(); ">Edit Plan
+                <span class="list-mark"></span></a></li>
+                
+               
+                
+                <li><a href="#">Zoom to position</a></li>
+                <li><a href="#">Zoom to plan</a></li>
+                <!--<li><a href="#">Menu item 7</a></li>-->
+                        
+                       
+            </ul>
+        
+ 
+        </div>  
+        
+        
+    </div>
+    
+
+    <div id="containerConnected_div">   
+    <span class="btn alert-danger" id="connected_div" style="visibility: visible;">
+        <span class="fa" id="connected" style="min-width:1rem;">
+        </span>
+	            </span>
+    </div>
+    
+    
+<div id="cesiumContainer"></div>
+<div id="credits"></div>
+<div id="hovercoord"></div>
 
 <script src="./jquery/jquery.min.js"></script>
 <script src="./build/bundle.js"></script>

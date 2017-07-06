@@ -12,6 +12,8 @@ import {Viewer, EllipsoidTerrainProvider, Cartesian3, Cartesian2, PolygonGeometr
 		CreateTileMapServiceImageryProvider, CesiumTerrainProvider, CallbackProperty, VerticalOrigin, HorizontalOrigin, Matrix4,
 		PinBuilder, Transforms, HeadingPitchRoll, ColorGeometryInstanceAttribute, GeometryInstance, Primitive} from './cesium_imports'
 
+import viewerCesiumNavigationMixin from './cesium-navigation/viewerCesiumNavigationMixin';
+
 if (!('destination' in config)) {
 	config.destination = Cartesian3.fromDegrees(config.siteConfig.centerPoint[0], config.siteConfig.centerPoint[1], config.siteConfig.centerPoint[2]);
 }
@@ -46,6 +48,11 @@ class ViewerWrapper{
 
         const viewer = new Viewer(this.container, {
             timeline : false,
+            animation : false,
+            homeButton : false,
+            navigationHelpButton : false,
+            geocoder : false,
+            sceneModePicker : false,
             creditContainer : 'credits',
             terrainExaggeration : terrainExaggeration,
             baseLayerPicker : false,
@@ -53,6 +60,10 @@ class ViewerWrapper{
             //imageryProvider : imageryProvider
 
         });
+        
+        viewer.extend(viewerCesiumNavigationMixin, {enableCompass:true, enableZoomControls:true, enableDistanceLegend:true
+        });
+        
         viewer.infoBox.frame.sandbox = 
         	'allow-same-origin allow-top-navigation allow-pointer-lock allow-popups allow-forms allow-scripts';
         
