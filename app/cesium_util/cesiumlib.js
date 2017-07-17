@@ -520,6 +520,34 @@ const buildCylinder = function(position, height, radius, slices, label, styleOpt
 };
 
 
+const buildSurfaceCircle = function(position, radius, styleOptions, id, viewerWrapper, callback) {
+	
+	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
+		let options = {
+				semiMinorAxis: radius,
+				semiMajorAxis: radius,
+				height: 0,
+				extrudedHeight: 0
+		};
+
+		options = Object.assign(options, styleOptions);
+		
+		let entityOptions = {
+				position: raisedPoint[0],
+				ellipse: options,
+				id: id,
+			};
+		
+		let entity = viewerWrapper.viewer.entities.add(entityOptions);
+
+		if (callback !== undefined){
+			callback(entity);
+		}
+	});
+
+};
+
+
 //TODO this was a debugging function, if you ever need to build a rectangle have to use the parameters
 const buildRectangle = function(position, width, height, label, color, id, viewerWrapper, callback) {
 	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
@@ -683,4 +711,4 @@ const updatePositionHeading = function(entity, position, heading, viewerWrapper,
 };
 
 
-export {ViewerWrapper, DynamicLines, zoom, heading, buildLineString, buildPin, buildCylinder, buildArrow, buildRectangle, updatePositionHeading}
+export {ViewerWrapper, DynamicLines, zoom, heading, buildLineString, buildPin, buildCylinder, buildArrow, buildRectangle, updatePositionHeading, buildSurfaceCircle}

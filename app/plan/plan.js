@@ -16,7 +16,7 @@
 
 const moment = require('moment');
 import {Color, defined, ScreenSpaceEventHandler, ScreenSpaceEventType, ImageMaterialProperty} from './../cesium_util/cesium_imports'
-import {DynamicLines, buildLineString, buildCylinder} from './../cesium_util/cesiumlib';
+import {DynamicLines, buildLineString, buildCylinder, buildSurfaceCircle} from './../cesium_util/cesiumlib';
 import {config} from './../../config/config_loader';
 
 const hostname = config.sse.protocol + '://' + config.sse.name;
@@ -28,9 +28,11 @@ class PlanManager {
 		this.viewerWrapper = viewerWrapper;
 		this.segmentElements = {};
 		this.stationElements = {};
+		this.stationBoundaries = {};
 		this.segmentStyle = {'material':Color.ORANGE};
 		this.stationImageUrl = hostname + '/' + config.server.nginx_prefix + '/icons/station_circle.png';
 		this.stationCylinderStyle = {'material': new ImageMaterialProperty({'image':this.stationImageUrl, 'transparent':true}), 'translucent': true, 'color': new Color(1.0, 1.0, 1.0, 0.5)};
+		this.stationBoundaryStyle = {'material': Color.YELLOW.withAlpha(0.25)};
 		this.fetchXGDSPlan();
 		global.editMode = false;
 		this.setupEditing();
@@ -78,7 +80,7 @@ class PlanManager {
 						let stationId = this.selectedStation.id;
 						let llh = this.viewerWrapper.toLongLatHeight(this.selectedStation.position._value);
 						let newPosition = [llh[0], llh[1]];
-						this.updateStationPosition(stationId, newPosition);
+						this.updateStationPosition(stationId, newPosition, this.selectedStation.position._value);
 						this.toggleNavigation(true);
 						this.selectedStation = undefined;
 					}
@@ -88,12 +90,17 @@ class PlanManager {
 
 	};
 	
-	updateStationPosition(id, position){
+	updateStationPosition(id, llPosition, rawPosition){
 		this.plan.sequence.forEach(function(element){
 			if (element.id == id){
-				element.geometry.coordinates = position;
+				element.geometry.coordinates = llPosition;
 			}
 		});
+		
+		let foundBoundary = this.stationBoundaries[id];
+		if (foundBoundary !== undefined){
+			foundBoundary.position = rawPosition;
+		}
 	};
 	
 	clearPlan(removePlan=true) {
@@ -105,8 +112,15 @@ class PlanManager {
 		keys.forEach(function(key){
 			this.viewerWrapper.viewer.entities.remove(this.stationElements[key]);
 		}, this);
+		keys = Object.keys(this.stationBoundaries);
+		keys.forEach(function(key){
+			this.viewerWrapper.viewer.entities.remove(this.stationBoundaries[key]);
+		}, this);
 		if (removePlan){
 			this.plan = undefined;
+			this.segmentElements = {};
+			this.stationElements = {};
+			this.stationBoundaries = {};
 		}
 	};
 	
@@ -191,6 +205,13 @@ class PlanManager {
 						10.0, 3.0, 128, station.name, this.stationCylinderStyle, station.id, this.viewerWrapper, function(entity){
 				this.stationElements[station.id] = entity;
 			}.bind(this));
+			
+			if (station.boundary !== undefined && station.boundary > 0.6) {
+				buildSurfaceCircle({longitude: station.geometry.coordinates[0], latitude: station.geometry.coordinates[1]},
+						station.boundary, this.stationBoundaryStyle, station.id + "_boundary", this.viewerWrapper, function(entity){
+					this.stationBoundaries[station.id] = entity;
+				}.bind(this));
+			}
 
 		}
 	};
