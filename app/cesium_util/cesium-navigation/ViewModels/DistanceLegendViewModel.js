@@ -7,8 +7,8 @@ define([
     'cesium/Source/Core/getTimestamp',
     'cesium/Source/Core/EventHelper',
     'knockout-es5',
-    '../Core/loadView',
-    'leaflet'
+    '../Core/loadView'
+    //'leaflet'
 ], function (
     defined,
     DeveloperError,
@@ -17,8 +17,9 @@ define([
     getTimestamp,
     EventHelper,
     Knockout,
-    loadView,
-    leaflet) {
+    loadView
+    //leaflet
+    ) {
     'use strict';
 
     var DistanceLegendViewModel = function (options) {
