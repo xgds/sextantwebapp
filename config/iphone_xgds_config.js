@@ -45,16 +45,25 @@ module.exports = {
     // Default geographical site
     defaultSite : 'HI_Mauna_Ulu',
     
+    // list of kml links to load
+    kml_urls : ['https://192.168.0.15/notes/notesFeed.kml',
+    	           'https://192.168.0.15/basaltApp/hvnp_so2_link.kml'],
+    
     // list of various sites we support
     sites : { 'HI_Mauna_Ulu' : { 'imagery' : 'CustomMaps/HI_lowqual_relief',
     							 'elevation' : 'tilesets/HI_highqual',
     							 'centerPoint' : [-155.2118, 19.3647, 5000]
     							},
-    		  'ID_COTM' : { 'imagery' : 'TODO',
+    			  'ID_COTM' : { 'imagery' : 'TODO',
        						'elevation' : 'TODO',
        						'centerPoint' : [-113.5787682, 43.4633101, 5000]
-       					  }
-             },
+       					  },
+       		  'Ames' : { 'imagery': 'TODO',
+       			  		 'elevation': 'TODO',
+       			  		 'centerPoint' : [-122.064789, 37.419362, 5000]
+       					  
+       		  		  }
+    },
     
     // whether or not this is a development server
     debug : true,
@@ -62,7 +71,7 @@ module.exports = {
     // whether or not to show lat long elevation hovering over mouse move
     showCoordinates : false,
 
-    // TODO override with your key.
+    // TODO override with your key if using bing.
     bing_key : 'Ak71PK14Ypz2_IuQ2-TGbV-OVYLKeg_KEXFFYiNmEny6aFJVYxUg_pUxZfhaQ2vy'
 
 }

@@ -2,7 +2,7 @@ import * as _ from 'lodash';
 import * as $ from 'jquery';
 import 'bootstrap-loader';
 import {config} from './../config/config_loader';
-import {ViewerWrapper, zoom, heading, DynamicLines} from './cesium_util/cesiumlib';
+import {ViewerWrapper, zoom, heading, DynamicLines, loadKmls} from './cesium_util/cesiumlib';
 import {Cartesian3, CesiumMath, Color, CallbackProperty} from './cesium_util/cesium_imports'
 
 
@@ -23,6 +23,10 @@ if (hasSSE) {
 } else {
 	gps_tracks = new DynamicLines(viewerWrapper);
 }
+
+// Load the kml configured if any
+console.log('pre kml load');
+loadKmls(config.kml_urls, viewerWrapper);
 
 ////GPS utility functions
 //function zoomToGPSTracks(){

@@ -39,14 +39,22 @@ module.exports = {
     
     // list of various sites we support
     sites : { 'HI_Mauna_Ulu' : { 'imagery' : 'CustomMaps/HI_lowqual_relief',
-    							 'elevation' : 'tilesets/HI_highqual',
-    							 'centerPoint' : [-155.2118, 19.3647, 5000]
-    							},
-    		  'ID_COTM' : { 'imagery' : 'TODO',
-       						'elevation' : 'TODO',
-       						'centerPoint' : [-113.5787682, 43.4633101, 5000]
-       					  }
-             },
+    								'elevation' : 'tilesets/HI_highqual',
+    								'centerPoint' : [-155.2118, 19.3647, 5000]
+    							   },
+    		      'ID_COTM' : { 'imagery' : 'TODO',
+    		    	  				'elevation' : 'TODO',
+    		    	  				'centerPoint' : [-113.5787682, 43.4633101, 5000]
+    		      			  },
+    		      'Ames' : { 'imagery': 'TODO',
+    		    	  			 'elevation': 'TODO',
+    		    	  			 'centerPoint' : [-122.064789, 37.419362, 5000]
+    					   }
+    },
+	
+	// list of kml links to load
+    kml_urls : [],
+    
     
     // whether or not this is a development server
     debug : true,

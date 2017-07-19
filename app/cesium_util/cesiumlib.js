@@ -10,7 +10,7 @@ buildModuleUrl.setBaseUrl('./');
 import {Viewer, EllipsoidTerrainProvider, Cartesian3, Cartesian2, PolygonGeometry, PolygonHierarchy, CesiumMath, Cartographic, Ellipsoid, Color,
 		sampleTerrain, ScreenSpaceEventHandler, ScreenSpaceEventType, Rectangle, RectangleGeometry, LabelStyle, CzmlDataSource,
 		CreateTileMapServiceImageryProvider, CesiumTerrainProvider, CallbackProperty, VerticalOrigin, HorizontalOrigin, Matrix4,
-		PinBuilder, Transforms, HeadingPitchRoll, ColorGeometryInstanceAttribute, GeometryInstance, Primitive} from './cesium_imports'
+		PinBuilder, Transforms, HeadingPitchRoll, ColorGeometryInstanceAttribute, GeometryInstance, Primitive, KmlDataSource} from './cesium_imports'
 
 import viewerCesiumNavigationMixin from './cesium-navigation/viewerCesiumNavigationMixin';
 
@@ -710,5 +710,26 @@ const updatePositionHeading = function(entity, position, heading, viewerWrapper,
 	});
 };
 
+const loadKml = function(kmlUrl, viewerWrapper, callback) {
+	viewerWrapper.viewer.dataSources.add(KmlDataSource.load(kmlUrl, {
+		        camera: viewerWrapper.viewer.camera,
+		        canvas: viewerWrapper.viewer.canvas
+		    })
+		).then( function (dataSource) {
+			if (callback !== undefined) {
+				callback(dataSource);
+			}
+		});
+}
 
-export {ViewerWrapper, DynamicLines, zoom, heading, buildLineString, buildPin, buildCylinder, buildArrow, buildRectangle, updatePositionHeading, buildSurfaceCircle}
+const loadKmls = function(kmlUrls, viewerWrapper, callback){
+	if (!_.isEmpty(kmlUrls)) {
+		console.log('config has kml urls');
+		for (let i=0; i<kmlUrls.length; i++){
+			console.log(kmlUrls[i]);
+			loadKml(kmlUrls[i], viewerWrapper, callback);
+		}
+	}
+}
+
+export {ViewerWrapper, DynamicLines, zoom, heading, buildLineString, buildPin, buildCylinder, buildArrow, buildRectangle, updatePositionHeading, buildSurfaceCircle, loadKml, loadKmls}
