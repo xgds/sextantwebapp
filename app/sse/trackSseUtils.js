@@ -73,7 +73,7 @@ class TrackSSE {
 	};
 
 	showDisconnected(channel) {
-		this.renderPosition(channel, ['stopped'], true);
+		this.renderPosition(channel, undefined, true);
 	};
 
 	subscribe(channel, context) {
@@ -93,13 +93,15 @@ class TrackSSE {
 		}
 		// in this example we just store the data
 		this.positions[channel] = data;
-		this.renderPosition(channel, [data.lon, data.lat], nonSse);
+		this.renderPosition(channel, data, nonSse);
 		this.getTrack(channel, data);
 	};
 
 	modifyPosition(channel, data, disconnected){
 		this.positions[channel] = data;
-		this.renderPosition(channel, [data.lon, data.lat], disconnected);
+		//data.heading = (Math.random() * (360.0)); //TODO testing heading, delete
+		data.heading = (Math.random() * (2* Math.PI)); //TODO testing heading, delete
+		this.renderPosition(channel, data, disconnected);
 	};
 
 	updatePosition(channel, data){
@@ -166,85 +168,51 @@ class TrackSSE {
 	};
 
 	renderPosition(channel, data, stopped){
-		if (!_.isEmpty(data)){
-			if (!(channel in this.cPosition)) {
-				if (data.length > 1){
-					let color = Color.GREEN;
-					if (channel in this.colors){
-						color = this.colors[channel];
-					}
-					buildPositionDataSource({longitude:data[0], latitude:data[1]}, 0.0,
-							channel, color, channel+'_POSITION', this.getLatestPosition, this, this.viewerWrapper, function(dataSource){
-							this.cPosition[channel] = dataSource;
-					}.bind(this));
-				}
-			} else {
-				let dataSource = this.cPosition[channel];
-				let pointEntity = dataSource.entities.values[0];
-				
-				if (stopped){
-					let color = this.colors['gray'];
-					if (pointEntity.ellipse.material.color != color){
-						pointEntity.ellipse.material.color = color;
-					}
-					return;
-				}
-				
-				
-				// update it
-				this.viewerWrapper.getRaisedPositions({longitude:data[0], latitude:data[1]}).then(function(raisedPoint) {
-					pointEntity.position = raisedPoint[0];
-					
-					let color = Color.GREEN;
-					if (channel in this.colors){
-						color = this.colors[channel];
-					}
-					if (pointEntity.ellipse.material.color != color){
-						pointEntity.ellipse.material.color = color;
-					}
+		if (!(channel in this.cPosition)) {
+			let color = Color.GREEN;
+			if (channel in this.colors){
+				color = this.colors[channel];
+			}
+
+			if (!_.isEmpty(data)){
+				buildPositionDataSource({longitude:data.lon, latitude:data.lat}, data.heading,
+						channel, color, channel+'_POSITION', this.getLatestPosition, this, this.viewerWrapper, function(dataSource){
+						this.cPosition[channel] = dataSource;
 				}.bind(this));
 			}
-		}
-		return;
-		if (!_.isEmpty(data)) {
-			if (stopped) {
-				//				if (!(channel in this.cStopped)) {
-				//					buildCylinder({longitude:data[0], latitude:data[1]},
-				//							5.0, 2.5, 8, channel, this.stoppedCylinderStyle, channel+'_STOPPED', this.viewerWrapper, function(entity){
-				//						this.cStopped[channel] = entity;
-				//					}.bind(this));
-				//				} else {
-				//					//update its position
-				//					this.cStopped[channel].position = this.viewerWrapper.getRaisedPositions([data]);
-				//				}
-				//				if (channel in this.cPosition){
-				//					this.viewerWrapper.viewer.scene.primitives.remove(this.cPosition[channel]);
-				//					this.isStopped[channel] = true;
-				//				}
-			} else {
-				if (!(channel in this.cPosition)) {
-					buildArrow({longitude:data[0], latitude:data[1]}, 0.0,
-							5.0, channel, Color.GREEN, channel+'_POSITION', this.viewerWrapper, function(entity){
-						this.cPosition[channel] = entity;
-					}.bind(this));
-					// TODO also build active cylinder
-				} else {
-					if (this.isStopped[channel]){
-						this.viewerWrapper.viewer.scene.primitives.add(this.cPosition[channel]);
-						this.isStopped[channel] = false;
-					}
-					// update its position
-					//updatePositionHeading(this.cPosition[channel],{longitude:data[0], latitude:data[1]}, 1.0, this.viewerWrapper);
-					//this.cPosition[channel].position = this.viewerWrapper.getRaisedPositions([data]);
+		} else {
+			let dataSource = this.cPosition[channel];
+			let pointEntity = dataSource.entities.values[0];
+			
+			if (stopped){
+				let color = this.colors['gray'];
+				if (pointEntity.ellipse.material.color != color){
+					pointEntity.ellipse.material.color = color;
 				}
-
-				if(channel in this.isStopped){
-					if (this.isStopped[channel]){
-						this.viewerWrapper.viewer.entities.remove(this.cStopped[channel]);
-						this.isStopped[channel] = false;
-					}
-				}
+				return;
 			}
+			
+			// update it
+			this.viewerWrapper.getRaisedPositions({longitude:data.lon, latitude:data.lat}).then(function(raisedPoint) {
+				pointEntity.position.setValue(raisedPoint[0]);
+				let hasHeading = (data.heading !== "");
+				if (hasHeading) {
+					pointEntity.orientation.setValue(data.heading);
+					pointEntity.ellipse.show = false;
+					pointEntity.polygon.show = true;
+				} else {
+					pointEntity.ellipse.show = true;
+					pointEntity.polygon.show = false;
+				} 
+				
+				let color = Color.GREEN;
+				if (channel in this.colors){
+					color = this.colors[channel];
+				}
+				if (pointEntity.ellipse.material.color != color){
+					pointEntity.ellipse.material.color = color;
+				}
+			}.bind(this));
 		}
 	};
 

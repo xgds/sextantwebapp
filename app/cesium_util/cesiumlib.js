@@ -571,9 +571,9 @@ const getArrowPoints = function(height) {
 const getArrowPoints3 = function(height) {
 	let positions = [];
 	positions.push(new Cartesian3(0, 0, 100000));
-	positions.push(new Cartesian3(-100, -30, 100000));
-	positions.push(new Cartesian3(0, 100, 100000));
-	positions.push(new Cartesian3(100, -30, 100000));
+	positions.push(new Cartesian3(-10, -3, 100000));
+	positions.push(new Cartesian3(0, 10, 100000));
+	positions.push(new Cartesian3(10, -3, 100000));
 	positions.push(new Cartesian3(0, 0, 100000));
 	return positions;
 }
@@ -607,10 +607,13 @@ const czml = [{
 
 const buildPositionDataSource = function(position, heading, label, color, id, getPositionFunction, trackSse, viewerWrapper, callback) {
 	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
-		var dataSource = new CustomDataSource(id);
+		let dataSource = new CustomDataSource(id);
 		
-		var entity = dataSource.entities.add({
+		let hasHeading = (heading !== "");
+		
+		let ellipseEntity = dataSource.entities.add({
 		   position: raisedPoint[0],
+		   orientation: heading,
 		   label : {
 					text: label,
 					verticalOrigin: VerticalOrigin.CENTER,
@@ -621,9 +624,18 @@ const buildPositionDataSource = function(position, heading, label, color, id, ge
 					semiMajorAxis: 1.5,
 					height: 0,
 					extrudedHeight: 0,
-					material: color
-			}
+					material: color,
+					show: (!hasHeading)
+			},
+			polygon: {
+					material: color,
+					hierarchy: new PolygonHierarchy(getArrowPoints3()),
+					show: hasHeading,
+					height: 10,
+					extrudedHeight: 10
+			   }
 		});
+		
 		
 		viewerWrapper.viewer.dataSources.add(dataSource);
 		
