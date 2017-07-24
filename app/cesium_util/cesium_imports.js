@@ -39,10 +39,11 @@ import PinBuilder from 'cesium/Source/Core/PinBuilder';
 import defined from 'cesium/Source/Core/defined';
 import CzmlDataSource from 'cesium/Source/DataSources/CzmlDataSource';
 import KmlDataSource from 'cesium/Source/DataSources/KmlDataSource';
+import CustomDataSource from 'cesium/Source/DataSources/CustomDataSource';
 
 BingMapsApi.defaultKey = global.config.bing_key;
 
-export {Viewer, EllipsoidTerrainProvider, Ellipsoid, Cartographic, Transforms, PointPrimitiveCollection, sampleTerrain,
+export {Viewer, EllipsoidTerrainProvider, Ellipsoid, Cartographic, Transforms, PointPrimitiveCollection, sampleTerrain, CustomDataSource,
 ScreenSpaceEventHandler, ScreenSpaceEventType, Cartesian3, Cartesian2, CesiumMath, Color, CallbackProperty, ImageMaterialProperty,
     ColorGeometryInstanceAttribute, GeometryInstance, Rectangle, RectangleGeometry, EntityCollection, CzmlDataSource, KmlDataSource,
     CreateTileMapServiceImageryProvider, GroundPrimitive, CesiumTerrainProvider, VerticalOrigin, PinBuilder, HorizontalOrigin,

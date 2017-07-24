@@ -19,7 +19,7 @@ const hasSSE = ('sse' in config);
 
 const moment = require('moment');
 import {Color} from './../cesium_util/cesium_imports'
-import {DynamicLines, buildCylinder, buildArrow, updatePositionHeading, buildRectangle} from './../cesium_util/cesiumlib';
+import {DynamicLines, buildCylinder, buildArrow, updatePositionHeading, buildRectangle, buildPositionDataSource} from './../cesium_util/cesiumlib';
 import {SSE} from './sseUtils'
 
 const hostname = config.sse.protocol + '://' + config.sse.name;
@@ -35,6 +35,7 @@ class TrackSSE {
 		this.viewerWrapper = viewerWrapper;
 		this.positions = {};
 		this.tracks =  {};
+		this.colors = {'gray': Color.GRAY.withAlpha(0.75)};
 		this.cTracks =  {};
 		this.cStopped =  {};
 		this.cPosition =  {};
@@ -60,8 +61,8 @@ class TrackSSE {
 	checkStale(channel, context) {
 		let connected = false
 		if (context.positions[channel] != undefined){
-			let nowmoment =  moment();
-			let diff = moment.duration(nowmoment.diff(context.positions[channel].timestamp));
+			let nowmoment =  moment().utc();
+			let diff = moment.duration(nowmoment.diff(moment(context.positions[channel].timestamp)));
 			if (diff.asSeconds() <= 10) {
 				connected = true;
 			}
@@ -72,7 +73,7 @@ class TrackSSE {
 	};
 
 	showDisconnected(channel) {
-		//		console.log(channel + ' DISCONNECTED');
+		this.renderPosition(channel, ['stopped'], true);
 	};
 
 	subscribe(channel, context) {
@@ -127,6 +128,9 @@ class TrackSSE {
 		if (data.color !== undefined) {
 			let color = Color.fromCssColorString('#' + data.color)
 			styleDict['material'] = color;
+			// make a translucent one
+			let cclone = color.clone().withAlpha(0.25);
+			this.colors[channel] = cclone;
 		}
 		let coords = data.coords;
 		if (coords.length > 0) {
@@ -153,8 +157,54 @@ class TrackSSE {
 		}
 		return track_name;
 	};
+	
+	getLatestPosition(channel) {
+		if (channel in this.positions) {
+			return {'longitude':this.positions[channel].lon, 'latitude':this.positions[channel].lat};
+		}
+		return undefined;
+	};
 
 	renderPosition(channel, data, stopped){
+		if (!_.isEmpty(data)){
+			if (!(channel in this.cPosition)) {
+				if (data.length > 1){
+					let color = Color.GREEN;
+					if (channel in this.colors){
+						color = this.colors[channel];
+					}
+					buildPositionDataSource({longitude:data[0], latitude:data[1]}, 0.0,
+							channel, color, channel+'_POSITION', this.getLatestPosition, this, this.viewerWrapper, function(dataSource){
+							this.cPosition[channel] = dataSource;
+					}.bind(this));
+				}
+			} else {
+				let dataSource = this.cPosition[channel];
+				let pointEntity = dataSource.entities.values[0];
+				
+				if (stopped){
+					let color = this.colors['gray'];
+					if (pointEntity.ellipse.material.color != color){
+						pointEntity.ellipse.material.color = color;
+					}
+					return;
+				}
+				
+				
+				// update it
+				this.viewerWrapper.getRaisedPositions({longitude:data[0], latitude:data[1]}).then(function(raisedPoint) {
+					pointEntity.position = raisedPoint[0];
+					
+					let color = Color.GREEN;
+					if (channel in this.colors){
+						color = this.colors[channel];
+					}
+					if (pointEntity.ellipse.material.color != color){
+						pointEntity.ellipse.material.color = color;
+					}
+				}.bind(this));
+			}
+		}
 		return;
 		if (!_.isEmpty(data)) {
 			if (stopped) {

@@ -8,7 +8,7 @@ buildModuleUrl.setBaseUrl('./');
 
 // Load all cesium components required
 import {Viewer, EllipsoidTerrainProvider, Cartesian3, Cartesian2, PolygonGeometry, PolygonHierarchy, CesiumMath, Cartographic, Ellipsoid, Color,
-		sampleTerrain, ScreenSpaceEventHandler, ScreenSpaceEventType, Rectangle, RectangleGeometry, LabelStyle, CzmlDataSource,
+		sampleTerrain, ScreenSpaceEventHandler, ScreenSpaceEventType, Rectangle, RectangleGeometry, LabelStyle, CzmlDataSource, CustomDataSource,
 		CreateTileMapServiceImageryProvider, CesiumTerrainProvider, CallbackProperty, VerticalOrigin, HorizontalOrigin, Matrix4,
 		PinBuilder, Transforms, HeadingPitchRoll, ColorGeometryInstanceAttribute, GeometryInstance, Primitive, KmlDataSource} from './cesium_imports'
 
@@ -345,7 +345,6 @@ class DynamicLines{
     
     initialize(latLongPoints) {
     	this.viewerWrapper.getRaisedPositions(latLongPoints).then(function (raisedMidPoints) {
-    		//console.log(this.points);
     		this.points = raisedMidPoints;
     		
             const polylineArguments = Object.assign({positions: new CallbackProperty(this.getPoints.bind(this), false),
@@ -379,11 +378,6 @@ class DynamicLines{
         }.bind(this));
     };
     
-    // gps_mesh is undefined, this makes no sense.
-//    addMesh(){
-//        gps_mesh.send('');
-//    };
-    
 	addPoint(lat, lon){
 		if (this.freeze) {
 			return; // drop
@@ -401,14 +395,6 @@ class DynamicLines{
 				});
 			}
 		} 
-		/* 
-		 *  The below makes no sense.  this.pushPoint adds the current lat and lon to the points, so we have already added it above. 
-		  else if(this.points.length > 2){
-			let lastcoords = _.takeRight(this.points,2);
-			if(lastcoords[0]!==lon) {
-				this.pushPoint(lon, lat);
-			}
-		} */
 	};
 	
 	zoomTo(){
@@ -548,7 +534,7 @@ const buildSurfaceCircle = function(position, radius, styleOptions, id, viewerWr
 };
 
 
-//TODO this was a debugging function, if you ever need to build a rectangle have to use the parameters
+//this was a debugging function, if you ever need to build a rectangle have to use the parameters
 const buildRectangle = function(position, width, height, label, color, id, viewerWrapper, callback) {
 	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
 		const rectangleInstance = new GeometryInstance({
@@ -619,6 +605,34 @@ const czml = [{
     }
 }];
 
+const buildPositionDataSource = function(position, heading, label, color, id, getPositionFunction, trackSse, viewerWrapper, callback) {
+	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
+		var dataSource = new CustomDataSource(id);
+		
+		var entity = dataSource.entities.add({
+		   position: raisedPoint[0],
+		   label : {
+					text: label,
+					verticalOrigin: VerticalOrigin.CENTER,
+			        horizontalOrigin: HorizontalOrigin.CENTER
+				},
+		   ellipse : {
+					semiMinorAxis: 1.5,
+					semiMajorAxis: 1.5,
+					height: 0,
+					extrudedHeight: 0,
+					material: color
+			}
+		});
+		
+		viewerWrapper.viewer.dataSources.add(dataSource);
+		
+		if (callback !== undefined){
+    			callback(dataSource);
+		}
+		
+	}); 
+};
 
 const buildArrow = function(position, heading, height, label, color, id, viewerWrapper, callback) {
 	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
@@ -651,10 +665,8 @@ const buildArrow = function(position, heading, height, label, color, id, viewerW
 			viewerWrapper.viewer.zoomTo(entity);
 			
 			if (callback !== undefined){
-		    	callback(entity);
+		    		callback(entity);
 		    }
-
-			
 
 		});
 		
@@ -732,4 +744,4 @@ const loadKmls = function(kmlUrls, viewerWrapper, callback){
 	}
 }
 
-export {ViewerWrapper, DynamicLines, zoom, heading, buildLineString, buildPin, buildCylinder, buildArrow, buildRectangle, updatePositionHeading, buildSurfaceCircle, loadKml, loadKmls}
+export {ViewerWrapper, DynamicLines, zoom, heading, buildLineString, buildPin, buildCylinder, buildArrow, buildRectangle, updatePositionHeading, buildSurfaceCircle, loadKml, loadKmls, buildPositionDataSource}

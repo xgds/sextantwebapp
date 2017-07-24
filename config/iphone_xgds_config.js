@@ -43,7 +43,7 @@ module.exports = {
     terrain : { port : 9090 },
     
     // Default geographical site
-    defaultSite : 'HI_Mauna_Ulu',
+    defaultSite : 'Ames',
     
     // list of kml links to load
     kml_urls : ['https://192.168.0.15/notes/notesFeed.kml',
