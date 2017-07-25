@@ -606,6 +606,8 @@ const czml = [{
 }];
 
 const buildPositionDataSource = function(position, heading, label, color, id, getPositionFunction, trackSse, viewerWrapper, callback) {
+	// This builds a circle on the surface; trackSseUtils currently uses this ellipse to modify the material and rotation of material
+	// and to update position to indicate current position and heading from GPS input.
 	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
 		let dataSource = new CustomDataSource(id);
 		
@@ -615,7 +617,6 @@ const buildPositionDataSource = function(position, heading, label, color, id, ge
 		
 		let ellipseEntity = dataSource.entities.add({
 		   position: raisedPoint[0],
-//		   orientation: heading,
 		   label : {
 					text: label,
 					verticalOrigin: VerticalOrigin.CENTER,
@@ -629,14 +630,6 @@ const buildPositionDataSource = function(position, heading, label, color, id, ge
 					material: color,
 					stRotation: heading
 			}
-			/*
-			polygon: {
-					material: color,
-					hierarchy: new ConstantProperty(new PolygonHierarchy(getArrowPoints3())),
-					show: hasHeading,
-					height: 10,
-					extrudedHeight: 10
-			   } */
 		});
 		
 		
@@ -739,6 +732,7 @@ const updatePositionHeading = function(entity, position, heading, viewerWrapper,
 
 const loadKml = function(kmlUrl, viewerWrapper, callback) {
 	viewerWrapper.viewer.dataSources.add(KmlDataSource.load(kmlUrl, {
+				name: kmlUrl,
 		        camera: viewerWrapper.viewer.camera,
 		        canvas: viewerWrapper.viewer.canvas
 		    })
@@ -751,7 +745,7 @@ const loadKml = function(kmlUrl, viewerWrapper, callback) {
 
 const loadKmls = function(kmlUrls, viewerWrapper, callback){
 	if (!_.isEmpty(kmlUrls)) {
-		console.log('config has kml urls');
+		console.log('Loading kml:');
 		for (let i=0; i<kmlUrls.length; i++){
 			console.log(kmlUrls[i]);
 			loadKml(kmlUrls[i], viewerWrapper, callback);

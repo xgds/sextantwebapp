@@ -25,7 +25,6 @@ if (hasSSE) {
 }
 
 // Load the kml configured if any
-console.log('pre kml load');
 loadKmls(config.kml_urls, viewerWrapper);
 
 ////GPS utility functions

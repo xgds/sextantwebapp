@@ -18,7 +18,7 @@ import {config} from './../../config/config_loader';
 const hasSSE = ('sse' in config);
 
 const moment = require('moment');
-import {Color, ImageMaterialProperty, ColorMaterialProperty, Cartesian2} from './../cesium_util/cesium_imports'
+import {Color, ImageMaterialProperty, ColorMaterialProperty, Cartesian2, CallbackProperty} from './../cesium_util/cesium_imports'
 import {DynamicLines, buildCylinder, buildArrow, updatePositionHeading, buildRectangle, buildPositionDataSource} from './../cesium_util/cesiumlib';
 import {SSE} from './sseUtils'
 
@@ -41,7 +41,7 @@ class TrackSSE {
 		this.cTracks =  {};
 		this.cStopped =  {};
 		this.cPosition =  {};
-		this.isStopped = {};
+		this.isStopped = [];
 		this.STALE_TIMEOUT= 5000;
 		this.pointerUrl = hostname + '/' + config.server.nginx_prefix + '/icons/pointer.png';
 		this.stoppedCylinderStyle = {material: Color.GRAY};
@@ -68,10 +68,15 @@ class TrackSSE {
 			let diff = moment.duration(nowmoment.diff(moment(context.positions[channel].timestamp)));
 			if (diff.asSeconds() <= 10) {
 				connected = true;
+				let index = context.isStopped.indexOf(channel);
+				if (index > -1) {
+					context.isStopped.splice(index, 1);
+				}
 			}
 		}
 		if (!connected){
-			context.showDisconnected(channel);
+			context.isStopped.push(channel);
+			//context.showDisconnected(channel);
 		}
 	};
 
@@ -91,10 +96,12 @@ class TrackSSE {
 	};
 
 	createPosition(channel, data, nonSse){
+		// store the data, render the position and get the track
+		console.log('creating position');
+		console.log(data);
 		if (nonSse == undefined){
 			nonSse = false;
 		}
-		// in this example we just store the data
 		this.positions[channel] = data;
 		data.heading = (Math.random() * (2* Math.PI)); //TODO testing heading, delete
 		this.renderPosition(channel, data, nonSse);
@@ -102,13 +109,15 @@ class TrackSSE {
 	};
 
 	modifyPosition(channel, data, disconnected){
+		console.log('modify position');
+		console.log(data);
 		this.positions[channel] = data;
-		//data.heading = (Math.random() * (360.0)); //TODO testing heading, delete
 		data.heading = (Math.random() * (2* Math.PI)); //TODO testing heading, delete
 		this.renderPosition(channel, data, disconnected);
 	};
 
 	updatePosition(channel, data){
+		console.log('update position');
 		if (!(channel in this.positions)){
 			this.createPosition(channel, data);
 		} else {
@@ -207,8 +216,43 @@ class TrackSSE {
 		return material;
 		
 	};
-
+	
+	getColor(channel) {
+		if (channel in this.isStopped) {
+			return this.colors['gray'];
+		}
+		if (channel in this.colors){
+			return this.colors[channel];
+		}
+		return Color.GREEN;
+	}
+	
+	getMaterial2(channel) {
+		// gets or initializes the material
+		let material = undefined;
+		let data = this.positions[channel];
+		let hasHeading = (data.heading !== "");
+		if (hasHeading) {
+			// make sure it has the image material
+			if (!(channel in this.imageMaterials)){
+				this.imageMaterials[channel] = new ImageMaterialProperty({'image': this.pointerUrl, 'transparent': true, 'color': new CallbackProperty(function() {context.getColor(channel);}, false)});
+			} 
+			material = this.imageMaterials[channel];
+		} else {
+			// make sure it has the color material
+			if (!(channel in this.colorMaterials)){
+				this.colorMaterials[channel] = new ColorMaterialProperty({'color': new CallbackProperty(function() {context.getColor(channel);}, false)});
+			} 
+			material = this.colorMaterials[channel];
+		} 
+		
+		return material;
+		
+	};
+	
+	/*
 	renderPosition(channel, data, stopped){
+		console.log('rendering position');
 		if (!(channel in this.cPosition)) {
 			let color = Color.GREEN;
 			if (channel in this.colors){
@@ -216,9 +260,48 @@ class TrackSSE {
 			}
 
 			if (!_.isEmpty(data)){
+//				let retrievedMaterial = this.getMaterial(channel, data);
+				console.log('building position data source');
+				let context = this;
+				let newMaterial = new CallbackProperty(function() {
+					context.getMaterial2(channel);
+					}, false);
+				buildPositionDataSource({longitude:data.lon, latitude:data.lat}, data.heading,
+						channel, newMaterial, channel+'_POSITION', this.getLatestPosition, this, this.viewerWrapper, function(dataSource){
+						console.log('built');
+						this.cPosition[channel] = dataSource;
+				}.bind(this));
+			}
+		} else {
+			let dataSource = this.cPosition[channel];
+			let pointEntity = dataSource.entities.values[0];
+			
+			// update it
+			this.viewerWrapper.getRaisedPositions({longitude:data.lon, latitude:data.lat}).then(function(raisedPoint) {
+				pointEntity.position.setValue(raisedPoint[0]);
+				
+			}.bind(this));
+		}
+	};
+	*/
+
+	renderPosition(channel, data, stopped){
+		console.log('rendering position');
+		let color = Color.GREEN;
+		if (channel in this.colors){
+			color = this.colors[channel];
+		}
+		
+		if (!(channel in this.cPosition)) {
+			
+
+			if (!_.isEmpty(data)){
 				let retrievedMaterial = this.getMaterial(channel, data);
+				console.log('building position data source');
+				let context = this;
 				buildPositionDataSource({longitude:data.lon, latitude:data.lat}, data.heading,
 						channel, retrievedMaterial, channel+'_POSITION', this.getLatestPosition, this, this.viewerWrapper, function(dataSource){
+						console.log('built');
 						this.cPosition[channel] = dataSource;
 				}.bind(this));
 			}
@@ -228,7 +311,7 @@ class TrackSSE {
 			
 			if (stopped){
 				let color = this.colors['gray'];
-				if (!color.equals(pointEntity.ellipse.material.color.getValue()){
+				if (!color.equals(pointEntity.ellipse.material.color.getValue())){
 					pointEntity.ellipse.material.color = color;
 				}
 				return;
@@ -243,18 +326,17 @@ class TrackSSE {
 				
 				let hasHeading = (data.heading !== "");
 				if (hasHeading) {
-					pointEntity.ellipse.stRotation = data.heading;
-					
-					//pointEntity.ellipse.stRotation.setValue(data.heading);
+					//console.log('setting orientation ' + data.heading);
+					pointEntity.ellipse.stRotation.setValue(data.heading);
 					// make sure it has the image material
 					if (material.getType() == "Color"){
 						console.log('switching from color to ' + retrievedMaterial.getType());
 						pointEntity.ellipse.material = retrievedMaterial;
 					} else {
 						// it already is, check the color
-//						if (!color.equals(pointEntity.ellipse.material.color.getValue())){
-//							pointEntity.ellipse.material.color = color;
-//						}
+						if (!retrievedMaterial.color.equals(pointEntity.ellipse.material.color.getValue())){
+							pointEntity.ellipse.material.color = color;
+						}
 					}
 				} else {
 					if (material.getType() != "Color"){
@@ -262,15 +344,15 @@ class TrackSSE {
 						pointEntity.ellipse.material = retrievedMaterial;
 					} else {
 						// it already is, check the color
-//						if (!color.equals(pointEntity.ellipse.material.color.getValue())){
-//							pointEntity.ellipse.material.color = color;
-//						}
+						if (!color.equals(pointEntity.ellipse.material.color.getValue())){
+							pointEntity.ellipse.material.color = color;
+						}
 					}
 				} 
 				
 			}.bind(this));
 		}
-	};
+	}; 
 
 	getCurrentPositions() {
 		let trackPKUrl = hostname + '/track/position/active/json'
