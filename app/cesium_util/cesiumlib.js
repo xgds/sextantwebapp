@@ -9,7 +9,7 @@ buildModuleUrl.setBaseUrl('./');
 // Load all cesium components required
 import {Viewer, EllipsoidTerrainProvider, Cartesian3, Cartesian2, PolygonGeometry, PolygonHierarchy, CesiumMath, Cartographic, Ellipsoid, Color,
 		sampleTerrain, ScreenSpaceEventHandler, ScreenSpaceEventType, Rectangle, RectangleGeometry, LabelStyle, CzmlDataSource, CustomDataSource,
-		CreateTileMapServiceImageryProvider, CesiumTerrainProvider, CallbackProperty, VerticalOrigin, HorizontalOrigin, Matrix4,
+		CreateTileMapServiceImageryProvider, CesiumTerrainProvider, CallbackProperty, VerticalOrigin, HorizontalOrigin, Matrix4, ConstantProperty,
 		PinBuilder, Transforms, HeadingPitchRoll, ColorGeometryInstanceAttribute, GeometryInstance, Primitive, KmlDataSource} from './cesium_imports'
 
 import viewerCesiumNavigationMixin from './cesium-navigation/viewerCesiumNavigationMixin';
@@ -609,11 +609,13 @@ const buildPositionDataSource = function(position, heading, label, color, id, ge
 	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
 		let dataSource = new CustomDataSource(id);
 		
-		let hasHeading = (heading !== "");
+		if (heading == "") {
+			heading = 0.0;
+		}
 		
 		let ellipseEntity = dataSource.entities.add({
 		   position: raisedPoint[0],
-		   orientation: heading,
+//		   orientation: heading,
 		   label : {
 					text: label,
 					verticalOrigin: VerticalOrigin.CENTER,
@@ -625,15 +627,16 @@ const buildPositionDataSource = function(position, heading, label, color, id, ge
 					height: 0,
 					extrudedHeight: 0,
 					material: color,
-					show: (!hasHeading)
-			},
+					stRotation: heading
+			}
+			/*
 			polygon: {
 					material: color,
-					hierarchy: new PolygonHierarchy(getArrowPoints3()),
+					hierarchy: new ConstantProperty(new PolygonHierarchy(getArrowPoints3())),
 					show: hasHeading,
 					height: 10,
 					extrudedHeight: 10
-			   }
+			   } */
 		});
 		
 		
