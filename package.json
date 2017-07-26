@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "www.github.com/norheim/pextant"
+    "url": "www.github.com/norheim/sextantwebapp"
   },
   "author": "Johannes Norheim",
   "license": "ISC",
@@ -61,7 +61,7 @@
     "style-loader": "^0.13.1",
     "url-loader": "^0.5.7",
     "watchify": "^3.7.0",
-    "webpack": "^1.13.3",
+    "webpack": "^1.15.0",
     "webpack-dev-middleware": "^1.8.4",
     "webpack-hot-middleware": "^2.13.1"
   }

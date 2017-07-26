@@ -37,7 +37,7 @@ Yes, you are reading this correctly. No more need for style tags in the header o
 ### Bundling things up with: Webkit
 I know of two libraries that can tackle the challenges of bundling and translating ES6 code(and also React, although React has not been added to this project): browserify and webkit. We are using webkit because... just because. It seems to be the easiest to setup, but don't take my words for it.
 
-Webkit requires some configuration: webkit.config.js, where you tell it what syntax of javascript your are writing in (e.g. ES5 or ES6), the name of your output bundle (normally bundle.js), and some other things. For production you would actually generate a physical bundle.js file, however the way we run webkit right now, bundle.js is served by **express**(remember from earlier? it is our backend server) without being stored physically somewhere in a file.
+Webkit requires some configuration: webkit.config.js, where you tell it what syntax of javascript your are writing in (e.g. ES5 or ES6), the name of your output bundle (normally bundle.js, we are using sextant.bundle.js), and some other things. For production you would actually generate a physical bundle.js file, however the way we run webkit right now, bundle.js is served by **express**(remember from earlier? it is our backend server) without being stored physically somewhere in a file.
 
 ### Hot Module Reload
 If you looked a bunch at the code already, you will notice there seems to be a lot of weird overhead in server.js and webkit.config.js. Although in webkit.config.js some of the overhead configs are for cesium to properly work, the extra code is mostly to take advantage of a really cool feature that the bundling process allows for: hot module reload.
@@ -166,3 +166,15 @@ To unset it, do:
 unset CONFIG_PATH
 
 If you want this defaulted in your environment, add that line to the .bashrc file in your home directory.
+
+## Production
+
+We use webpack, so follow the steps described here: https://webpack.js.org/guides/production/
+
+sudo npm install -g --save-dev webpack
+sudo npm install -g clean-webpack-plugin --save-dev
+
+To pack it for production
+webpack -p
+To build it:
+npm run build
