@@ -51,8 +51,6 @@ module.exports = {
     'zoom': zoom,
     'heading': heading,
     'tsse': tsse,
-    //'zoomToGPSTracks': zoomToGPSTracks,
-    //'reloadPlan': reloadPlan,
     'planManager': planManager,
     'gps_tracks': gps_tracks,
     '$':$

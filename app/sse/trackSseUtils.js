@@ -18,12 +18,13 @@ import {config} from './../../config/config_loader';
 const hasSSE = ('sse' in config);
 
 const moment = require('moment');
-import {Color, ImageMaterialProperty, ColorMaterialProperty, Cartesian2, CallbackProperty} from './../cesium_util/cesium_imports'
+import {Color, ImageMaterialProperty, ColorMaterialProperty, Cartesian2, CallbackProperty, HeadingPitchRange} from './../cesium_util/cesium_imports'
 import {DynamicLines, buildCylinder, buildArrow, updatePositionHeading, buildRectangle, buildPositionDataSource} from './../cesium_util/cesiumlib';
 import {SSE} from './sseUtils'
 
 const hostname = config.sse.protocol + '://' + config.sse.name;
 let sse = undefined;
+let fakeHeading = false;
 
 if (hasSSE){
 	sse = new SSE(hostname);
@@ -94,30 +95,54 @@ class TrackSSE {
 		context.updatePosition(channel, data);
 		context.updateTrack(channel, data);
 	};
+	
+	zoomToPosition(channel){
+		if (channel === undefined){
+			let keys = Object.keys(this.cPosition);
+			if (keys.length > 0) {
+				channel = keys[0];
+			}
+		}
+		if (channel !== undefined) {
+			let entity = this.cPosition[channel].entities.values[0];
+			this.viewerWrapper.viewer.zoomTo(entity, new HeadingPitchRange(0, -Math.PI/2.0, 150.0));
+		}
+	};
+	
+	zoomToTracks(channel){
+		if (channel === undefined){
+			let keys = Object.keys(this.cPosition);
+			if (keys.length > 0) {
+				channel = keys[0];
+			}
+		}
+		this.viewerWrapper.viewer.zoomTo(this.cTracks[channel], new HeadingPitchRange(0, Math.PI/2.0, 15.0));
+	};
 
 	createPosition(channel, data, nonSse){
 		// store the data, render the position and get the track
-		console.log('creating position');
-		console.log(data);
+		//console.log(data);
 		if (nonSse == undefined){
 			nonSse = false;
 		}
 		this.positions[channel] = data;
-		data.heading = (Math.random() * (2* Math.PI)); //TODO testing heading, delete
+		if (fakeHeading) {
+			data.heading = (Math.random() * (2* Math.PI)); //TODO testing heading, delete
+		}
 		this.renderPosition(channel, data, nonSse);
 		this.getTrack(channel, data);
 	};
 
 	modifyPosition(channel, data, disconnected){
-		console.log('modify position');
-		console.log(data);
+		//console.log(data);
 		this.positions[channel] = data;
-		data.heading = (Math.random() * (2* Math.PI)); //TODO testing heading, delete
+		if (fakeHeading) {
+			data.heading = (Math.random() * (2* Math.PI)); //TODO testing heading, delete
+		}
 		this.renderPosition(channel, data, disconnected);
 	};
 
 	updatePosition(channel, data){
-		console.log('update position');
 		if (!(channel in this.positions)){
 			this.createPosition(channel, data);
 		} else {
@@ -286,7 +311,7 @@ class TrackSSE {
 	*/
 
 	renderPosition(channel, data, stopped){
-		console.log('rendering position');
+//		console.log('rendering position');
 		let color = Color.GREEN;
 		if (channel in this.colors){
 			color = this.colors[channel];
@@ -297,11 +322,10 @@ class TrackSSE {
 
 			if (!_.isEmpty(data)){
 				let retrievedMaterial = this.getMaterial(channel, data);
-				console.log('building position data source');
+//				console.log('building position data source ' + retrievedMaterial.getType());
 				let context = this;
 				buildPositionDataSource({longitude:data.lon, latitude:data.lat}, data.heading,
 						channel, retrievedMaterial, channel+'_POSITION', this.getLatestPosition, this, this.viewerWrapper, function(dataSource){
-						console.log('built');
 						this.cPosition[channel] = dataSource;
 				}.bind(this));
 			}
@@ -311,7 +335,7 @@ class TrackSSE {
 			
 			if (stopped){
 				let color = this.colors['gray'];
-				if (!color.equals(pointEntity.ellipse.material.color.getValue())){
+				if (!color.getValue().equals(pointEntity.ellipse.material.color.getValue())){
 					pointEntity.ellipse.material.color = color;
 				}
 				return;
@@ -326,27 +350,34 @@ class TrackSSE {
 				
 				let hasHeading = (data.heading !== "");
 				if (hasHeading) {
-					//console.log('setting orientation ' + data.heading);
+//					console.log('setting orientation ' + data.heading);
 					pointEntity.ellipse.stRotation.setValue(data.heading);
 					// make sure it has the image material
 					if (material.getType() == "Color"){
-						console.log('switching from color to ' + retrievedMaterial.getType());
+//						console.log('switching from color to ' + retrievedMaterial.getType());
 						pointEntity.ellipse.material = retrievedMaterial;
 					} else {
 						// it already is, check the color
-						if (!retrievedMaterial.color.equals(pointEntity.ellipse.material.color.getValue())){
+						if (!retrievedMaterial.color.getValue().equals(pointEntity.ellipse.material.color.getValue())){
 							pointEntity.ellipse.material.color = color;
 						}
 					}
 				} else {
 					if (material.getType() != "Color"){
-						console.log('switching from ' + material.getType() + ' to ' + retrievedMaterial.getType());
+//						console.log('switching from ' + material.getType() + ' to ' + retrievedMaterial.getType());
 						pointEntity.ellipse.material = retrievedMaterial;
 					} else {
 						// it already is, check the color
-						if (!color.equals(pointEntity.ellipse.material.color.getValue())){
-							pointEntity.ellipse.material.color = color;
+						try {
+							if (!color.getValue().equals(pointEntity.ellipse.material.color.getValue())){
+								pointEntity.ellipse.material.color = color;
+							}
+						} catch (err) {
+							if (!color.equals(pointEntity.ellipse.material.color.getValue())){
+								pointEntity.ellipse.material.color = color;
+							}
 						}
+						
 					}
 				} 
 				

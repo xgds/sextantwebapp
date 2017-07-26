@@ -2,112 +2,62 @@
 <html>
 <head>
 
-<link rel="stylesheet" type="text/css" href="font-awesome/css/font-awesome.min.css">
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <link rel="stylesheet" type="text/css" href="font-awesome/css/font-awesome.min.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
 
-<title>SEXTANT</title>
+    <title>SEXTANT</title>
+
+    <!-- Newly Added by Kenneth to use jQueryMobile TODO- remove these after adding modules to the webpack-->
+
+    <!-- Include meta tag to ensure proper rendering and touch zooming -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Include jQuery Mobile stylesheets -->
+    <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+
+    <!-- Include the jQuery library -->
+    <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+
+    <!-- Include the jQuery Mobile library -->
+    <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+
+
+    <!-- jQuery scripts for handling saving path. Currently does nothing, but can be altered to send http POST request to xgds server -->
+    <script>
+        $(document).ready(function(){
+            $("form").submit(function(e) {
+                //TODO- This callback is called on form submission. e.preventDefault prevents the default response.
+                e.preventDefault();
+                $("#savePopup").toggle();
+                $("#myForm")[0].reset();
+            });
+
+            $("#cancel").click(function(e) {
+                $("#savePopup").toggle();
+                $("#myForm")[0].reset();
+            });
+        });
+
+        //Helper method used to toggle between views
+        function toggleMode(){
+             $('#viewModeToolbar').toggle(); 
+             $('#editModeToolbar').toggle();
+             $('.editModeText').toggle();
+        }
+    </script>
 </head>
 <body>
-     
-    
+
+
     <style>
-       
-        html, body, #cesiumContainer {
-          width: 100%; 
-          height: 100%; 
-          margin: 0; 
-          padding: 0; 
+
+    html, body, #cesiumContainer {
+          width: 100vw; 
+          /* Apparently you need spaces around the - sign for calc() to work (https://stackoverflow.com/questions/30412580/why-is-css-calc100-250px-not-working)- quite frustrating*/
+          height: calc(100vh - 50px); 
           overflow: hidden;
-    }
-        
-        .menu-icon {
-            position:absolute;
-            top:20px;
-            left:20px;
-            background-color:white;
-            height:40px;
-            width:40px;
-            border:1px solid black;
-            border-radius:2px;
-            cursor: pointer;
-            z-index:2;
-            
-       
-        }      
-        .menu-icon:hover {
-            background-color:#5f6f81; 
-        }
-        .menu-icon:before {
-            display: inline-block;
-            width: 30px;
-            height: 3px;
-            content: "";
-            margin-left: 4px;
-            margin-top: 22px;
-            background: #5993cd;
-            box-shadow: 0 3px white, 
-            0 -6px #5993cd, 
-            0 -9px white, 
-            0 -12px #5993cd;
-    }
-
-        .menu-icon:hover::before {
-            background: white;
-            box-shadow: 0 3px #5f6f81, 
-            0 -6px white, 
-            0 -9px #5f6f81, 
-            0 -12px white;
-    }
-        .menu-web {
-            position:absolute;
-            top:80px;
-            left:20px;
-            width:auto;
-            background-color:white;
-            display: none;
-            z-index:2;
-            overflow: scroll;
-          
-            border:2px solid black;
-            border-radius:15px;
-              
-        }  
-        
-        .menu-web > ul> li a {
-            display:block;
-            padding: 14px 16px;
-            color: #5f6f81;
-            font-family: arial, sans-serif;
-            text-align: left;
-            text-decoration: none;
-            border-right: 1px solid #c6d0da;
-        }
-        
-        .menu-web > ul> li a:hover {
-            color: white;
-            background-color: #5f6f81;
-        }
-        .menu-web >ul {
-            list-style-type: auto;
-        }
-        
-        .list-mark {
-        position: relative;
-        display: inline-block;
-        vertical-align: top;
-        margin-top: 3px;
-        margin-left: 6px;
-        width: 12px;
-        height: 12px;
-        border: 2px solid #c4cbd2;
-        border-radius: 12px;
-    }
-
-    .list-mark.checked {
-        border: 2px solid #c4cbd2;
-        background: #39ca74;
-    }
+      }
     
     #containerConnected_div {
         position: absolute;
@@ -121,49 +71,113 @@
         border-radius:12px;
     }
 
-        
-    </style>
-    
-    
-    <div class="menu">
-        <a class="menu-icon" onClick="$('.menu-web').toggle();"></a>
-        <div class="menu-web">
-            <ul>
-                <li><a href="#" onclick="reloadPlan()">Reload Plan</a></li>
-                <li><a href="#" onclick="sendPlanToSextant()">Calculate Path</a></li>
-                <li><a href="#" onclick="clearTracks()">Clear Track</a></li>
-                <li><a href="#" onclick="$('.list-mark').toggleClass('checked'); toggleEditMode(); ">Edit Plan
-                <span class="list-mark"></span></a></li>
-                
-               
-                
-                <li><a href="#">Zoom to position</a></li>
-                <li><a href="#">Zoom to plan</a></li>
-                <!--<li><a href="#">Menu item 7</a></li>-->
-                        
-                       
-            </ul>
-        
- 
-        </div>  
-        
-        
-    </div>
-    
+    .saveDialog{
+        position: absolute;
+        z-index:2;
+        width:200px;
+        height:auto;
+        display: none;      
+        top: 50%;
+        left: 50%;
+        margin: -100px 0 0 -150px;
+        background-color:white;
+        border:2px solid black;
+        border-radius:5px;
+        padding:10px;
 
-    <div id="containerConnected_div">   
+    }
+
+    /* Handles Mobile Phone Scrollbars- Left it in as it may prove useful if we add more features*/
+
+    /* !important is needed sometimes */
+    ::-webkit-scrollbar {
+        width: 12px !important;
+    }
+
+    /* Track */
+    ::-webkit-scrollbar-track {
+       -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3) !important;
+       -webkit-border-radius: 10px !important;
+       border-radius: 10px !important;
+   }
+
+   /* Handle */
+   ::-webkit-scrollbar-thumb {
+    -webkit-border-radius: 10px !important;
+    border-radius: 10px !important;
+    background: #41617D !important; 
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5) !important; 
+
+    }
+    ::-webkit-scrollbar-thumb:window-inactive {
+    background: #41617D !important; 
+    }
+</style>
+
+
+<!-- Popup when you hit SavePlan soft TODO, as it should be formatted to look better.
+On phones, when virtual keyboard is being used, it may cover the text field. -->
+
+<div id="savePopup"  class="saveDialog">
+    <form method="post" action="someurl.com" id="myForm">
+        <label for="planName">Save as:</label>
+        <input type="text" name="planName" id="planName" placeholder="New Plan Name" data-clear-btn="true">
+    <input type="submit" value="Save" id="submitForm">
+    <input type="button" value="Cancel" id="cancel" style="display:inline;">
+</form>
+</div>
+
+
+<!-- Symbol that shows whether we're connected to container in top right of screen -->
+<div id="containerConnected_div">   
     <span class="btn alert-danger" id="connected_div" style="visibility: visible;">
         <span class="fa" id="connected" style="min-width:1rem;">
         </span>
-	            </span>
-    </div>
-    
-    
-<div id="cesiumContainer"></div>
-<div id="credits"></div>
-<div id="hovercoord"></div>
+    </span>
+</div>
 
+<!-- Text Displayed in top left during regular viewing- -->
+<div class="editModeText" id="viewMode">   
+    <span style="color:red" id="planNameSpan"></span>
+</div>
+
+<!-- Text Displayed in top left while editing- TODO -->
+<div class="editModeText" id="editMode" style="display:none;">   
+    <span style="color:red">EDITING PLAN NAME</span>
+</div>
+
+
+<div id="cesiumContainer"></div>
+<div id="credits" style="display:none;"></div>
+<div id="hovercoord" style="display:none;"></div>
+
+
+<!-- Regular Mode toolbar -->
+<div data-role="footer" data-position="inline" style="text-align:center;" id="viewModeToolbar">
+  <div data-role="controlgroup" data-type="horizontal">
+    <a href="#" class="ui-btn" onclick="reloadPlan();">Reload Plan</a>
+    <a href="#" class="ui-btn" onclick="clearTracks();">Clear Track</a>
+    <!-- Calls toggleEdit from sextant_caller and switches toolbars-->
+    <a href="#" class="ui-btn" onclick="toggleEditMode(); toggleMode();">Edit Plan</a>
+    <a href="#" class="ui-btn" onclick="zoomToPosition();">Zoom to Position</a>
+    <a href="#" class="ui-btn" onclick="zoomToPlan();">Zoom to Plan</a>
+  </div>
+</div>
+
+<!-- Edit Mode toolbar -->
+<div data-role="footer" data-position="inline" style="text-align:center; display:none;" id="editModeToolbar">
+  <div data-role="controlgroup" data-type="horizontal" id="editControl">
+    <a href="#" class="ui-btn" onclick="sendPlanToSextant()">Calculate Path</a>
+    <a href="#" class="ui-btn" onclick="clearTracks()">Clear Track</a>
+    <a href="#" class="ui-btn" onclick="$('#savePopup').toggle();" disabled>Save Plan</a>
+    <!-- Calls toggleEdit from sextant_caller and switches toolbars-->
+    <a href="#" class="ui-btn" onclick="toggleEditMode(); toggleMode();">Done Editing</a>
+  </div>
+</div>
+
+<!-- TODO add jQuery Mobile for its convenient classes -->
 <script src="./jquery/jquery.min.js"></script>
+<script src="./jquery/jquery.mobile.js"></script>
 <script src="./build/bundle.js"></script>
 <script src="./sextant_caller.js"></script>
 </body>

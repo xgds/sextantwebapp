@@ -57,8 +57,23 @@
 	function zoomToTracks(){
 		if (sextant.gps_tracks !== undefined) {
 			sextant.gps_tracks.zoomTo();
+		} else if  (sextant.tsse !== undefined) {
+			sextant.tsse.zoomToTracks();
 		}
 	}
+	
+	function zoomToPlan(){
+		if (sextant.planManager !== undefined) {
+			sextant.planManager.zoomTo();
+		}
+	}
+	
+	function zoomToPosition(){
+		if (sextant.tsse !== undefined) {
+			sextant.tsse.zoomToPosition();
+		}
+	}
+	
 	function serialstatus(){
 		console.log('serialstatus0')
 		sextant.serialrequest.connect();

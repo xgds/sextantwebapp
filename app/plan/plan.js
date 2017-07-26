@@ -15,7 +15,7 @@
 // __END_LICENSE__
 
 const moment = require('moment');
-import {Color, defined, ScreenSpaceEventHandler, ScreenSpaceEventType, ImageMaterialProperty} from './../cesium_util/cesium_imports'
+import {Color, defined, ScreenSpaceEventHandler, ScreenSpaceEventType, ImageMaterialProperty, HeadingPitchRange} from './../cesium_util/cesium_imports'
 import {DynamicLines, buildLineString, buildCylinder, buildSurfaceCircle} from './../cesium_util/cesiumlib';
 import {config} from './../../config/config_loader';
 
@@ -124,6 +124,14 @@ class PlanManager {
 		}
 	};
 	
+	zoomTo() {
+		let keys = Object.keys(this.segmentElements);
+		if (keys.length > 0) {
+			//TODO need to make some sort of group entity so we can zoom to the whole thing.
+			this.viewerWrapper.viewer.zoomTo(this.segmentElements[keys[0]], new HeadingPitchRange(0, -Math.PI/2.0, 150.0));
+		}
+	};
+	
 	fetchXGDSPlan() {
 		if (this.plan !== undefined){
 			this.clearPlan();
@@ -155,6 +163,8 @@ class PlanManager {
 	};
 	
 	renderPlan() {
+		
+		$("#planNameSpan").html(this.plan.name);
 		
 		let sequence = this.plan.sequence;
 		if (!_.isEmpty(sequence)){

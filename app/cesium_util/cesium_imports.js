@@ -5,6 +5,7 @@ import Viewer from 'cesium/Source/Widgets/Viewer/Viewer';
 import EllipsoidTerrainProvider from 'cesium/Source/Core/EllipsoidTerrainProvider';
 import Cartographic from 'cesium/Source/Core/Cartographic';
 import Ellipsoid from 'cesium/Source/Core/Ellipsoid';
+import SceneMode from 'cesium/Source/Scene/SceneMode';
 import Transforms from 'cesium/Source/Core/Transforms';
 import PointPrimitiveCollection from 'cesium/Source/Scene/PointPrimitiveCollection';
 import sampleTerrain from 'cesium/Source/Core/sampleTerrain';
@@ -16,6 +17,7 @@ import CesiumMath from 'cesium/Source/Core/Math';
 import Color from 'cesium/Source/Core/Color';
 import Matrix4 from 'cesium/Source/Core/Matrix4';
 import HeadingPitchRoll from 'cesium/Source/Core/HeadingPitchRoll';
+import HeadingPitchRange from 'cesium/Source/Core/HeadingPitchRange';
 import CallbackProperty from 'cesium/Source/DataSources/CallbackProperty';
 import ConstantProperty from 'cesium/Source/DataSources/ConstantProperty';
 import ImageMaterialProperty from 'cesium/Source/DataSources/ImageMaterialProperty';
@@ -46,7 +48,8 @@ import CustomDataSource from 'cesium/Source/DataSources/CustomDataSource';
 BingMapsApi.defaultKey = global.config.bing_key;
 
 export {Viewer, EllipsoidTerrainProvider, Ellipsoid, Cartographic, Transforms, PointPrimitiveCollection, sampleTerrain, CustomDataSource,
-ScreenSpaceEventHandler, ScreenSpaceEventType, Cartesian3, Cartesian2, CesiumMath, Color, CallbackProperty, ImageMaterialProperty, ColorMaterialProperty,
+	ScreenSpaceEventHandler, ScreenSpaceEventType, Cartesian3, Cartesian2, CesiumMath, Color, CallbackProperty, ImageMaterialProperty, ColorMaterialProperty,
     ColorGeometryInstanceAttribute, GeometryInstance, Rectangle, RectangleGeometry, EntityCollection, CzmlDataSource, KmlDataSource,
     CreateTileMapServiceImageryProvider, GroundPrimitive, CesiumTerrainProvider, VerticalOrigin, PinBuilder, HorizontalOrigin, ConstantProperty,
-    CylinderGeometry, CylinderGraphics, Primitive, defined, PolygonHierarchy, PolygonGeometry, HeadingPitchRoll, Matrix4, LabelStyle}
+    CylinderGeometry, CylinderGraphics, Primitive, defined, PolygonHierarchy, PolygonGeometry, HeadingPitchRoll, Matrix4, LabelStyle,
+    SceneMode, HeadingPitchRange}

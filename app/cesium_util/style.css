@@ -19,3 +19,16 @@
 #credits {
 	display: none;
 }
+
+#planNameSpan {
+	font-size: 2rem;
+}
+
+.editModeText{
+     position: absolute;
+     z-index:2;
+     width:auto;
+     height:auto;
+     top:20px;
+     left:30px;
+ }
