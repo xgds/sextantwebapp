@@ -5,13 +5,11 @@
     <link rel="stylesheet" type="text/css" href="font-awesome/css/font-awesome.min.css">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
 
     <title>SEXTANT</title>
 
     <!-- Newly Added by Kenneth to use jQueryMobile TODO- remove these after adding modules to the webpack-->
-
-    <!-- Include meta tag to ensure proper rendering and touch zooming -->
-    <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Include jQuery Mobile stylesheets -->
     <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
@@ -115,6 +113,30 @@
 </style>
 
 
+
+<!-- Regular Mode toolbar -->
+<div data-role="header" data-position="inline" style="text-align:center;" id="viewModeToolbar">
+  <div data-role="controlgroup" data-type="horizontal">
+    <a href="#" class="ui-btn" onclick="reloadPlan();">Reload Plan</a>
+    <a href="#" class="ui-btn" onclick="clearTracks();">Clear Track</a>
+    <!-- Calls toggleEdit from sextant_caller and switches toolbars-->
+    <a href="#" class="ui-btn" onclick="toggleEditMode(); toggleMode();">Edit Plan</a>
+    <a href="#" class="ui-btn" onclick="zoomToPosition();">Zoom to Position</a>
+    <a href="#" class="ui-btn" onclick="zoomToPlan();">Zoom to Plan</a>
+  </div>
+</div>
+
+<!-- Edit Mode toolbar -->
+<div data-role="header" data-position="inline" style="text-align:center; display:none;" id="editModeToolbar">
+  <div data-role="controlgroup" data-type="horizontal" id="editControl">
+    <a href="#" class="ui-btn" onclick="sendPlanToSextant()">Calculate Path</a>
+    <a href="#" class="ui-btn" onclick="clearTracks()">Clear Track</a>
+    <a href="#" class="ui-btn" onclick="$('#savePopup').toggle();" style="display:none;">Save Plan</a>
+    <!-- Calls toggleEdit from sextant_caller and switches toolbars-->
+    <a href="#" class="ui-btn" onclick="toggleEditMode(); toggleMode();">Done Editing</a>
+  </div>
+</div>
+
 <!-- Popup when you hit SavePlan soft TODO, as it should be formatted to look better.
 On phones, when virtual keyboard is being used, it may cover the text field. -->
 
@@ -138,12 +160,12 @@ On phones, when virtual keyboard is being used, it may cover the text field. -->
 
 <!-- Text Displayed in top left during regular viewing- -->
 <div class="editModeText" id="viewMode">   
-    <span style="color:red" id="planNameSpan"></span>
+    <span style="color:red" class="planNameSpan"></span>
 </div>
 
 <!-- Text Displayed in top left while editing- TODO -->
 <div class="editModeText" id="editMode" style="display:none;">   
-    <span style="color:red">EDITING PLAN NAME</span>
+    <span style="color:red">EDITING<span class="planNameSpan"></span></span>
 </div>
 
 
@@ -151,29 +173,6 @@ On phones, when virtual keyboard is being used, it may cover the text field. -->
 <div id="credits" style="display:none;"></div>
 <div id="hovercoord" style="display:none;"></div>
 
-
-<!-- Regular Mode toolbar -->
-<div data-role="footer" data-position="inline" style="text-align:center;" id="viewModeToolbar">
-  <div data-role="controlgroup" data-type="horizontal">
-    <a href="#" class="ui-btn" onclick="reloadPlan();">Reload Plan</a>
-    <a href="#" class="ui-btn" onclick="clearTracks();">Clear Track</a>
-    <!-- Calls toggleEdit from sextant_caller and switches toolbars-->
-    <a href="#" class="ui-btn" onclick="toggleEditMode(); toggleMode();">Edit Plan</a>
-    <a href="#" class="ui-btn" onclick="zoomToPosition();">Zoom to Position</a>
-    <a href="#" class="ui-btn" onclick="zoomToPlan();">Zoom to Plan</a>
-  </div>
-</div>
-
-<!-- Edit Mode toolbar -->
-<div data-role="footer" data-position="inline" style="text-align:center; display:none;" id="editModeToolbar">
-  <div data-role="controlgroup" data-type="horizontal" id="editControl">
-    <a href="#" class="ui-btn" onclick="sendPlanToSextant()">Calculate Path</a>
-    <a href="#" class="ui-btn" onclick="clearTracks()">Clear Track</a>
-    <a href="#" class="ui-btn" onclick="$('#savePopup').toggle();" style="display:none;">Save Plan</a>
-    <!-- Calls toggleEdit from sextant_caller and switches toolbars-->
-    <a href="#" class="ui-btn" onclick="toggleEditMode(); toggleMode();">Done Editing</a>
-  </div>
-</div>
 
 <!-- TODO add jQuery Mobile for its convenient classes -->
 <script src="./jquery/jquery.min.js"></script>

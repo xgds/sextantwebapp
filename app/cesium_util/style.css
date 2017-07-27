@@ -20,7 +20,7 @@
 	display: none;
 }
 
-#planNameSpan {
+.planNameSpan {
 	font-size: 2rem;
 }
 
@@ -29,6 +29,13 @@
      z-index:2;
      width:auto;
      height:auto;
-     top:20px;
-     left:30px;
+     bottom:15px;
+     left:35px;
  }
+
+#connected_div{
+    position:absolute;
+    z-index:2;
+    bottom:15px;
+    left:5px;
+}

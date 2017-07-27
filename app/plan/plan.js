@@ -164,7 +164,7 @@ class PlanManager {
 	
 	renderPlan() {
 		
-		$("#planNameSpan").html(this.plan.name);
+		$(".planNameSpan").html(this.plan.name);
 		
 		let sequence = this.plan.sequence;
 		if (!_.isEmpty(sequence)){
