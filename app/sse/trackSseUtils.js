@@ -49,9 +49,14 @@ class TrackSSE {
 		this.getCurrentPositions();
 		this.allChannels(this.subscribe, this);
 		let context = this;
+		this.followPosition = true;
 		setInterval(function() {context.allChannels(context.checkStale, context);}, context.STALE_TIMEOUT);
 	};
 
+	setFollowPosition(value) {
+		this.followPosition = value;
+	};
+	
 	allChannels(theFunction, context){
 		let channels = sse.getChannels();
 		if (channels !== undefined){
@@ -330,6 +335,9 @@ class TrackSSE {
 				buildPositionDataSource({longitude:data.lon, latitude:data.lat}, data.heading,
 						channel, retrievedMaterial, channel+'_POSITION', this.getLatestPosition, this, this.viewerWrapper, function(dataSource){
 						this.cPosition[channel] = dataSource;
+						if (this.followPosition){
+							this.zoomToPosition(channel);
+						}
 				}.bind(this));
 			}
 		} else {
@@ -347,6 +355,9 @@ class TrackSSE {
 			// update it
 			this.viewerWrapper.getRaisedPositions({longitude:data.lon, latitude:data.lat}).then(function(raisedPoint) {
 				pointEntity.position.setValue(raisedPoint[0]);
+				if (this.followPosition){
+					this.zoomToPosition(channel);
+				}
 				
 				let retrievedMaterial = this.getMaterial(channel, data);
 				let material = pointEntity.ellipse.material;

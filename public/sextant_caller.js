@@ -70,7 +70,14 @@
 	
 	function zoomToPosition(){
 		if (sextant.tsse !== undefined) {
-			sextant.tsse.zoomToPosition();
+			sextant.tsse.zoomToPosition(config.sse.follow_channel);
+		}
+	}
+	
+	
+	function followPosition(follow){
+		if (sextant.tsse !== undefined) {
+			sextant.tsse.setFollowPosition(follow);
 		}
 	}
 	

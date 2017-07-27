@@ -26,7 +26,8 @@ module.exports = {
     sse : { port : 443, 
     	    name : 'localhost',
     	    protocol : 'https',
-    	    ev_channels: ['EV1', 'EV2']},
+    	    ev_channels: ['EV1', 'EV2'],
+    	    follow_channel: 'EV1'},
     
     // If we are using web sockets this should only exist in the default side
     socket : { protocol : 'http',

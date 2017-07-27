@@ -120,9 +120,10 @@
     <a href="#" class="ui-btn" onclick="reloadPlan();">Reload Plan</a>
     <a href="#" class="ui-btn" onclick="clearTracks();">Clear Track</a>
     <!-- Calls toggleEdit from sextant_caller and switches toolbars-->
-    <a href="#" class="ui-btn" onclick="toggleEditMode(); toggleMode();">Edit Plan</a>
-    <a href="#" class="ui-btn" onclick="zoomToPosition();">Zoom to Position</a>
+    <a href="#" class="ui-btn" onclick="followPosition(false); toggleEditMode(); toggleMode();">Edit Plan</a>
+    <!--  <a href="#" class="ui-btn" onclick="zoomToPosition();">Zoom to Position</a>  -->
     <a href="#" class="ui-btn" onclick="zoomToPlan();">Zoom to Plan</a>
+    <label id="follow_label"><input type="checkbox" onclick="followPosition(event.target.checked)" checked id="follow_checkbox"></input> Follow</label> 
   </div>
 </div>
 
@@ -134,7 +135,7 @@
     <a href="#" class="ui-btn" onclick="clearTracks()">Clear Track</a>
     <a href="#" class="ui-btn" onclick="$('#savePopup').toggle();" style="display:none;">Save Plan</a>
     <!-- Calls toggleEdit from sextant_caller and switches toolbars-->
-    <a href="#" class="ui-btn" onclick="toggleEditMode(); toggleMode();">Done Editing</a>
+    <a href="#" class="ui-btn" onclick="toggleEditMode(); toggleMode(); followPosition($('#follow_checkbox').prop('checked'));">Done Editing</a>
   </div>
 </div>
 
