@@ -43,6 +43,13 @@ function addGPSLocation(data){
 	}
 }
 
+window.addEventListener("load",function() {
+	// Set a timeout...
+	setTimeout(function(){
+		// Hide the address bar!
+		window.scrollTo(0, 1);
+	}, 0);
+});
 
 module.exports = {
 	'camera': viewerWrapper.viewer.scene.camera,
