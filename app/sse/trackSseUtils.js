@@ -54,11 +54,15 @@ class TrackSSE {
 
 	allChannels(theFunction, context){
 		let channels = sse.getChannels();
-		for (let i=0; i<channels.length; i++){
-			let channel = channels[i];
-			if (channel != 'sse') {
-				theFunction(channel, context);
+		if (channels !== undefined){
+			for (let i=0; i<channels.length; i++){
+				let channel = channels[i];
+				if (channel != 'sse') {
+					theFunction(channel, context);
+				}
 			}
+		} else {
+			alert("Problem connecting to xGDS");
 		}
 	};
 
@@ -318,7 +322,6 @@ class TrackSSE {
 		}
 		
 		if (!(channel in this.cPosition)) {
-			
 
 			if (!_.isEmpty(data)){
 				let retrievedMaterial = this.getMaterial(channel, data);

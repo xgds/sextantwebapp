@@ -495,7 +495,8 @@ const buildCylinder = function(position, height, radius, slices, label, styleOpt
 				verticalOrigin: VerticalOrigin.TOP,
 		        horizontalOrigin: HorizontalOrigin.RIGHT,
 		        fillColor: Color.YELLOW,
-		        outlineWidth: 3.0
+		        outlineWidth: 3.0,
+		        eyeOffset: new Cartesian3(radius + 2, 0, 1.0)
 			}
 		}
 		let entity = viewerWrapper.viewer.entities.add(entityOptions);
@@ -622,11 +623,14 @@ const buildPositionDataSource = function(position, heading, label, color, id, ge
 		   label : {
 					text: label,
 					verticalOrigin: VerticalOrigin.CENTER,
-			        horizontalOrigin: HorizontalOrigin.CENTER
+			        horizontalOrigin: HorizontalOrigin.CENTER,
+			        eyeOffset: new Cartesian3(8, 0, 1.0),
+			        fillColor: Color.CYAN,
+			        outlineWidth: 3.0
 				},
 		   ellipse : {
-					semiMinorAxis: 1.5,
-					semiMajorAxis: 1.5,
+					semiMinorAxis: 3.5,
+					semiMajorAxis: 3.5,
 					height: 0,
 					extrudedHeight: 0,
 					material: color,

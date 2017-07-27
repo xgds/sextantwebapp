@@ -21,6 +21,7 @@
     "http": "0.0.0",
     "ify-loader": "^1.0.3",
     "jquery": "^3.1.1",
+    "jquery-mobile": "^1.5.0-alpha.1",
     "lodash": "^4.16.6",
     "moment": "^2.18.1",
     "plotly": "^1.0.6",

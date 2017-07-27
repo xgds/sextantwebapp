@@ -130,6 +130,7 @@
 <div data-role="header" data-position="inline" style="text-align:center; display:none;" id="editModeToolbar">
   <div data-role="controlgroup" data-type="horizontal" id="editControl">
     <a href="#" class="ui-btn" onclick="sendPlanToSextant()">Calculate Path</a>
+    <a href="#" class="ui-btn" onclick="reloadPlan();">Reload Plan</a>
     <a href="#" class="ui-btn" onclick="clearTracks()">Clear Track</a>
     <a href="#" class="ui-btn" onclick="$('#savePopup').toggle();" style="display:none;">Save Plan</a>
     <!-- Calls toggleEdit from sextant_caller and switches toolbars-->
@@ -165,7 +166,7 @@ On phones, when virtual keyboard is being used, it may cover the text field. -->
 
 <!-- Text Displayed in top left while editing- TODO -->
 <div class="editModeText" id="editMode" style="display:none;">   
-    <span style="color:red">EDITING<span class="planNameSpan"></span></span>
+    <span style="color:red">EDITING &nbsp;<span class="planNameSpan"></span></span>
 </div>
 
 

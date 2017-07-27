@@ -31,7 +31,8 @@ class PlanManager {
 		this.stationElements = {};
 		this.stationBoundaries = {};
 		this.segmentStyle = {'material':Color.ORANGE};
-		this.stationImageUrl = config.server.protocol + "://" + config.server.name + '/' + config.server.nginx_prefix + '/' + config.server.nginx_prefix + '/icons/station_circle.png';
+		this.stationImageUrl = hostname + '/' + config.server.nginx_prefix + '/icons/station_circle.png';
+		//this.stationImageUrl = config.server.protocol + "://" + config.server.name + '/' + config.server.nginx_prefix + '/' + '/icons/station_circle.png';
 		this.stationCylinderStyle = {'material': new ImageMaterialProperty({'image':this.stationImageUrl, 'transparent':true}), 'translucent': true, 'color': new Color(1.0, 1.0, 1.0, 0.5)};
 		this.stationBoundaryStyle = {'material': Color.YELLOW.withAlpha(0.25)};
 		this.fetchXGDSPlan();
@@ -301,6 +302,7 @@ class PlanManager {
             	//TODO handle error case
             	console.log(data);
             	console.log('NO PATH FOUND FROM SEXTANT');
+            	alert('NO PATH FOUND FROM SEXTANT');
             }, this)
           });
 		
