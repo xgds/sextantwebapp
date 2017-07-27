@@ -8,20 +8,6 @@
 
     <title>SEXTANT</title>
 
-    <!-- Newly Added by Kenneth to use jQueryMobile TODO- remove these after adding modules to the webpack-->
-
-    <!-- Include meta tag to ensure proper rendering and touch zooming -->
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <!-- Include jQuery Mobile stylesheets -->
-    <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
-
-    <!-- Include the jQuery library -->
-    <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
-
-    <!-- Include the jQuery Mobile library -->
-    <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
-
 
     <!-- jQuery scripts for handling saving path. Currently does nothing, but can be altered to send http POST request to xgds server -->
     <script>
@@ -54,9 +40,10 @@
 
     html, body, #cesiumContainer {
           width: 100vw; 
-          /* Apparently you need spaces around the - sign for calc() to work (https://stackoverflow.com/questions/30412580/why-is-css-calc100-250px-not-working)- quite frustrating*/
-          height: calc(100vh - 50px); 
-          overflow: hidden;
+           /*Apparently you need spaces around the - sign for calc() to work (https://stackoverflow.com/questions/30412580/why-is-css-calc100-250px-not-working)- quite frustrating*/
+          height: 90%;
+          position:fixed;
+          top:0px;
       }
     
     #containerConnected_div {
@@ -85,6 +72,69 @@
         border-radius:5px;
         padding:10px;
 
+    }
+    .editModeText{
+        position: absolute;
+        z-index:2;
+        width:auto;
+        height:auto;
+        top:20px;
+        left:30px;
+    }
+
+
+    .toolbar{
+        position: fixed;
+        z-index:2;
+        width:100vw;
+        height:10vh;
+        bottom:0px;
+        background-color: white;
+        text-align:center;
+        overflow:scroll;
+    }
+
+    .viewButton{
+        height:100%;
+        min-width:20%;
+        text-align: center;
+        display: inline;
+        border-style: solid;
+        margin: 0;
+    }
+
+    .editButton{
+        height:100%;
+        width:25%;/*Change this depending on how many buttons you want*/
+    }
+
+    ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    background-color: #f1f1f1;
+    height: 10vh;
+    position: fixed; /* Make it stick, even on scroll */
+    overflow: hidden; /* Enable scrolling if the sidenav has too much content */
+    position:fixed;
+    bottom: 0;
+    }
+
+    li {
+    float: left;
+    border-right: 1px solid #bbb;
+    border-left: 1px solid #bbb;
+    text-align:center;
+    height:100%;
+    }
+
+    li a {
+    width: calc(20vw - 2px);
+    height:100%;
+    display: block;
+    padding:auto;
+    background-color: #dddddd;
     }
 
     /* Handles Mobile Phone Scrollbars- Left it in as it may prove useful if we add more features*/
@@ -136,9 +186,9 @@ On phones, when virtual keyboard is being used, it may cover the text field. -->
     </span>
 </div>
 
-<!-- Text Displayed in top left during regular viewing- -->
+<!-- Text Displayed in top left during regular viewing- TODO -->
 <div class="editModeText" id="viewMode">   
-    <span style="color:red" id="planNameSpan"></span>
+    <span style="color:red">INSERT PLAN NAME</span>
 </div>
 
 <!-- Text Displayed in top left while editing- TODO -->
@@ -153,32 +203,27 @@ On phones, when virtual keyboard is being used, it may cover the text field. -->
 
 
 <!-- Regular Mode toolbar -->
-<div data-role="footer" data-position="inline" style="text-align:center;" id="viewModeToolbar">
-  <div data-role="controlgroup" data-type="horizontal">
-    <a href="#" class="ui-btn" onclick="reloadPlan();">Reload Plan</a>
-    <a href="#" class="ui-btn" onclick="clearTracks();">Clear Track</a>
+<ul id="viewModeToolbar">
+    <li><a href="#" onclick="reloadPlan();">Reload Plan</a></li>
+    <li><a href="#" onclick="clearTracks();">Clear Track</a></li>
     <!-- Calls toggleEdit from sextant_caller and switches toolbars-->
-    <a href="#" class="ui-btn" onclick="toggleEditMode(); toggleMode();">Edit Plan</a>
-    <a href="#" class="ui-btn" onclick="zoomToPosition();">Zoom to Position</a>
-    <a href="#" class="ui-btn" onclick="zoomToPlan();">Zoom to Plan</a>
-  </div>
-</div>
+    <li><a href="#" onclick="toggleEditMode(); toggleMode();">Edit Plan</a></li>
+    <li><a href="#" >Zoom to position- TODO</a></li>
+    <li><a href="#" onclick="zoomToTracks();">Zoom to plan</a></li>
+</ul>
 
 <!-- Edit Mode toolbar -->
-<div data-role="footer" data-position="inline" style="text-align:center; display:none;" id="editModeToolbar">
-  <div data-role="controlgroup" data-type="horizontal" id="editControl">
-    <a href="#" class="ui-btn" onclick="sendPlanToSextant()">Calculate Path</a>
-    <a href="#" class="ui-btn" onclick="clearTracks()">Clear Track</a>
-    <a href="#" class="ui-btn" onclick="$('#savePopup').toggle();" disabled>Save Plan</a>
+<ul style="display:none;" id="editModeToolbar">
+    <li><a href="#" onclick="sendPlanToSextant()">Calculate Path</a></li>
+    <li><a href="#" onclick="clearTracks()">Clear Track</a></li>
+    <li><a href="#" onclick="$('#savePopup').toggle();">Save Plan- TODO</a></li>
     <!-- Calls toggleEdit from sextant_caller and switches toolbars-->
-    <a href="#" class="ui-btn" onclick="toggleEditMode(); toggleMode();">Done Editing</a>
-  </div>
-</div>
+    <li><a href="#" onclick="toggleEditMode(); toggleMode();">Done Editing</a></li>
+</ul>
 
 <!-- TODO add jQuery Mobile for its convenient classes -->
 <script src="./jquery/jquery.min.js"></script>
-<script src="./jquery/jquery.mobile.js"></script>
-<script src="./build/sextant.bundle.js"></script>
+<script src="./build/bundle.js"></script>
 <script src="./sextant_caller.js"></script>
 </body>
 </html>

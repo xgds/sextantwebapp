@@ -15,9 +15,9 @@
 // __END_LICENSE__
 
 import {config} from './../../config/config_loader';
+import {getXgdsToken} from './../util/xgdsUtils';
 
 const moment = require('moment');
-
 
 class SSE{
     constructor(host){
@@ -92,12 +92,18 @@ class SSE{
     getChannels() {
         // get the active channels over AJAX
         if (this.activeChannels === undefined){
+        	
             $.ajax({
-                url: '/xgds_core/sseActiveChannels',
+                url: this.host + '/xgds_core/sseActiveChannels',
                 dataType: 'json',
+                data: getXgdsToken(),
                 async: false,
                 success: $.proxy(function(data) {
                     this.activeChannels = data;
+                }, this),
+                error: $.proxy(function(data) {
+                    console.log('Could not get active channels');
+                    console.log(data);
                 }, this)
             });
         }

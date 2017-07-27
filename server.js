@@ -49,6 +49,9 @@ app.use(express.static(cesiumPath));
 const jqueryPath = path.resolve(__dirname, 'node_modules', 'jquery', 'dist');
 app.use('/jquery', express.static(jqueryPath));
 
+const jqueryMobilePath = path.resolve(__dirname, 'node_modules', 'jquery-mobile', 'dist');
+app.use('/jquery-mobile', express.static(jqueryMobilePath));
+
 // Host terrain tiles
 // TODO: move terrain folder in here?
 //const terrainPath = 'https://s3-us-west-2.amazonaws.com/sextantdata';

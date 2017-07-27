@@ -400,7 +400,11 @@ class TrackSSE {
 						}
 					}
 				}
-			}, this)
+			}, this),
+			error: $.proxy(function(data) {
+				console.log('could not get active track position');
+				console.log(data);
+			})
 		});
 	};
 
@@ -419,7 +423,11 @@ class TrackSSE {
 					this.tracks[channel] = data[0];
 					this.renderTrack(channel, data[0]);
 				}
-			}, this)
+			}, this),
+			error: $.proxy(function(response) {
+				console.log('could not get track contents for ' + data.track_pk);
+				console.log(response);
+			})
 		});
 
 	};
