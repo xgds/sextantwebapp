@@ -15,7 +15,7 @@
 // __END_LICENSE__
 
 const moment = require('moment');
-import {Color, defined, ScreenSpaceEventHandler, ScreenSpaceEventType, ImageMaterialProperty, HeadingPitchRange} from './../cesium_util/cesium_imports'
+import {Color, defined, ScreenSpaceEventHandler, ScreenSpaceEventType, ImageMaterialProperty, HeadingPitchRange,Cartesian3, CesiumMath, CallbackProperty, EntityCollection } from './../cesium_util/cesium_imports'
 import {DynamicLines, buildLineString, buildCylinder, buildSurfaceCircle} from './../cesium_util/cesiumlib';
 import {config} from './../../config/config_loader';
 import {getXgdsToken} from './../util/xgdsUtils';
@@ -126,11 +126,17 @@ class PlanManager {
 		}
 	};
 	
-	zoomTo() {
+	zoomTo() { //TODO
+		let entityGroup = new EntityCollection;
 		let keys = Object.keys(this.segmentElements);
+
 		if (keys.length > 0) {
-			//TODO need to make some sort of group entity so we can zoom to the whole thing.
-			this.viewerWrapper.viewer.zoomTo(this.segmentElements[keys[0]], new HeadingPitchRange(0, -Math.PI/2.0, 150.0));
+
+			for(let i = 0; i<keys.length; i++){
+				entityGroup.add(this.segmentElements[keys[i]]);
+			}
+
+			this.viewerWrapper.viewer.zoomTo(entityGroup, new HeadingPitchRange(0, -Math.PI/2.0, 150.0));
 		}
 	};
 	
@@ -339,6 +345,21 @@ class PlanManager {
 		// we rerender everything, we could be fancy and just rerender the segments.
 		this.renderPlan();
 	};
+
+
+	//Added by Kenneth- reorients camera
+	reOrient(){
+		this.viewerWrapper.camera.setView({
+            orientation: {
+            heading : 0.0,
+            pitch : -CesiumMath.PI_OVER_TWO,
+            roll : 0.0
+        }
+    });
+	};
+
+
+
 
 }
 

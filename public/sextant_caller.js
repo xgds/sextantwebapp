@@ -147,3 +147,7 @@
 		//window.editMode = state;
                 window.editMode ^= true;
 	}
+
+	function reOrient(){
+		sextant.planManager.reOrient();
+	}
