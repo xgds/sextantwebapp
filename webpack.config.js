@@ -1,6 +1,10 @@
 const path = require('path');
 const webpack = require('webpack');
 
+//webpack has a hmr with some more plugins so we don't need the middleware
+// use webpack --watch to watch code to recompile
+// use express in server.js (ie use debug flag)
+
 const nodeModulesPath = path.resolve(__dirname, 'node_modules');
 const buildPath = path.resolve(__dirname, 'public', 'build');
 const mainPath = path.resolve(__dirname, 'app', 'index.js');
@@ -39,7 +43,6 @@ const config = {
 //           jQuery: "jquery"
 //       })
     ],
-
     module: {
         noParse: [
             /.pako_inflate.js/ //this module seems to cause some warning apparently

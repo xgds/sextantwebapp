@@ -2,7 +2,6 @@
 <html>
 <head>
 
-    <link rel="stylesheet" type="text/css" href="font-awesome/css/font-awesome.min.css">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -12,38 +11,10 @@
     <!-- Newly Added by Kenneth to use jQueryMobile TODO- remove these after adding modules to the webpack-->
 
     <!-- Include jQuery Mobile stylesheets -->
-    <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
-
-    <!-- Include the jQuery library -->
-    <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
-
-    <!-- Include the jQuery Mobile library -->
-    <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
-
-
-    <!-- jQuery scripts for handling saving path. Currently does nothing, but can be altered to send http POST request to xgds server -->
-    <script>
-        $(document).ready(function(){
-            $("form").submit(function(e) {
-                //TODO- This callback is called on form submission. e.preventDefault prevents the default response.
-                e.preventDefault();
-                $("#savePopup").toggle();
-                $("#myForm")[0].reset();
-            });
-
-            $("#cancel").click(function(e) {
-                $("#savePopup").toggle();
-                $("#myForm")[0].reset();
-            });
-        });
-
-        //Helper method used to toggle between views
-        function toggleMode(){
-             $('#viewModeToolbar').toggle(); 
-             $('#editModeToolbar').toggle();
-             $('.editModeText').toggle();
-        }
-    </script>
+    <!-- <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">-->
+    <link rel="stylesheet" type="text/css" href="/wristApp/jquery-mobile/jquery.mobile.min.css">
+	<link rel="stylesheet" type="text/css" href="/wristApp/font-awesome/css/font-awesome.min.css">
+    
 </head>
 <body>
 
@@ -177,9 +148,36 @@ On phones, when virtual keyboard is being used, it may cover the text field. -->
 
 
 <!-- TODO add jQuery Mobile for its convenient classes -->
-<script src="./jquery/jquery.min.js"></script>
-<script src="./jquery/jquery.mobile.js"></script>
+<script src="/wristApp/jquery/jquery.min.js"></script>
+<script src="/wristApp/jquery-mobile/jquery.mobile.min.js"></script>
+<!-- Include the jQuery Mobile library -->
+<!-- <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script> -->
+
 <script src="./build/sextant.bundle.js"></script>
 <script src="./sextant_caller.js"></script>
+
+<!-- jQuery scripts for handling saving path. Currently does nothing, but can be altered to send http POST request to xgds server -->
+    <script>
+        $(document).ready(function(){
+            $("form").submit(function(e) {
+                //TODO- This callback is called on form submission. e.preventDefault prevents the default response.
+                e.preventDefault();
+                $("#savePopup").toggle();
+                $("#myForm")[0].reset();
+            });
+
+            $("#cancel").click(function(e) {
+                $("#savePopup").toggle();
+                $("#myForm")[0].reset();
+            });
+        });
+
+        //Helper method used to toggle between views
+        function toggleMode(){
+             $('#viewModeToolbar').toggle(); 
+             $('#editModeToolbar').toggle();
+             $('.editModeText').toggle();
+        }
+    </script>
 </body>
 </html>
