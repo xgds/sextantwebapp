@@ -39,6 +39,7 @@ class PlanManager {
 		global.editMode = false;
 		this.setupEditing();
 		this.initializedPextant = false;
+		this.planName = undefined; //Added by Kenneth
 	};
 	
 	toggleNavigation(value){
@@ -357,6 +358,13 @@ class PlanManager {
         }
     });
 	};
+
+	//Added by Kenneth- handles name saving
+	savePlan(newPlanName){
+		if(this.planName !== newPlanName){
+			this.planName = newPlanName
+		}
+	}
 
 
 
