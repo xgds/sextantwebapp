@@ -21,7 +21,7 @@ let app = express();
 	
 	  // Step 3: Attach the hot middleware to the compiler & the server
 	  app.use(webpackHotMiddleware(compiler, {
-	    log: console.log, path: '/__webpack_hmr', heartbeat: 10 * 1000
+	    log: console.log, path: '/' + config.server.nginx_prefix + '/__webpack_hmr', heartbeat: 10 * 1000
 	  }));
 //  }
 })();
@@ -43,14 +43,20 @@ app.get('/CustomMaps/:tileset/:z/:x/:y.png', function (req, res) {
     res.sendFile(path.resolve(__dirname, 'public', 'CustomMaps', tileset, z, x, y + '.png'));
 });*/
 
+//TODO might want webpack version of cesium just require it
 const cesiumPath = path.resolve(__dirname, 'node_modules', 'cesium', 'Build','Cesium');
 app.use(express.static(cesiumPath));
 
 const jqueryPath = path.resolve(__dirname, 'node_modules', 'jquery', 'dist');
 app.use('/jquery', express.static(jqueryPath));
 
+//require("imports?this=>window!jquery-mobile/dist/jquery.mobile.js");
+
 const jqueryMobilePath = path.resolve(__dirname, 'node_modules', 'jquery-mobile', 'dist');
 app.use('/jquery-mobile', express.static(jqueryMobilePath));
+
+const fontAwesomePath = path.resolve(__dirname, 'node_modules', 'font-awesome');
+app.use('/font-awesome', express.static(fontAwesomePath));
 
 // Host terrain tiles
 // TODO: move terrain folder in here?
