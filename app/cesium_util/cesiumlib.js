@@ -11,7 +11,7 @@ import {Viewer, EllipsoidTerrainProvider, Cartesian3, Cartesian2, PolygonGeometr
 		sampleTerrain, ScreenSpaceEventHandler, ScreenSpaceEventType, Rectangle, RectangleGeometry, LabelStyle, CzmlDataSource, CustomDataSource,
 		CreateTileMapServiceImageryProvider, CesiumTerrainProvider, CallbackProperty, VerticalOrigin, HorizontalOrigin, Matrix4, ConstantProperty,
 		SceneMode,
-		PinBuilder, Transforms, HeadingPitchRoll, ColorGeometryInstanceAttribute, GeometryInstance, Primitive, KmlDataSource} from './cesium_imports'
+		PinBuilder, Transforms, HeadingPitchRoll, ColorGeometryInstanceAttribute, GeometryInstance, Primitive, KmlDataSource, Clock} from './cesium_imports'
 
 import viewerCesiumNavigationMixin from './cesium-navigation/viewerCesiumNavigationMixin';
 
@@ -59,6 +59,7 @@ class ViewerWrapper{
             baseLayerPicker : false,
             terrainProvider : terrainProvider,
             sceneMode: SceneMode.SCENE3D,
+            clock: new Clock() //Added by Kenneth 8/12/2017
             //imageryProvider : imageryProvider
 
         });

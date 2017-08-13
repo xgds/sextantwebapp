@@ -18,7 +18,7 @@ import {config} from './../../config/config_loader';
 const hasSSE = ('sse' in config);
 
 const moment = require('moment');
-import {Color, ImageMaterialProperty, ColorMaterialProperty, Cartesian2, CallbackProperty, HeadingPitchRange} from './../cesium_util/cesium_imports'
+import {Color, ImageMaterialProperty, ColorMaterialProperty, Cartesian2, Cartesian3, CallbackProperty, HeadingPitchRange, Clock} from './../cesium_util/cesium_imports'
 import {DynamicLines, buildCylinder, buildArrow, updatePositionHeading, buildRectangle, buildPositionDataSource} from './../cesium_util/cesiumlib';
 import {SSE} from './sseUtils'
 
@@ -115,6 +115,39 @@ class TrackSSE {
 		if (channel !== undefined) {
 			let entity = this.cPosition[channel].entities.values[0];
 			this.viewerWrapper.viewer.zoomTo(entity, new HeadingPitchRange(0, -Math.PI/2.0, 150.0));
+		}
+	};
+
+	/*
+	This Zoom to position method does not change bearing or height. Made by Kenneth Fang, hence the initals TODO
+	*/
+	zoomToPositionKF(channel){
+		if (channel === undefined){
+			let keys = Object.keys(this.cPosition);
+			if (keys.length > 0) {
+				channel = keys[0];
+			}
+		}
+		if (channel !== undefined) {
+
+			let entity = this.cPosition[channel].entities.values[0];
+			//let z = this.viewerWrapper.camera.position.z;
+			//let x = entity.position.getValue(this.viewerWrapper.viewer.clock.currentTime).x;
+			//let y = entity.position.getValue(this.viewerWrapper.viewer.clock.currentTime).y;
+			//console.log(x);
+			//console.log(y);
+			//console.log(z);
+			//this.viewerWrapper.camera.flyTo({
+			//	destination: new Cartesian3(x,y,z)});
+
+	        let ray = this.viewerWrapper.camera.getPickRay(new Cartesian2(
+	            Math.round(this.viewerWrapper.viewer.scene.canvas.clientWidth / 2),
+	            Math.round(this.viewerWrapper.viewer.scene.canvas.clientHeight / 2)
+	        ));
+			let position = this.viewerWrapper.viewer.scene.globe.pick(ray, this.viewerWrapper.viewer.scene);
+			let range = Cartesian3.distance(position, this.viewerWrapper.camera.position);
+
+			this.viewerWrapper.viewer.zoomTo(entity, new HeadingPitchRange(0, -Math.PI/2.0, range));
 		}
 	};
 	
@@ -336,7 +369,7 @@ class TrackSSE {
 						channel, retrievedMaterial, channel+'_POSITION', this.getLatestPosition, this, this.viewerWrapper, function(dataSource){
 						this.cPosition[channel] = dataSource;
 						if (this.followPosition){
-							this.zoomToPosition(channel);
+							this.zoomToPositionKF(channel);
 						}
 				}.bind(this));
 			}
@@ -356,7 +389,7 @@ class TrackSSE {
 			this.viewerWrapper.getRaisedPositions({longitude:data.lon, latitude:data.lat}).then(function(raisedPoint) {
 				pointEntity.position.setValue(raisedPoint[0]);
 				if (this.followPosition){
-					this.zoomToPosition(channel);
+							this.zoomToPositionKF(channel);
 				}
 				
 				let retrievedMaterial = this.getMaterial(channel, data);

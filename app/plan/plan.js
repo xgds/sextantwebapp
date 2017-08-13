@@ -350,7 +350,8 @@ class PlanManager {
 
 	//Added by Kenneth- reorients camera
 	reOrient(){
-		this.viewerWrapper.camera.setView({
+		this.viewerWrapper.camera.flyTo({
+			destination: camera.position,
             orientation: {
             heading : 0.0,
             pitch : -CesiumMath.PI_OVER_TWO,

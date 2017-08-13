@@ -8,48 +8,9 @@
 
     <title>SEXTANT</title>
 
-    <!-- Newly Added by Kenneth to use jQueryMobile TODO- remove these after adding modules to the webpack-->
-
     <!-- Include jQuery Mobile stylesheets -->
-<<<<<<< HEAD
-    <link rel="stylesheet" type="text/css" href="./jquery.mobile-1.4.5.min.css">
-
-    <!-- Include the jQuery library -->
-    <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
-
-    <!-- Include the jQuery Mobile library -->
-    <script src="./jquery.mobile-1.4.5.min.js"></script>
-
-
-    <!-- jQuery scripts for handling saving path. Currently does nothing, but can be altered to send http POST request to xgds server -->
-    <script>
-        $(document).ready(function(){
-            $("form").submit(function(e) {
-                //TODO- This callback is called on form submission. e.preventDefault prevents the default response.
-                e.preventDefault();
-                $("#savePopup").toggle();
-                $("#myForm")[0].reset();
-            });
-
-            $("#cancel").click(function(e) {
-                $("#savePopup").toggle();
-                $("#myForm")[0].reset();
-            });
-        });
-
-        //Helper method used to toggle between views
-        function toggleMode(){
-             $('#viewModeToolbar').toggle(); 
-             $('#editModeToolbar').toggle();
-             $('.editModeText').toggle();
-        }
-    </script>
-=======
-    <!-- <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">-->
     <link rel="stylesheet" type="text/css" href="/wristApp/jquery-mobile/jquery.mobile.min.css">
 	<link rel="stylesheet" type="text/css" href="/wristApp/font-awesome/css/font-awesome.min.css">
-    
->>>>>>> 1179c2d796d102db3ff3bd962659122269302659
 </head>
 <body>
 
@@ -101,6 +62,9 @@
         z-index:2;
         background: rgba(255, 255, 255, 0.5); /*green transparent background*/
     }
+
+    /*Hide silly looking follow checkbox*/
+    #follow_checkbox, #follow_label input {display:none;}
 
     /* Handles Mobile Phone Scrollbars- Left it in as it may prove useful if we add more features*/
 
@@ -182,6 +146,7 @@ On phones, when virtual keyboard is being used, it may cover the text field. -->
     <a href="#" class="ui-btn" onclick="zoomToPlan();">Zoom to Plan</a>
     <a href="#" class="ui-btn" onclick="reOrient();">ReOrient</a>
     <a href="#" class="ui-btn" onclick="$('#connectedDevices').toggle();">Show Connected</a>
+
     <label id="follow_label"><input type="checkbox" onclick="followPosition(event.target.checked)" checked id="follow_checkbox"></input> Follow</label> 
   </div>
 </div>
@@ -199,15 +164,8 @@ On phones, when virtual keyboard is being used, it may cover the text field. -->
 </div>
 
 
-<!-- TODO add jQuery Mobile for its convenient classes -->
-<<<<<<< HEAD
-=======
 <script src="/wristApp/jquery/jquery.min.js"></script>
 <script src="/wristApp/jquery-mobile/jquery.mobile.min.js"></script>
-<!-- Include the jQuery Mobile library -->
-<!-- <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script> -->
-
->>>>>>> 1179c2d796d102db3ff3bd962659122269302659
 <script src="./build/sextant.bundle.js"></script>
 <script src="./sextant_caller.js"></script>
 
