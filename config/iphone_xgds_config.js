@@ -75,4 +75,24 @@ module.exports = {
     // TODO override with your key if using bing.
     bing_key : 'Ak71PK14Ypz2_IuQ2-TGbV-OVYLKeg_KEXFFYiNmEny6aFJVYxUg_pUxZfhaQ2vy'
 
+    //List of Connected Devices TODO
+/*
+    connectedDevices: {
+
+    backpack1:{
+    redCamera1: false,
+    boat1: false
+
+    },
+
+    backpack2:{
+    pXRF: false,
+    LIBS: false,
+    FLIR: false,
+    FTIR: false,
+    redCamera2 : false,
+    boat2: false
+    }
+    }
+*/
 }

@@ -148,6 +148,14 @@
                 window.editMode ^= true;
 	}
 
-	function reOrient(){
+	function reOrient(){ // Added by Kenneth
 		sextant.planManager.reOrient();
+	}
+
+	function getPlanName(){// Added by Kenneth
+        return sextant.planManager.getPlanName();
+	}
+
+	function savePlan(planName){ //Added by Kenneth
+		return sextant.planManager.savePlan(planName);
 	}

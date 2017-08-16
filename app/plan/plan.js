@@ -350,7 +350,7 @@ class PlanManager {
 
 	//Added by Kenneth- reorients camera
 	reOrient(){
-		this.viewerWrapper.camera.flyTo({
+		this.viewerWrapper.viewer.camera.flyTo({
 			destination: camera.position,
             orientation: {
             heading : 0.0,
@@ -362,9 +362,36 @@ class PlanManager {
 
 	//Added by Kenneth- handles name saving
 	savePlan(newPlanName){
-		if(this.planName !== newPlanName){
-			this.planName = newPlanName
+		if(newPlanName!== undefined && newPlanName.length>0){
+			if(this.planName !== newPlanName){
+				this.planName = newPlanName
+			}
+			//TODO fix URL
+            $.post("xgds.url.potato",
+            {
+                planName: this.planName,
+                plan: this.plan
+            },
+            function(data, status){
+                if(status === 200){
+                	alert("Save Successful");
+                	return true;
+                }
+                else{
+	                alert("Data: " + data + "\nStatus: " + status);
+                	return false;
+                }
+            });
 		}
+		else{
+		alert("Please enter a Plan Name");
+		return false;
+		}
+	}
+
+	//Added by Kenneth Fang- simple getter method 
+	getPlanName(){
+		return this.planName;
 	}
 
 

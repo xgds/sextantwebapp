@@ -51,6 +51,14 @@ class TrackSSE {
 		let context = this;
 		this.followPosition = true;
 		setInterval(function() {context.allChannels(context.checkStale, context);}, context.STALE_TIMEOUT);
+		 //Added by Kenneth for Follow position implementaiton 8/13/2017
+		this.isInitialized=false;
+		this.isMoving=false;
+		var self = this;
+		//Event listeners track when camera is moving or not, to prevent zooming during a move
+		this.viewerWrapper.viewer.camera.moveStart.addEventListener(function(){self.isMoving=true;});
+		this.viewerWrapper.viewer.camera.moveEnd.addEventListener(function(){self.isMoving=false;});
+
 	};
 
 	setFollowPosition(value) {
@@ -119,7 +127,7 @@ class TrackSSE {
 	};
 
 	/*
-	This Zoom to position method does not change bearing or height. Made by Kenneth Fang, hence the initals TODO
+	This Zoom to position method does not change bearing or height. Made by Kenneth Fang, hence the initals
 	*/
 	zoomToPositionKF(channel){
 		if (channel === undefined){
@@ -128,18 +136,11 @@ class TrackSSE {
 				channel = keys[0];
 			}
 		}
-		if (channel !== undefined) {
+		if (channel !== undefined && !this.isMoving) {
 
 			let entity = this.cPosition[channel].entities.values[0];
-			//let z = this.viewerWrapper.camera.position.z;
-			//let x = entity.position.getValue(this.viewerWrapper.viewer.clock.currentTime).x;
-			//let y = entity.position.getValue(this.viewerWrapper.viewer.clock.currentTime).y;
-			//console.log(x);
-			//console.log(y);
-			//console.log(z);
-			//this.viewerWrapper.camera.flyTo({
-			//	destination: new Cartesian3(x,y,z)});
-
+            //this was useful: https://groups.google.com/forum/#!topic/cesium-dev/QSFf3RxNRfE
+            
 	        let ray = this.viewerWrapper.camera.getPickRay(new Cartesian2(
 	            Math.round(this.viewerWrapper.viewer.scene.canvas.clientWidth / 2),
 	            Math.round(this.viewerWrapper.viewer.scene.canvas.clientHeight / 2)
@@ -147,7 +148,20 @@ class TrackSSE {
 			let position = this.viewerWrapper.viewer.scene.globe.pick(ray, this.viewerWrapper.viewer.scene);
 			let range = Cartesian3.distance(position, this.viewerWrapper.camera.position);
 
-			this.viewerWrapper.viewer.zoomTo(entity, new HeadingPitchRange(0, -Math.PI/2.0, range));
+			if(this.isInitialized){ //After inital zoom, follows target entity at the viewer's current height
+			    this.viewerWrapper.viewer.zoomTo(entity, new HeadingPitchRange(0, -Math.PI/2.0, range));
+
+		    }   
+
+			else{ //Initial zoom to entity
+
+				this.viewerWrapper.viewer.zoomTo(entity, new HeadingPitchRange(0, -Math.PI/2.0, 150.0));
+				
+				if(range<155.0 && range>145.0){
+				    this.isInitialized=true;
+			    }
+
+			}
 		}
 	};
 	

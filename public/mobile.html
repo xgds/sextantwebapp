@@ -183,7 +183,10 @@ On phones, when virtual keyboard is being used, it may cover the text field. -->
                 $("#savePopup").toggle();
                 $("#myForm")[0].reset();
             });
-        });
+
+
+            //setInterval(function(){ alert("Hello"); }, 3000);
+            });
 
         //Helper method used to toggle between views
         function toggleMode(){
@@ -191,6 +194,7 @@ On phones, when virtual keyboard is being used, it may cover the text field. -->
              $('#editModeToolbar').toggle();
              $('.editModeText').toggle();
         }
+
     </script>
 </body>
 </html>
