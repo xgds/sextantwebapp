@@ -18,14 +18,14 @@ module.exports = {
 	// The server that is running this node app 
     server : { port : 3001,
     		   cesium_port: undefined,
-    		   name : '192.168.0.15', //TODO REPLACE THIS WITH YOUR IP ADDRESS 
+    		   name : '10.0.0.4', //TODO REPLACE THIS WITH YOUR IP ADDRESS 
     		   //name : 'tamar-docker.xgds.org', //TODO REPLACE THIS WITH YOUR SSL-CERT NAME
     		   protocol: 'https',
     		   nginx_prefix: 'wristApp'},
     		   
     // This should only exist in xGDS side
     sse : { port : 443, 
-    		name : '192.168.0.15', //TODO REPLACE THIS WITH YOUR IP ADDRESS 
+    		name : '10.0.0.4', //TODO REPLACE THIS WITH YOUR IP ADDRESS 
 		   //name : 'tamar-docker.xgds.org', //TODO REPLACE THIS WITH YOUR SSL-CERT NAME
     	    protocol : 'https',
     	    ev_channels: ['EV1', 'EV2'],
@@ -47,8 +47,8 @@ module.exports = {
     defaultSite : 'Ames',
     
     // list of kml links to load
-    kml_urls : ['https://192.168.0.15/notes/notesFeed.kml',
-    	           'https://192.168.0.15/basaltApp/hvnp_so2.kml'],
+    kml_urls : ['https://10.0.0.4/notes/notesFeed.kml',
+    	           'https://10.0.0.4/basaltApp/hvnp_so2.kml'], //TODO REPLACE THIS WITH YOUR IP ADDRESS
     
     // list of various sites we support
     sites : { 'HI_Mauna_Ulu' : { 'imagery' : 'CustomMaps/HI_lowqual_relief',
@@ -77,22 +77,9 @@ module.exports = {
 
     //List of Connected Devices TODO
 /*
-    connectedDevices: {
-
-    backpack1:{
-    redCamera1: false,
-    boat1: false
-
-    },
-
-    backpack2:{
-    pXRF: false,
-    LIBS: false,
-    FLIR: false,
-    FTIR: false,
-    redCamera2 : false,
-    boat2: false
-    }
-    }
+    connectedDevices: [
+    "backpack1":["redCamera1,boat1"],
+    "backpack2":["pXRF","LIBS","FLIR","FTIR","redCamera2","boat2"]
+    ]
 */
 }

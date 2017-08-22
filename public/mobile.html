@@ -66,6 +66,25 @@
     /*Hide silly looking follow checkbox*/
     #follow_checkbox, #follow_label input {display:none;}
 
+    #savePopup{
+        position: fixed;
+        top: 50px;
+        left: 200px;
+        width: 250px;
+        height:auto;
+        z-index: 5;
+        display:none; 
+        background:white;
+        border-radius: 5px;
+        box-shadow: 0 10px 10px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    }
+    #savePopup tr:nth-child(odd) {
+    background-color: #eee;
+    }
+    #savePopup th, td {
+    padding: 5px;
+    }
+
     /* Handles Mobile Phone Scrollbars- Left it in as it may prove useful if we add more features*/
 
     /* !important is needed sometimes */
@@ -94,15 +113,41 @@
 </style>
 
 <!-- Popup when you hit SavePlan soft TODO, as it should be formatted to look better.
-On phones, when virtual keyboard is being used, it may cover the text field. -->
+On phones, when virtual keyboard is being used, it may cover the text field. 
 
 <div id="savePopup"  class="saveDialog">
-    <form method="post" action="someurl.com" id="myForm">
+    <form id="myForm">
+      <div class="ui-field-contain">
         <label for="planName">Save as:</label>
         <input type="text" name="planName" id="planName" placeholder="New Plan Name" data-clear-btn="true">
     <input type="submit" value="Save" id="submitForm">
     <input type="button" value="Cancel" id="cancel" style="display:inline;">
+    </div>
 </form>
+</div> -->
+
+<!-- Same html from xgds server -->
+<div id="savePopup">
+        <p>Enter a new name and/or version to save as.  (Version already changed.)</p>
+        <table>
+        <tr>
+            <td><label for="saveAsName">Name</label></td>
+            <td><input type="text" id="saveAsName"></td>
+        </tr>
+        <tr>
+            <td><label for="saveAsVersion">Version</label></td>
+            <td><input type="text" id="saveAsVersion"></td>
+        </tr>
+        <tr>
+            <td><label for="saveAsNotes">Notes</label></td>
+            <td><input type="text" id="saveAsNotes"></td>
+        </tr>
+        <tr></tr>
+        </table>
+        <div data-role="controlgroup" data-type="horizontal">
+            <a href="#" class="ui-btn" onclick="$('#savePopup').toggle();"> Cancel</a>
+            <a href="#" class="ui-btn" onclick="handleSave();">Save</a>
+        </div>
 </div>
 
 
@@ -157,7 +202,7 @@ On phones, when virtual keyboard is being used, it may cover the text field. -->
     <a href="#" class="ui-btn" onclick="sendPlanToSextant()">Calculate Path</a>
     <a href="#" class="ui-btn" onclick="reloadPlan();">Reload Plan</a>
     <a href="#" class="ui-btn" onclick="clearTracks()">Clear Track</a>
-    <a href="#" class="ui-btn" onclick="$('#savePopup').toggle();" style="display:none;">Save Plan</a>
+    <a href="#" class="ui-btn" onclick="$('#savePopup').toggle();">Save Plan</a>
     <!-- Calls toggleEdit from sextant_caller and switches toolbars-->
     <a href="#" class="ui-btn" onclick="toggleEditMode(); toggleMode(); followPosition($('#follow_checkbox').prop('checked'));">Done Editing</a>
   </div>
@@ -172,27 +217,16 @@ On phones, when virtual keyboard is being used, it may cover the text field. -->
 <!-- jQuery scripts for handling saving path. Currently does nothing, but can be altered to send http POST request to xgds server -->
     <script>
         $(document).ready(function(){
-            $("form").submit(function(e) {
-                //TODO- This callback is called on form submission. e.preventDefault prevents the default response.
-                e.preventDefault();
-                $("#savePopup").toggle();
-                $("#myForm")[0].reset();
-            });
-
-            $("#cancel").click(function(e) {
-                $("#savePopup").toggle();
-                $("#myForm")[0].reset();
-            });
-
-
-            //setInterval(function(){ alert("Hello"); }, 3000);
-            });
-
+        });
         //Helper method used to toggle between views
         function toggleMode(){
              $('#viewModeToolbar').toggle(); 
              $('#editModeToolbar').toggle();
              $('.editModeText').toggle();
+        }
+
+        function handleSave(){
+            savePlan($('#saveAsName').val(),$('#saveAsVersion').val(),$('#saveAsNotes').val());
         }
 
     </script>

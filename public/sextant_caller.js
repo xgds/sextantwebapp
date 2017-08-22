@@ -156,6 +156,6 @@
         return sextant.planManager.getPlanName();
 	}
 
-	function savePlan(planName){ //Added by Kenneth
-		return sextant.planManager.savePlan(planName);
+	function savePlan(newName,newVersion,newNotes){ //Added by Kenneth
+		return sextant.planManager.savePlan(newName,newVersion,newNotes);
 	}

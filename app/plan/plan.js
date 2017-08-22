@@ -15,7 +15,7 @@
 // __END_LICENSE__
 
 const moment = require('moment');
-import {Color, defined, ScreenSpaceEventHandler, ScreenSpaceEventType, ImageMaterialProperty, HeadingPitchRange,Cartesian3, CesiumMath, CallbackProperty, EntityCollection } from './../cesium_util/cesium_imports'
+import {Color, defined, ScreenSpaceEventHandler, ScreenSpaceEventType, ImageMaterialProperty, HeadingPitchRange,Cartesian3, CesiumMath, CallbackProperty, EntityCollection, Clock } from './../cesium_util/cesium_imports'
 import {DynamicLines, buildLineString, buildCylinder, buildSurfaceCircle} from './../cesium_util/cesiumlib';
 import {config} from './../../config/config_loader';
 import {getXgdsToken} from './../util/xgdsUtils';
@@ -39,7 +39,6 @@ class PlanManager {
 		global.editMode = false;
 		this.setupEditing();
 		this.initializedPextant = false;
-		this.planName = undefined; //Added by Kenneth
 	};
 	
 	toggleNavigation(value){
@@ -130,11 +129,24 @@ class PlanManager {
 	zoomTo() { //TODO
 		let entityGroup = new EntityCollection;
 		let keys = Object.keys(this.segmentElements);
+		let extremes = [];
 
 		if (keys.length > 0) {
 
 			for(let i = 0; i<keys.length; i++){
-				entityGroup.add(this.segmentElements[keys[i]]);
+				let entity=this.segmentElements[keys[i]]
+				entityGroup.add(entity);
+				console.log(entity.polyline.positions.value);
+				let x1 = entity.polyline.positions[0].value.x;
+				let x2 = entity.polyline.positions[1].value.x;
+				let y1 = entity.polyline.positions[0].value.y;
+				let y2 = entity.polyline.positions[1].value.y;
+				console.log(x1);
+				console.log(x2);
+				//let x = entity.position.getValue(this.viewerWrapper.viewer.clock.currentTime).x;
+	 			//let y = entity.position.getValue(this.viewerWrapper.viewer.clock.currentTime).y;
+	 			console.log(y1);
+	 			console.log(y2);
 			}
 
 			this.viewerWrapper.viewer.zoomTo(entityGroup, new HeadingPitchRange(0, -Math.PI/2.0, 150.0));
@@ -351,7 +363,7 @@ class PlanManager {
 	//Added by Kenneth- reorients camera
 	reOrient(){
 		this.viewerWrapper.viewer.camera.flyTo({
-			destination: camera.position,
+			destination: this.viewerWrapper.viewer.camera.position,
             orientation: {
             heading : 0.0,
             pitch : -CesiumMath.PI_OVER_TWO,
@@ -361,16 +373,42 @@ class PlanManager {
 	};
 
 	//Added by Kenneth- handles name saving
-	savePlan(newPlanName){
-		if(newPlanName!== undefined && newPlanName.length>0){
-			if(this.planName !== newPlanName){
-				this.planName = newPlanName
+	savePlan(newName,newVersion,newNotes){
+		console.log(this.plan);
+
+		    //Setting Plan Name (There are two name properties for some reason)
+			if(this.plan.name !== newName){ //Check if plan name was changed
+				this.plan.planName = newName;
+				this.plan.name = newName;
 			}
+            
+            //Setting plan Version
+			if(this.plan.planVersion === undefined || this.plan.planVersion === ""){ //Check if planVersion has been set
+				if(newVersion !== ""){
+					this.plan.planVersion=newVersion;
+				}
+				else{
+					this.plan.planVersion='A';
+				}
+			}
+			else{ //If planVersion is curently defined
+                if(newVersion !== ""){
+                	this.plan.planVersion=newVersion;
+                }
+                else{
+                	this.plan.planVersion=String.fromCharCode(version.charCodeAt(0) + 1).toUpperCase();
+                }
+			}
+
+            //Setting Notes property
+			if(newNotes !== ""){
+				this.plan.notes=newNotes;
+			}
+
+
 			//TODO fix URL
             $.post("xgds.url.potato",
             {
-                planName: this.planName,
-                plan: this.plan
             },
             function(data, status){
                 if(status === 200){
@@ -378,18 +416,14 @@ class PlanManager {
                 	return true;
                 }
                 else{
-	                alert("Data: " + data + "\nStatus: " + status);
+	                alert("Unable to Save\nData: " + data + "\nStatus: " + status);
                 	return false;
                 }
             });
-		}
-		else{
-		alert("Please enter a Plan Name");
-		return false;
-		}
+		
 	}
 
-	//Added by Kenneth Fang- simple getter method 
+	//Added by Kenneth Fang- simple getter method to preserve abstraction
 	getPlanName(){
 		return this.planName;
 	}

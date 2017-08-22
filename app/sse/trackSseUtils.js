@@ -158,7 +158,7 @@ class TrackSSE {
 				this.viewerWrapper.viewer.zoomTo(entity, new HeadingPitchRange(0, -Math.PI/2.0, 150.0));
 				
 				if(range<155.0 && range>145.0){
-				    this.isInitialized=true;
+				    this.isInitialized = true;
 			    }
 
 			}
