@@ -60,6 +60,7 @@ module.exports = {
     'tsse': tsse,
     'planManager': planManager,
     'gps_tracks': gps_tracks,
+    'connectedDevices' : config.connectedDevices, //Added by Kenneth 9/4/17
     '$':$
 };
 

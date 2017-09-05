@@ -159,3 +159,52 @@
 	function savePlan(newName,newVersion,newNotes){ //Added by Kenneth
 		return sextant.planManager.savePlan(newName,newVersion,newNotes);
 	}
+
+	function loadDevices(){
+		console.log(sextant.connectedDevices);
+		$.each(sextant.connectedDevices, function( key, value ) {
+            console.log( key + ": " + value );
+            let listEntry="<li "+"id="+key+">"+value+"</li>";
+			$('#deviceList').append(listEntry);
+        });
+	}
+
+    function checkConnectedDevices(){ 
+        let deviceNames="";
+        $.each(sextant.connectedDevices, function( key, value ) {
+            deviceNames= deviceNames + key + " ";
+        });
+        deviceNames=deviceNames.slice(0,-1);
+
+
+        console.log(deviceNames);
+
+        //TODO change to your ip address
+        $.post("https://10.132.6.224/xgds_status_board/multiSubsystemStatusJson/",
+        {
+            names:deviceNames
+        },
+        function(data, status){ //TODO handle the color changing
+            //console.log(data);
+            $.each(sextant.connectedDevices, function( key, value ) {
+                $("#"+key).css("color",data.key.statusColor);
+            });
+
+        });   
+        //$.ajax({
+        //url: "https://10.0.0.4/xgds_status_board/multiSubsystemStatusJson/",
+        //method: "POST",
+        //dataType: "json",
+        //data: {names: "pXRF LIBS FLIR FTIR redCamera2 boat"},
+        //success: function(data) {
+        //    console.log(data);
+        //}      
+        //success: $.proxy(function(data) {
+        //    console.log(data);
+        //})//,
+        //error: $.proxy(function(data) {
+        //    console.log('Error checking devices');
+        //    console.log(data);
+        //}, this)
+      //});
+    }

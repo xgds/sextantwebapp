@@ -28,10 +28,10 @@
     
     #containerConnected_div {
         position: absolute;
-        top:50px;
-        right:30px;
-        width:30px;
-        height:15px;
+        top:80px;
+        right:80px;
+        /*width:30px;
+        height:15px;*/
         background-color:white;
         z-index:2;
         //border:1px solid black;
@@ -56,11 +56,11 @@
     #connectedDevices{
         position: fixed;
         top:50px;
-        bottom:100px;
         left:30px;
-        width:50px;
+        width:auto;
+        height:auto;
         z-index:2;
-        background: rgba(255, 255, 255, 0.5); /*green transparent background*/
+        background: rgba(255, 255, 255, 0.5);
     }
 
     /*Hide silly looking follow checkbox*/
@@ -159,8 +159,9 @@ On phones, when virtual keyboard is being used, it may cover the text field.
     </span>
 </div>
 
-<div id = connectedDevices>
-
+<div id = connectedDevices> <!-- TODO Added by Kenneth- list content is loaded from config-->
+    <ul id = deviceList style="list-style-type:none; margin:5px; padding:0;">
+    </ul>
 </div>
 
 <!-- Text Displayed in top left during regular viewing- -->
@@ -190,7 +191,6 @@ On phones, when virtual keyboard is being used, it may cover the text field.
     <!--  <a href="#" class="ui-btn" onclick="zoomToPosition();">Zoom to Position</a>  -->
     <a href="#" class="ui-btn" onclick="zoomToPlan();">Zoom to Plan</a>
     <a href="#" class="ui-btn" onclick="reOrient();">ReOrient</a>
-    <a href="#" class="ui-btn" onclick="$('#connectedDevices').toggle();">Show Connected</a>
 
     <label id="follow_label"><input type="checkbox" onclick="followPosition(event.target.checked)" checked id="follow_checkbox"></input> Follow</label> 
   </div>
@@ -217,6 +217,8 @@ On phones, when virtual keyboard is being used, it may cover the text field.
 <!-- jQuery scripts for handling saving path. Currently does nothing, but can be altered to send http POST request to xgds server -->
     <script>
         $(document).ready(function(){
+            loadDevices();
+            setInterval(function(){checkConnectedDevices();},1000);
         });
         //Helper method used to toggle between views
         function toggleMode(){
@@ -225,8 +227,9 @@ On phones, when virtual keyboard is being used, it may cover the text field.
              $('.editModeText').toggle();
         }
 
-        function handleSave(){
-            savePlan($('#saveAsName').val(),$('#saveAsVersion').val(),$('#saveAsNotes').val());
+        function handleSave(){ //TODO rather redundant
+            let info=savePlan($('#saveAsName').val(),$('#saveAsVersion').val(),$('#saveAsNotes').val());
+            console.log(info);
         }
 
     </script>

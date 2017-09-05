@@ -39,6 +39,7 @@ class PlanManager {
 		global.editMode = false;
 		this.setupEditing();
 		this.initializedPextant = false;
+		this.wasEdited = false; //Added by Kenneth 8/27
 	};
 	
 	toggleNavigation(value){
@@ -136,17 +137,17 @@ class PlanManager {
 			for(let i = 0; i<keys.length; i++){
 				let entity=this.segmentElements[keys[i]]
 				entityGroup.add(entity);
-				console.log(entity.polyline.positions.value);
-				let x1 = entity.polyline.positions[0].value.x;
-				let x2 = entity.polyline.positions[1].value.x;
-				let y1 = entity.polyline.positions[0].value.y;
-				let y2 = entity.polyline.positions[1].value.y;
-				console.log(x1);
-				console.log(x2);
+				//console.log(entity.polyline.positions.value);
+				//let x1 = entity.polyline.positions[0].value.x;
+				//let x2 = entity.polyline.positions[1].value.x;
+				//let y1 = entity.polyline.positions[0].value.y;
+			    //let y2 = entity.polyline.positions[1].value.y;
+				//console.log(x1);
+				//console.log(x2);
 				//let x = entity.position.getValue(this.viewerWrapper.viewer.clock.currentTime).x;
 	 			//let y = entity.position.getValue(this.viewerWrapper.viewer.clock.currentTime).y;
-	 			console.log(y1);
-	 			console.log(y2);
+	 			//console.log(y1);
+	 			//console.log(y2);
 			}
 
 			this.viewerWrapper.viewer.zoomTo(entityGroup, new HeadingPitchRange(0, -Math.PI/2.0, 150.0));
@@ -380,6 +381,8 @@ class PlanManager {
 			if(this.plan.name !== newName){ //Check if plan name was changed
 				this.plan.planName = newName;
 				this.plan.name = newName;
+				this.plan.planVersion = ""; //Reset planVersion if saving new plan
+				this.wasEdited = true;
 			}
             
             //Setting plan Version
@@ -388,7 +391,7 @@ class PlanManager {
 					this.plan.planVersion=newVersion;
 				}
 				else{
-					this.plan.planVersion='A';
+					this.plan.planVersion="A";
 				}
 			}
 			else{ //If planVersion is curently defined
@@ -396,7 +399,7 @@ class PlanManager {
                 	this.plan.planVersion=newVersion;
                 }
                 else{
-                	this.plan.planVersion=String.fromCharCode(version.charCodeAt(0) + 1).toUpperCase();
+                	this.plan.planVersion=String.fromCharCode(this.plan.planVersion.charCodeAt(0) + 1).toUpperCase();
                 }
 			}
 
@@ -420,6 +423,13 @@ class PlanManager {
                 	return false;
                 }
             });
+
+            if(this.wasEdited){
+            	return [this.plan.planName,this.plan.planVersion];
+            }
+            else{
+            	return undefined;
+            }
 		
 	}
 
