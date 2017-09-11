@@ -38,21 +38,6 @@
         border-radius:12px;
     }
 
-    .saveDialog{
-        position: absolute;
-        z-index:2;
-        width:200px;
-        height:auto;
-        display: none;      
-        top: 50%;
-        left: 50%;
-        margin: -100px 0 0 -150px;
-        background-color:white;
-        border:2px solid black;
-        border-radius:5px;
-        padding:10px;
-    }
-
     #connectedDevices{
         position: fixed;
         top:50px;
@@ -69,7 +54,7 @@
     #savePopup{
         position: fixed;
         top: 50px;
-        left: 200px;
+        left: calc(50vw - 125px);
         width: 250px;
         height:auto;
         z-index: 5;
@@ -78,11 +63,14 @@
         border-radius: 5px;
         box-shadow: 0 10px 10px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     }
+    #savePopup p{
+        padding:10px;
+    }
     #savePopup tr:nth-child(odd) {
     background-color: #eee;
     }
     #savePopup th, td {
-    padding: 5px;
+    padding: 10px;
     }
 
     /* Handles Mobile Phone Scrollbars- Left it in as it may prove useful if we add more features*/
@@ -132,7 +120,7 @@ On phones, when virtual keyboard is being used, it may cover the text field.
         <table>
         <tr>
             <td><label for="saveAsName">Name</label></td>
-            <td><input type="text" id="saveAsName"></td>
+            <td><input type="text" id="saveAsName" placeholder="REQUIRED"></td>
         </tr>
         <tr>
             <td><label for="saveAsVersion">Version</label></td>
@@ -145,8 +133,9 @@ On phones, when virtual keyboard is being used, it may cover the text field.
         <tr></tr>
         </table>
         <div data-role="controlgroup" data-type="horizontal">
+
+            <a href="#" class="ui-btn" onclick="handleSave();" id = "submit"> Save</a>
             <a href="#" class="ui-btn" onclick="$('#savePopup').toggle();"> Cancel</a>
-            <a href="#" class="ui-btn" onclick="handleSave();">Save</a>
         </div>
 </div>
 
@@ -218,7 +207,12 @@ On phones, when virtual keyboard is being used, it may cover the text field.
     <script>
         $(document).ready(function(){
             loadDevices();
-            setInterval(function(){checkConnectedDevices();},1000);
+            $('#saveAsName').keyup(function(){
+                if($(this).val().length !=0)
+                    $('#submit').attr('disabled', false);            
+                else
+                    $('#submit').attr('disabled',true);
+            })
         });
         //Helper method used to toggle between views
         function toggleMode(){
@@ -227,9 +221,29 @@ On phones, when virtual keyboard is being used, it may cover the text field.
              $('.editModeText').toggle();
         }
 
-        function handleSave(){ //TODO rather redundant
-            let info=savePlan($('#saveAsName').val(),$('#saveAsVersion').val(),$('#saveAsNotes').val());
-            console.log(info);
+        function handleSave(){ //TODO rather redundant. Also, will break if user names their plan "REQUIRED"
+            
+            let defaultName = document.getElementById("saveAsName").placeholder;
+            if($('#saveAsName').val() === "" && $('#saveAsName').attr("placeholder") === "REQUIRED")
+                    alert('Please input a new name!');
+
+            else{
+            if($('#saveAsName').val() === "")
+                $('#saveAsName').val(defaultName);
+
+            let info=savePlan($('#saveAsName').val(),$('#saveAsVersion').val(),$('#saveAsNotes').val()); //Returns array with [Name,Version]
+            
+            if(info !== undefined){
+                $('#saveAsName').attr("placeholder", info[0]);
+                $('#saveAsVersion').attr("placeholder", info[1]);
+                $('#saveAsName').val("");
+                $('#saveAsVersion').val("");
+                $('#savePopup').toggle();
+            }
+            else{
+                alert('Something went wrong with the save! Check plan.js')
+            }
+        }
         }
 
     </script>

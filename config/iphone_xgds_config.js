@@ -18,14 +18,14 @@ module.exports = {
 	// The server that is running this node app 
     server : { port : 3001,
     		   cesium_port: undefined,
-    		   name : '10.132.6.224', //TODO REPLACE THIS WITH YOUR IP ADDRESS 
+    		   name : '10.131.26.180', //TODO REPLACE THIS WITH YOUR IP ADDRESS 
     		   //name : 'tamar-docker.xgds.org', //TODO REPLACE THIS WITH YOUR SSL-CERT NAME
     		   protocol: 'https',
     		   nginx_prefix: 'wristApp'},
     		   
     // This should only exist in xGDS side
     sse : { port : 443, 
-    		name : '10.132.6.224', //TODO REPLACE THIS WITH YOUR IP ADDRESS 
+    		name : '10.131.26.180', //TODO REPLACE THIS WITH YOUR IP ADDRESS 
 		   //name : 'tamar-docker.xgds.org', //TODO REPLACE THIS WITH YOUR SSL-CERT NAME
     	    protocol : 'https',
     	    ev_channels: ['EV1', 'EV2'],
@@ -47,8 +47,8 @@ module.exports = {
     defaultSite : 'Ames',
     
     // list of kml links to load
-    kml_urls : ['https://10.132.6.224/notes/notesFeed.kml',
-    	           'https://10.132.6.224/basaltApp/hvnp_so2.kml'], //TODO REPLACE THIS WITH YOUR IP ADDRESS
+    kml_urls : ['https://10.131.26.180/notes/notesFeed.kml',
+    	           'https://10.131.26.180/basaltApp/hvnp_so2.kml'], //TODO REPLACE THIS WITH YOUR IP ADDRESS
     
     // list of various sites we support
     sites : { 'HI_Mauna_Ulu' : { 'imagery' : 'CustomMaps/HI_lowqual_relief',
@@ -75,11 +75,15 @@ module.exports = {
     // TODO override with your key if using bing.
     bing_key : 'Ak71PK14Ypz2_IuQ2-TGbV-OVYLKeg_KEXFFYiNmEny6aFJVYxUg_pUxZfhaQ2vy',
 
-    //List of Connected Devices TODO
-    connectedDevices : {pXRF : 'pXRF', 
-                        LIBS : 'LIBS', 
-                        FLIR : 'FLIR', 
-                        FTIR : 'FTIR', 
-                        redCamera2 : 'CAM2', 
-                        boat2 : 'IV'}
+    //List of Connected Devices TODO replace with your IP
+    connectedDevices : { url : 'https://10.131.26.180/xgds_status_board/multiSubsystemStatusJson/',
+
+                        list : 
+                          {pXRF : 'pXRF', 
+                          LIBS : 'LIBS', 
+                          FLIR : 'FLIR', 
+                          FTIR : 'FTIR', 
+                          redCamera2 : 'CAM2', 
+                          boat2 : 'IV'}
+                        }
 }

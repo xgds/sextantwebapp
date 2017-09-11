@@ -374,8 +374,8 @@ class PlanManager {
 	};
 
 	//Added by Kenneth- handles name saving
+	//If there's a new name to save, this method will return an array wiht [newName, newVersion]
 	savePlan(newName,newVersion,newNotes){
-		console.log(this.plan);
 
 		    //Setting Plan Name (There are two name properties for some reason)
 			if(this.plan.name !== newName){ //Check if plan name was changed
@@ -431,11 +431,6 @@ class PlanManager {
             	return undefined;
             }
 		
-	}
-
-	//Added by Kenneth Fang- simple getter method to preserve abstraction
-	getPlanName(){
-		return this.planName;
 	}
 
 

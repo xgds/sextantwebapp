@@ -152,59 +152,53 @@
 		sextant.planManager.reOrient();
 	}
 
-	function getPlanName(){// Added by Kenneth
-        return sextant.planManager.getPlanName();
-	}
-
 	function savePlan(newName,newVersion,newNotes){ //Added by Kenneth
 		return sextant.planManager.savePlan(newName,newVersion,newNotes);
 	}
 
+    //If the connected devices are defined, they will be loaded into a toolbar and the polling will be started
+    //Otherwise, the entire connected devices functionality will not be started
 	function loadDevices(){
-		console.log(sextant.connectedDevices);
-		$.each(sextant.connectedDevices, function( key, value ) {
-            console.log( key + ": " + value );
-            let listEntry="<li "+"id="+key+">"+value+"</li>";
-			$('#deviceList').append(listEntry);
+		if(sextant.connectedDevices !== undefined){
+
+		$.each(sextant.connectedDevices.list, function( key, value ) { //key here is the device name, and value is the displayName corresponding to it.
+            let listEntry="<li "+"id='"+key+"'>"+value+"</li>";
+            console.log(listEntry); //TODO remove me
+			$('#deviceList').append(listEntry); //Display all connected devices using their display names from config
         });
+        
+        setInterval(function(){checkConnectedDevices();},1000);//Start Polling
+	}
+	else{
+		$('#connectedDevices').css("display","none");
+		alert("Your configuration doesn't have any devices to check.");
+	}
 	}
 
-    function checkConnectedDevices(){ 
+    function checkConnectedDevices(){
         let deviceNames="";
-        $.each(sextant.connectedDevices, function( key, value ) {
+        $.each(sextant.connectedDevices.list, function( key, value ) {
+
+        //console.log("#"+key); TODO try me! I change the color of each of the entries
+        //$("#"+key).css("color", "#ff0000"); 
             deviceNames= deviceNames + key + " ";
         });
-        deviceNames=deviceNames.slice(0,-1);
-
-
-        console.log(deviceNames);
+        deviceNames = deviceNames.slice(0,-1);
 
         //TODO change to your ip address
-        $.post("https://10.132.6.224/xgds_status_board/multiSubsystemStatusJson/",
+        $.post(sextant.connectedDevices.url,
         {
             names:deviceNames
         },
         function(data, status){ //TODO handle the color changing
             //console.log(data);
             $.each(sextant.connectedDevices, function( key, value ) {
-                $("#"+key).css("color",data.key.statusColor);
+            	
+            	//TODO try me
+                //for(let i=0;i<data.length;i++){
+                //	$("#"+data[i].name).css(data[i].statusColor)
+                //}
             });
 
         });   
-        //$.ajax({
-        //url: "https://10.0.0.4/xgds_status_board/multiSubsystemStatusJson/",
-        //method: "POST",
-        //dataType: "json",
-        //data: {names: "pXRF LIBS FLIR FTIR redCamera2 boat"},
-        //success: function(data) {
-        //    console.log(data);
-        //}      
-        //success: $.proxy(function(data) {
-        //    console.log(data);
-        //})//,
-        //error: $.proxy(function(data) {
-        //    console.log('Error checking devices');
-        //    console.log(data);
-        //}, this)
-      //});
     }
