@@ -8,13 +8,9 @@
 
     <title>SEXTANT</title>
 
-    <!-- Newly Added by Kenneth to use jQueryMobile TODO- remove these after adding modules to the webpack-->
-
     <!-- Include jQuery Mobile stylesheets -->
-    <!-- <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">-->
     <link rel="stylesheet" type="text/css" href="/wristApp/jquery-mobile/jquery.mobile.min.css">
 	<link rel="stylesheet" type="text/css" href="/wristApp/font-awesome/css/font-awesome.min.css">
-    
 </head>
 <body>
 
@@ -26,34 +22,55 @@
           /* Apparently you need spaces around the - sign for calc() to work (https://stackoverflow.com/questions/30412580/why-is-css-calc100-250px-not-working)- quite frustrating*/
           height: calc(100vh - 50px); 
           overflow: hidden;
+          position:fixed;
+          top:0px;
       }
     
     #containerConnected_div {
         position: absolute;
-        top:20px;
-        right:30px;
-        width:30px;
-        height:15px;
+        top:80px;
+        right:80px;
+        /*width:30px;
+        height:15px;*/
         background-color:white;
         z-index:2;
         //border:1px solid black;
         border-radius:12px;
     }
 
-    .saveDialog{
-        position: absolute;
-        z-index:2;
-        width:200px;
+    #connectedDevices{
+        position: fixed;
+        top:50px;
+        left:30px;
+        width:auto;
         height:auto;
-        display: none;      
-        top: 50%;
-        left: 50%;
-        margin: -100px 0 0 -150px;
-        background-color:white;
-        border:2px solid black;
-        border-radius:5px;
-        padding:10px;
+        z-index:2;
+        background: rgba(255, 255, 255, 0.5);
+    }
 
+    /*Hide silly looking follow checkbox*/
+    #follow_checkbox, #follow_label input {display:none;}
+
+    #savePopup{
+        position: fixed;
+        top: 50px;
+        left: calc(50vw - 125px);
+        width: 250px;
+        height:auto;
+        z-index: 5;
+        display:none; 
+        background:white;
+        border-radius: 5px;
+        box-shadow: 0 10px 10px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    }
+    #savePopup p{
+        padding:10px;
+    }
+    #savePopup tr:nth-child(odd) {
+    background-color: #eee;
+    }
+    #savePopup th, td {
+    padding: 10px;
     }
 
     /* Handles Mobile Phone Scrollbars- Left it in as it may prove useful if we add more features*/
@@ -83,43 +100,43 @@
     }
 </style>
 
-
-
-<!-- Regular Mode toolbar -->
-<div data-role="header" data-position="inline" style="text-align:center;" id="viewModeToolbar">
-  <div data-role="controlgroup" data-type="horizontal">
-    <a href="#" class="ui-btn" onclick="reloadPlan();">Reload Plan</a>
-    <a href="#" class="ui-btn" onclick="clearTracks();">Clear Track</a>
-    <!-- Calls toggleEdit from sextant_caller and switches toolbars-->
-    <a href="#" class="ui-btn" onclick="followPosition(false); toggleEditMode(); toggleMode();">Edit Plan</a>
-    <!--  <a href="#" class="ui-btn" onclick="zoomToPosition();">Zoom to Position</a>  -->
-    <a href="#" class="ui-btn" onclick="zoomToPlan();">Zoom to Plan</a>
-    <label id="follow_label"><input type="checkbox" onclick="followPosition(event.target.checked)" checked id="follow_checkbox"></input> Follow</label> 
-  </div>
-</div>
-
-<!-- Edit Mode toolbar -->
-<div data-role="header" data-position="inline" style="text-align:center; display:none;" id="editModeToolbar">
-  <div data-role="controlgroup" data-type="horizontal" id="editControl">
-    <a href="#" class="ui-btn" onclick="sendPlanToSextant()">Calculate Path</a>
-    <a href="#" class="ui-btn" onclick="reloadPlan();">Reload Plan</a>
-    <a href="#" class="ui-btn" onclick="clearTracks()">Clear Track</a>
-    <a href="#" class="ui-btn" onclick="$('#savePopup').toggle();" style="display:none;">Save Plan</a>
-    <!-- Calls toggleEdit from sextant_caller and switches toolbars-->
-    <a href="#" class="ui-btn" onclick="toggleEditMode(); toggleMode(); followPosition($('#follow_checkbox').prop('checked'));">Done Editing</a>
-  </div>
-</div>
-
 <!-- Popup when you hit SavePlan soft TODO, as it should be formatted to look better.
-On phones, when virtual keyboard is being used, it may cover the text field. -->
+On phones, when virtual keyboard is being used, it may cover the text field. 
 
 <div id="savePopup"  class="saveDialog">
-    <form method="post" action="someurl.com" id="myForm">
+    <form id="myForm">
+      <div class="ui-field-contain">
         <label for="planName">Save as:</label>
         <input type="text" name="planName" id="planName" placeholder="New Plan Name" data-clear-btn="true">
     <input type="submit" value="Save" id="submitForm">
     <input type="button" value="Cancel" id="cancel" style="display:inline;">
+    </div>
 </form>
+</div> -->
+
+<!-- Same html from xgds server -->
+<div id="savePopup">
+        <p>Enter a new name and/or version to save as.  (Version already changed.)</p>
+        <table>
+        <tr>
+            <td><label for="saveAsName">Name</label></td>
+            <td><input type="text" id="saveAsName" placeholder="REQUIRED"></td>
+        </tr>
+        <tr>
+            <td><label for="saveAsVersion">Version</label></td>
+            <td><input type="text" id="saveAsVersion"></td>
+        </tr>
+        <tr>
+            <td><label for="saveAsNotes">Notes</label></td>
+            <td><input type="text" id="saveAsNotes"></td>
+        </tr>
+        <tr></tr>
+        </table>
+        <div data-role="controlgroup" data-type="horizontal">
+
+            <a href="#" class="ui-btn" onclick="handleSave();" id = "submit"> Save</a>
+            <a href="#" class="ui-btn" onclick="$('#savePopup').toggle();"> Cancel</a>
+        </div>
 </div>
 
 
@@ -129,6 +146,11 @@ On phones, when virtual keyboard is being used, it may cover the text field. -->
         <span class="fa" id="connected" style="min-width:1rem;">
         </span>
     </span>
+</div>
+
+<div id = connectedDevices> <!-- TODO Added by Kenneth- list content is loaded from config-->
+    <ul id = deviceList style="list-style-type:none; margin:5px; padding:0;">
+    </ul>
 </div>
 
 <!-- Text Displayed in top left during regular viewing- -->
@@ -147,37 +169,53 @@ On phones, when virtual keyboard is being used, it may cover the text field. -->
 <div id="hovercoord" style="display:none;"></div>
 
 
-<!-- TODO add jQuery Mobile for its convenient classes -->
+
+<!-- Regular Mode toolbar -->
+<div data-role="footer" data-position="fixed" data-tap-toggle="false" style="text-align:center;" id="viewModeToolbar">
+  <div data-role="controlgroup" data-type="horizontal">
+    <a href="#" class="ui-btn" onclick="reloadPlan();">Reload Plan</a>
+    <a href="#" class="ui-btn" onclick="clearTracks();">Clear Track</a>
+    <!-- Calls toggleEdit from sextant_caller and switches toolbars-->
+    <a href="#" class="ui-btn" onclick="followPosition(false); toggleEditMode(); toggleMode();">Edit Plan</a>
+    <!--  <a href="#" class="ui-btn" onclick="zoomToPosition();">Zoom to Position</a>  -->
+    <a href="#" class="ui-btn" onclick="zoomToPlan();">Zoom to Plan</a>
+    <a href="#" class="ui-btn" onclick="reOrient();">ReOrient</a>
+
+    <label id="follow_label"><input type="checkbox" onclick="followPosition(event.target.checked)" checked id="follow_checkbox"></input> Follow</label> 
+  </div>
+</div>
+
+<!-- Edit Mode toolbar -->
+<div data-role="footer" data-position="fixed" data-tap-toggle="false" style="text-align:center; display:none;" id="editModeToolbar">
+  <div data-role="controlgroup" data-type="horizontal" id="editControl">
+    <a href="#" class="ui-btn" onclick="sendPlanToSextant()">Calculate Path</a>
+    <a href="#" class="ui-btn" onclick="reloadPlan();">Reload Plan</a>
+    <a href="#" class="ui-btn" onclick="clearTracks()">Clear Track</a>
+    <a href="#" class="ui-btn" onclick="$('#savePopup').toggle();">Save Plan</a>
+    <!-- Calls toggleEdit from sextant_caller and switches toolbars-->
+    <a href="#" class="ui-btn" onclick="toggleEditMode(); toggleMode(); followPosition($('#follow_checkbox').prop('checked'));">Done Editing</a>
+  </div>
+</div>
+
+
 <script src="/wristApp/jquery/jquery.min.js"></script>
 <script src="/wristApp/jquery-mobile/jquery.mobile.min.js"></script>
-<!-- Include the jQuery Mobile library -->
-<!-- <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script> -->
-
 <script src="./build/sextant.bundle.js"></script>
 <script src="./sextant_caller.js"></script>
+<script src="./nonsextant_utils.js"></script>
 
-<!-- jQuery scripts for handling saving path. Currently does nothing, but can be altered to send http POST request to xgds server -->
     <script>
         $(document).ready(function(){
-            $("form").submit(function(e) {
-                //TODO- This callback is called on form submission. e.preventDefault prevents the default response.
-                e.preventDefault();
-                $("#savePopup").toggle();
-                $("#myForm")[0].reset();
-            });
-
-            $("#cancel").click(function(e) {
-                $("#savePopup").toggle();
-                $("#myForm")[0].reset();
-            });
+            loadDevices();
+            $('#saveAsName').keyup(function(){
+                if($(this).val().length !=0)
+                    $('#submit').attr('disabled', false);            
+                else
+                    $('#submit').attr('disabled',true);
+            })
         });
+        
 
-        //Helper method used to toggle between views
-        function toggleMode(){
-             $('#viewModeToolbar').toggle(); 
-             $('#editModeToolbar').toggle();
-             $('.editModeText').toggle();
-        }
     </script>
 </body>
 </html>

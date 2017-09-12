@@ -147,3 +147,13 @@
 		//window.editMode = state;
                 window.editMode ^= true;
 	}
+
+	function reOrient(){ // Added by Kenneth
+		sextant.planManager.reOrient();
+	}
+
+	function savePlan(newName,newVersion,newNotes){ //Added by Kenneth
+		return sextant.planManager.savePlan(newName,newVersion,newNotes);
+	}
+
+    

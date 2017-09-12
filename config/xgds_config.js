@@ -70,6 +70,16 @@ module.exports = {
     showCoordinates : false,
 
     // TODO override with your key if using bing.
-    bing_key : 'Ak71PK14Ypz2_IuQ2-TGbV-OVYLKeg_KEXFFYiNmEny6aFJVYxUg_pUxZfhaQ2vy'
+    bing_key : 'Ak71PK14Ypz2_IuQ2-TGbV-OVYLKeg_KEXFFYiNmEny6aFJVYxUg_pUxZfhaQ2vy',
+    
+    //List of Connected Devices 
+    connectedDevices : { pXRF : 'pXRF', 
+                          LIBS : 'LIBS', 
+                          FLIR : 'FLIR', 
+                          FTIR : 'FTIR', 
+                          redCamera2 : 'CAM2', 
+                          boat2 : 'IV'
+                        }
+
 
 }

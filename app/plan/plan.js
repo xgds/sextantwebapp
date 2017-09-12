@@ -15,7 +15,7 @@
 // __END_LICENSE__
 
 const moment = require('moment');
-import {Color, defined, ScreenSpaceEventHandler, ScreenSpaceEventType, ImageMaterialProperty, HeadingPitchRange} from './../cesium_util/cesium_imports'
+import {Color, defined, ScreenSpaceEventHandler, ScreenSpaceEventType, ImageMaterialProperty, HeadingPitchRange,Cartesian3, CesiumMath, CallbackProperty, EntityCollection, Clock } from './../cesium_util/cesium_imports'
 import {DynamicLines, buildLineString, buildCylinder, buildSurfaceCircle} from './../cesium_util/cesiumlib';
 import {config} from './../../config/config_loader';
 import {getXgdsToken} from './../util/xgdsUtils';
@@ -39,6 +39,7 @@ class PlanManager {
 		global.editMode = false;
 		this.setupEditing();
 		this.initializedPextant = false;
+		this.wasEdited = false; //Added by Kenneth 8/27
 	};
 	
 	toggleNavigation(value){
@@ -126,11 +127,30 @@ class PlanManager {
 		}
 	};
 	
-	zoomTo() {
+	zoomTo() { //TODO
+		let entityGroup = new EntityCollection;
 		let keys = Object.keys(this.segmentElements);
+		let extremes = [];
+
 		if (keys.length > 0) {
-			//TODO need to make some sort of group entity so we can zoom to the whole thing.
-			this.viewerWrapper.viewer.zoomTo(this.segmentElements[keys[0]], new HeadingPitchRange(0, -Math.PI/2.0, 150.0));
+
+			for(let i = 0; i<keys.length; i++){
+				let entity=this.segmentElements[keys[i]]
+				entityGroup.add(entity);
+				//console.log(entity.polyline.positions.value);
+				//let x1 = entity.polyline.positions[0].value.x;
+				//let x2 = entity.polyline.positions[1].value.x;
+				//let y1 = entity.polyline.positions[0].value.y;
+			    //let y2 = entity.polyline.positions[1].value.y;
+				//console.log(x1);
+				//console.log(x2);
+				//let x = entity.position.getValue(this.viewerWrapper.viewer.clock.currentTime).x;
+	 			//let y = entity.position.getValue(this.viewerWrapper.viewer.clock.currentTime).y;
+	 			//console.log(y1);
+	 			//console.log(y2);
+			}
+
+			this.viewerWrapper.viewer.zoomTo(entityGroup, new HeadingPitchRange(0, -Math.PI/2.0, 150.0));
 		}
 	};
 	
@@ -339,6 +359,82 @@ class PlanManager {
 		// we rerender everything, we could be fancy and just rerender the segments.
 		this.renderPlan();
 	};
+
+
+	//Added by Kenneth- reorients camera
+	reOrient(){
+		this.viewerWrapper.viewer.camera.flyTo({
+			destination: this.viewerWrapper.viewer.camera.position,
+            orientation: {
+            heading : 0.0,
+            pitch : -CesiumMath.PI_OVER_TWO,
+            roll : 0.0
+        }
+    });
+	};
+
+	//Added by Kenneth- handles name saving
+	//If there's a new name to save, this method will return an array wiht [newName, newVersion]
+	savePlan(newName,newVersion,newNotes){
+
+		    //Setting Plan Name (There are two name properties for some reason)
+			if(this.plan.name !== newName){ //Check if plan name was changed
+				this.plan.planName = newName;
+				this.plan.name = newName;
+				this.plan.planVersion = ""; //Reset planVersion if saving new plan
+				this.wasEdited = true;
+			}
+            
+            //Setting plan Version
+			if(this.plan.planVersion === undefined || this.plan.planVersion === ""){ //Check if planVersion has been set
+				if(newVersion !== ""){
+					this.plan.planVersion=newVersion;
+				}
+				else{
+					this.plan.planVersion="A";
+				}
+			}
+			else{ //If planVersion is curently defined
+                if(newVersion !== ""){
+                	this.plan.planVersion=newVersion;
+                }
+                else{
+                	this.plan.planVersion=String.fromCharCode(this.plan.planVersion.charCodeAt(0) + 1).toUpperCase();
+                }
+			}
+
+            //Setting Notes property
+			if(newNotes !== ""){
+				this.plan.notes=newNotes;
+			}
+
+
+			//TODO fix URL
+            $.post("xgds.url.potato",
+            {
+            },
+            function(data, status){
+                if(status === 200){
+                	alert("Save Successful");
+                	return true;
+                }
+                else{
+	                alert("Unable to Save\nData: " + data + "\nStatus: " + status);
+                	return false;
+                }
+            });
+
+            if(this.wasEdited){
+            	return [this.plan.planName,this.plan.planVersion];
+            }
+            else{
+            	return undefined;
+            }
+		
+	}
+
+
+
 
 }
 

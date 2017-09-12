@@ -43,7 +43,7 @@ function addGPSLocation(data){
 	}
 }
 
-window.addEventListener("load",function() {
+window.addEventListener("load",function() { // TODO not needed anymore
 	// Set a timeout...
 	setTimeout(function(){
 		// Hide the address bar!
@@ -60,6 +60,7 @@ module.exports = {
     'tsse': tsse,
     'planManager': planManager,
     'gps_tracks': gps_tracks,
+    'connectedDevices' : config.connectedDevices, //Added by Kenneth 9/4/17
     '$':$
 };
 
