@@ -60,7 +60,11 @@ module.exports = {
        		  'Ames' : { 'imagery': 'TODO',
        			  		 'elevation': 'TODO',
        			  		 'centerPoint' : [-122.064789, 37.419362, 5000]
-       				   }
+       				   },
+			'Black_Point' : { 'imagery' : 'TODO',
+							 'elevation' : 'TODO',
+							 'centerPoint' : [-111.466442, 35.690775, 6000]
+			  }
     },
     
     // whether or not this is a development server
