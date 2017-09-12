@@ -76,14 +76,20 @@ module.exports = {
     bing_key : 'Ak71PK14Ypz2_IuQ2-TGbV-OVYLKeg_KEXFFYiNmEny6aFJVYxUg_pUxZfhaQ2vy',
 
     //List of Connected Devices TODO replace with your IP
-    connectedDevices : { url : 'https://10.131.26.180/xgds_status_board/multiSubsystemStatusJson/',
-
-                        list : 
-                          {pXRF : 'pXRF', 
-                          LIBS : 'LIBS', 
-                          FLIR : 'FLIR', 
-                          FTIR : 'FTIR', 
-                          redCamera2 : 'CAM2', 
-                          boat2 : 'IV'}
-                        }
+//    connectedDevices : { url : 'https://10.131.26.180/xgds_status_board/multiSubsystemStatusJson/',
+//
+//                        list : 
+//                          {pXRF : 'pXRF', 
+//                          LIBS : 'LIBS', 
+//                          FLIR : 'FLIR', 
+//                          FTIR : 'FTIR', 
+//                          redCamera2 : 'CAM2', 
+//                          boat2 : 'IV'}
+//                        }
+    connectedDevices : {pXRF : 'pXRF', 
+          			   LIBS : 'LIBS', 
+          			   FLIR : 'FLIR', 
+          			   FTIR : 'FTIR', 
+          			   redCamera2 : 'CAM2', 
+          			   boat2 : 'IV'}
 }

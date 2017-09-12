@@ -202,8 +202,8 @@ On phones, when virtual keyboard is being used, it may cover the text field.
 <script src="/wristApp/jquery-mobile/jquery.mobile.min.js"></script>
 <script src="./build/sextant.bundle.js"></script>
 <script src="./sextant_caller.js"></script>
+<script src="./nonsextant_utils.js"></script>
 
-<!-- jQuery scripts for handling saving path. Currently does nothing, but can be altered to send http POST request to xgds server -->
     <script>
         $(document).ready(function(){
             loadDevices();
@@ -214,37 +214,7 @@ On phones, when virtual keyboard is being used, it may cover the text field.
                     $('#submit').attr('disabled',true);
             })
         });
-        //Helper method used to toggle between views
-        function toggleMode(){
-             $('#viewModeToolbar').toggle(); 
-             $('#editModeToolbar').toggle();
-             $('.editModeText').toggle();
-        }
-
-        function handleSave(){ //TODO rather redundant. Also, will break if user names their plan "REQUIRED"
-            
-            let defaultName = document.getElementById("saveAsName").placeholder;
-            if($('#saveAsName').val() === "" && $('#saveAsName').attr("placeholder") === "REQUIRED")
-                    alert('Please input a new name!');
-
-            else{
-            if($('#saveAsName').val() === "")
-                $('#saveAsName').val(defaultName);
-
-            let info=savePlan($('#saveAsName').val(),$('#saveAsVersion').val(),$('#saveAsNotes').val()); //Returns array with [Name,Version]
-            
-            if(info !== undefined){
-                $('#saveAsName').attr("placeholder", info[0]);
-                $('#saveAsVersion').attr("placeholder", info[1]);
-                $('#saveAsName').val("");
-                $('#saveAsVersion').val("");
-                $('#savePopup').toggle();
-            }
-            else{
-                alert('Something went wrong with the save! Check plan.js')
-            }
-        }
-        }
+        
 
     </script>
 </body>
