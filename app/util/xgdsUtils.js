@@ -16,12 +16,8 @@
 
 import {config} from './../../config/config_loader';
 
-function getXgdsToken() {
-	let data = {};
-//	if (xgds_token in config){
-//		data = config.xgds_token;
-//	}
-	return data;
+function beforeSend(xhr) {
+       xhr.setRequestHeader ("Authorization", "Basic " + config.xgds.username + ":" + config.xgds.password);
 }
 
-export {getXgdsToken}
+export {beforeSend}

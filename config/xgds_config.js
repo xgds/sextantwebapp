@@ -23,11 +23,14 @@ module.exports = {
     		   nginx_prefix: 'wristApp'},
     		   
     // This should only exist in xGDS side
-    sse : { port : 443, 
+    xgds : { port : 443, 
     	    name : 'localhost',
     	    protocol : 'https',
     	    ev_channels: ['EV1', 'EV2'],
-    	    follow_channel: 'EV1'},
+    	    follow_channel: 'EV1',
+    	    	username: 'TODO put in username',
+    	    	password: 'TODO put in auth token'
+    	    	},
     
     // If we are using web sockets this should only exist in the default side
     socket : { protocol : 'http',

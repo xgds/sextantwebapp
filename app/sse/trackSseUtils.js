@@ -15,14 +15,14 @@
 //__END_LICENSE__
 
 import {config} from './../../config/config_loader';
-const hasSSE = ('sse' in config);
+const hasSSE = ('xgds' in config);
 
 const moment = require('moment');
 import {Color, ImageMaterialProperty, ColorMaterialProperty, Cartesian2, Cartesian3, CallbackProperty, HeadingPitchRange, Clock} from './../cesium_util/cesium_imports'
 import {DynamicLines, buildCylinder, buildArrow, updatePositionHeading, buildRectangle, buildPositionDataSource} from './../cesium_util/cesiumlib';
 import {SSE} from './sseUtils'
 
-const hostname = config.sse.protocol + '://' + config.sse.name;
+const hostname = config.xgds.protocol + '://' + config.xgds.name;
 let sse = undefined;
 let fakeHeading = false;
 

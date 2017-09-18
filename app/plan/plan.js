@@ -18,14 +18,15 @@ const moment = require('moment');
 import {Color, defined, ScreenSpaceEventHandler, ScreenSpaceEventType, ImageMaterialProperty, HeadingPitchRange,Cartesian3, CesiumMath, CallbackProperty, EntityCollection, Clock } from './../cesium_util/cesium_imports'
 import {DynamicLines, buildLineString, buildCylinder, buildSurfaceCircle} from './../cesium_util/cesiumlib';
 import {config} from './../../config/config_loader';
-import {getXgdsToken} from './../util/xgdsUtils';
+import {beforeSend} from './../util/xgdsUtils';
 
-const hostname = config.sse.protocol + '://' + config.sse.name;
+const hostname = config.xgds.protocol + '://' + config.xgds.name;
 
 class PlanManager {
 	
 	constructor(viewerWrapper) {
 		this.plan = undefined;
+		this.neverSaved = true;
 		this.viewerWrapper = viewerWrapper;
 		this.segmentElements = {};
 		this.stationElements = {};
@@ -39,7 +40,6 @@ class PlanManager {
 		global.editMode = false;
 		this.setupEditing();
 		this.initializedPextant = false;
-		this.wasEdited = false; //Added by Kenneth 8/27
 	};
 	
 	toggleNavigation(value){
@@ -154,6 +154,46 @@ class PlanManager {
 		}
 	};
 	
+	hideSaveAsPopup() {
+		let savePopup = $('#savePopup');
+		if (savePopup.length == 0){
+			return;
+		}
+		savePopup.hide();
+	};
+	
+	setSaveMessage(message){
+		try {
+			$('#saveMessage').html('</br>');
+		} catch(err) {
+			
+		}
+	};
+	
+	updateSaveAsPopup(forceSaveAs) {
+		if (_.isUndefined(this.plan)){
+			return;
+		}
+		try {
+			let saveAsName = $('#saveAsName');
+			if (saveAsName.length == 0){
+				return;
+			}
+			saveAsName.val(this.plan.name);
+			
+			if (forceSaveAs) {
+				let newVersion = String.fromCharCode(this.plan.planVersion.charCodeAt(0) + 1).toUpperCase();
+				$('#saveAsVersion').val(newVersion);
+			} else {
+				$('#saveAsVersion').val(this.plan.planVersion);
+			}
+			$('#saveAsNotes').val(this.plan.notes);
+			this.setSaveMessage('</br>');
+		} catch(err) {
+			//noop
+		}
+	};
+	
 	fetchXGDSPlan() {
 		if (this.plan !== undefined){
 			this.clearPlan();
@@ -163,7 +203,6 @@ class PlanManager {
 		$.ajax({
             url: currentPlanUrl,
             dataType: 'json',
-            data: getXgdsToken(),
             success: $.proxy(function(data) {
             	if (data != null){
             		let planDict = data;
@@ -175,6 +214,7 @@ class PlanManager {
 	            		if (thePlan !== undefined) {
 	            			this.plan = thePlan;
 	            			this.renderPlan();
+	            			this.updateSaveAsPopup(true);
 	            		}
             		}
             	}
@@ -373,64 +413,102 @@ class PlanManager {
     });
 	};
 
-	//Added by Kenneth- handles name saving
-	//If there's a new name to save, this method will return an array wiht [newName, newVersion]
-	savePlan(newName,newVersion,newNotes){
+	savePlan(newName, newVersion, newNotes){
+		// save the plan or save the plan as a new plan & schedule the new plan.
+		// reloads the saved plan on success.
 
+			let saveAs = false;
+			
 		    //Setting Plan Name (There are two name properties for some reason)
 			if(this.plan.name !== newName){ //Check if plan name was changed
 				this.plan.planName = newName;
 				this.plan.name = newName;
-				this.plan.planVersion = ""; //Reset planVersion if saving new plan
-				this.wasEdited = true;
-			}
+				saveAs = true;
+			} 
             
             //Setting plan Version
-			if(this.plan.planVersion === undefined || this.plan.planVersion === ""){ //Check if planVersion has been set
-				if(newVersion !== ""){
-					this.plan.planVersion=newVersion;
+			if (newVersion == "" || _.isUndefined(newVersion)){
+				if (saveAs) {
+					newVersion = "A";
+				} else {
+					newVersion = this.plan.planVersion;
 				}
-				else{
-					this.plan.planVersion="A";
-				}
+			} else if (newVersion !== this.plan.planVersion){
+				saveAs = true;
 			}
-			else{ //If planVersion is curently defined
-                if(newVersion !== ""){
-                	this.plan.planVersion=newVersion;
-                }
-                else{
-                	this.plan.planVersion=String.fromCharCode(this.plan.planVersion.charCodeAt(0) + 1).toUpperCase();
-                }
+			
+			if (saveAs) {
+				this.plan.planVersion = newVersion;
 			}
 
-            //Setting Notes property
 			if(newNotes !== ""){
 				this.plan.notes=newNotes;
 			}
 
 
-			//TODO fix URL
-            $.post("xgds.url.potato",
-            {
-            },
-            function(data, status){
-                if(status === 200){
-                	alert("Save Successful");
-                	return true;
-                }
-                else{
-	                alert("Unable to Save\nData: " + data + "\nStatus: " + status);
-                	return false;
-                }
-            });
-
-            if(this.wasEdited){
-            	return [this.plan.planName,this.plan.planVersion];
-            }
-            else{
-            	return undefined;
-            }
+			let savePlanUrl = hostname + '/xgds_planner2/plan/' + this.plan.serverId + '/' + this.plan.name.replace(/ /g,"_") + '.json';
+			
+			// save as uses post
+			let method='PUT';
+			if (saveAs){
+				method = 'POST';
+			}
+			
+			this.setSaveMessage('Saving Plan.');
+			
+			$.ajax({
+	            url: savePlanUrl,
+	            method: method,
+	            dataType: 'json',
+	            beforeSend: beforeSend,
+	            data: JSON.stringify(this.plan),
+	            success: $.proxy(function(data) {
+		            	if (data != null){
+		            		let oldPlanPK = this.plan.serverId;
+		            		
+		            		// load the new plan
+		            		this.clearPlan(true);
+		            		this.plan = data;
+	            			this.renderPlan();
+	            			this.hideSaveAsPopup();
+	            			this.updateSaveAsPopup(false);
+	            			
+		            		// then schedule the plan
+	            			if (this.plan.serverId !== oldPlanPK){
+	            				this.schedulePlan();
+	            			}
+		            	}
+	            }, this),
+	            error: $.proxy(function(data) {
+	            		this.setSaveMessage('Saving Plan Error');
+	            		console.log('Could not save the plan.');
+	            		console.log(data);
+	            }, this)
+	          });
 		
+	};
+	
+	schedulePlan(){
+		// Schedule the current plan to go with the currently active flight.
+		// this makes it the 'active' plan 
+		
+		let schedulePlanUrl = hostname + '/xgds_planner2/schedulePlanActive/' + config.xgds.follow_channel + '/' + this.plan.serverId;
+		$.ajax({
+            url: schedulePlanUrl,
+            method: 'POST',
+            dataType: 'json',
+            beforeSend: beforeSend,
+            success: $.proxy(function(data) {
+	            	if (data != null){
+	            		console.log('plan scheduled.')
+	            	}
+            }, this),
+            error: $.proxy(function(data) {
+            		alert('Scheduling Plan Error');
+            		console.log(data);
+            }, this)
+          });
+	
 	}
 
 

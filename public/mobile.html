@@ -67,10 +67,10 @@
         padding:10px;
     }
     #savePopup tr:nth-child(odd) {
-    background-color: #eee;
+    		background-color: #eee;
     }
     #savePopup th, td {
-    padding: 10px;
+    		padding: 10px;
     }
 
     /* Handles Mobile Phone Scrollbars- Left it in as it may prove useful if we add more features*/
@@ -100,27 +100,13 @@
     }
 </style>
 
-<!-- Popup when you hit SavePlan soft TODO, as it should be formatted to look better.
-On phones, when virtual keyboard is being used, it may cover the text field. 
-
-<div id="savePopup"  class="saveDialog">
-    <form id="myForm">
-      <div class="ui-field-contain">
-        <label for="planName">Save as:</label>
-        <input type="text" name="planName" id="planName" placeholder="New Plan Name" data-clear-btn="true">
-    <input type="submit" value="Save" id="submitForm">
-    <input type="button" value="Cancel" id="cancel" style="display:inline;">
-    </div>
-</form>
-</div> -->
-
 <!-- Same html from xgds server -->
 <div id="savePopup">
         <p>Enter a new name and/or version to save as.  (Version already changed.)</p>
         <table>
         <tr>
             <td><label for="saveAsName">Name</label></td>
-            <td><input type="text" id="saveAsName" placeholder="REQUIRED"></td>
+            <td><input type="text" id="saveAsName"></td>
         </tr>
         <tr>
             <td><label for="saveAsVersion">Version</label></td>
@@ -133,10 +119,13 @@ On phones, when virtual keyboard is being used, it may cover the text field.
         <tr></tr>
         </table>
         <div data-role="controlgroup" data-type="horizontal">
-
             <a href="#" class="ui-btn" onclick="handleSave();" id = "submit"> Save</a>
             <a href="#" class="ui-btn" onclick="$('#savePopup').toggle();"> Cancel</a>
         </div>
+        <div>
+        		<span id="saveMessage" style="color:red; margin-left:5px;"></span>
+        </div>
+        
 </div>
 
 

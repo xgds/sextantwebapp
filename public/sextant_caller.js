@@ -70,7 +70,7 @@
 	
 	function zoomToPosition(){
 		if (sextant.tsse !== undefined) {
-			sextant.tsse.zoomToPosition(config.sse.follow_channel);
+			sextant.tsse.zoomToPosition(config.xgds.follow_channel);
 		}
 	}
 	
@@ -145,14 +145,14 @@
 		//let button = $("#editButton");
 		//let state = button.prop('checked');
 		//window.editMode = state;
-                window.editMode ^= true;
+         window.editMode ^= true;
 	}
 
-	function reOrient(){ // Added by Kenneth
+	function reOrient(){ 
 		sextant.planManager.reOrient();
 	}
 
-	function savePlan(newName,newVersion,newNotes){ //Added by Kenneth
+	function savePlan(newName,newVersion,newNotes){ 
 		return sextant.planManager.savePlan(newName,newVersion,newNotes);
 	}
 

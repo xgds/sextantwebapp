@@ -15,7 +15,7 @@
 // __END_LICENSE__
 
 import {config} from './../../config/config_loader';
-import {getXgdsToken} from './../util/xgdsUtils';
+import {beforeSend} from './../util/xgdsUtils';
 
 const moment = require('moment');
 
@@ -96,7 +96,7 @@ class SSE{
             $.ajax({
                 url: this.host + '/xgds_core/sseActiveChannels',
                 dataType: 'json',
-                data: getXgdsToken(),
+	            beforeSend: beforeSend,
                 async: false,
                 success: $.proxy(function(data) {
                     this.activeChannels = data;

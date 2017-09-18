@@ -14,7 +14,7 @@
 //specific language governing permissions and limitations under the License.
 //__END_LICENSE__
 
-const hostname = config.sse.protocol + '://' + config.sse.name;
+const hostname = config.xgds.protocol + '://' + config.xgds.name;
 
 let deviceNames = "";
 
@@ -73,25 +73,12 @@ function toggleMode(){
 
 function handleSave(){ //TODO rather redundant. Also, will break if user names their plan "REQUIRED"
 
-	let defaultName = document.getElementById("saveAsName").placeholder;
-	if($('#saveAsName').val() === "" && $('#saveAsName').attr("placeholder") === "REQUIRED")
+	if($('#saveAsName').val() === "") {
 		alert('Please input a new name!');
-
-	else{
+	}else{
 		if($('#saveAsName').val() === "")
 			$('#saveAsName').val(defaultName);
 
-		let info=savePlan($('#saveAsName').val(),$('#saveAsVersion').val(),$('#saveAsNotes').val()); //Returns array with [Name,Version]
-
-		if(info !== undefined){
-			$('#saveAsName').attr("placeholder", info[0]);
-			$('#saveAsVersion').attr("placeholder", info[1]);
-			$('#saveAsName').val("");
-			$('#saveAsVersion').val("");
-			$('#savePopup').toggle();
-		}
-		else{
-			alert('Something went wrong with the save! Check plan.js')
-		}
+		savePlan($('#saveAsName').val(),$('#saveAsVersion').val(),$('#saveAsNotes').val()); //Returns array with [Name,Version]
 	}
 };

@@ -10,7 +10,7 @@ import {Cartesian3, CesiumMath, Color, CallbackProperty} from './cesium_util/ces
 const viewerWrapper = new ViewerWrapper(config.urlPrefix, config.server.cesium_port, config.server.nginx_prefix, 1, 'cesiumContainer');
 
 // Set up for SSE or GPS input
-const hasSSE = ('sse' in config);
+const hasSSE = ('xgds' in config);
 import {TrackSSE} from './sse/trackSseUtils'
 import {PlanManager} from './plan/plan'
 let gps_tracks = undefined;
