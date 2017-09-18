@@ -484,14 +484,14 @@ const buildCylinder = function(position, height, radius, slices, label, styleOpt
 
 		options = Object.assign(options, styleOptions);
 		
-		let entityOptions = {
+		let cylinderOptions = {
 				position: raisedPoint[0],
 				cylinder: options,
 				id: id,
 			};
 		
 		if (label !== undefined && !_.isEmpty(label)){
-			entityOptions['label'] = {
+			cylinderOptions['label'] = {
 				text: label,
 				verticalOrigin: VerticalOrigin.TOP,
 		        horizontalOrigin: HorizontalOrigin.RIGHT,
@@ -500,10 +500,10 @@ const buildCylinder = function(position, height, radius, slices, label, styleOpt
 		        eyeOffset: new Cartesian3(radius + 2, 0, 1.0)
 			}
 		}
-		let entity = viewerWrapper.viewer.entities.add(entityOptions);
+		let cylinderEntity = viewerWrapper.viewer.entities.add(cylinderOptions);
 
 		if (callback !== undefined){
-			callback(entity);
+			callback(cylinderEntity);
 		}
 	});
 
@@ -522,13 +522,13 @@ const buildSurfaceCircle = function(position, radius, styleOptions, id, viewerWr
 
 		options = Object.assign(options, styleOptions);
 		
-		let entityOptions = {
+		let surfaceCircleOptions = {
 				position: raisedPoint[0],
 				ellipse: options,
 				id: id,
 			};
 		
-		let entity = viewerWrapper.viewer.entities.add(entityOptions);
+		let entity = viewerWrapper.viewer.entities.add(surfaceCircleOptions);
 
 		if (callback !== undefined){
 			callback(entity);
@@ -626,7 +626,7 @@ const buildPositionDataSource = function(position, heading, label, color, id, ge
 					verticalOrigin: VerticalOrigin.CENTER,
 			        horizontalOrigin: HorizontalOrigin.CENTER,
 			        eyeOffset: new Cartesian3(8, 0, 1.0),
-			        fillColor: Color.CYAN,
+			        fillColor: color,
 			        outlineWidth: 3.0
 				},
 		   ellipse : {
@@ -649,6 +649,7 @@ const buildPositionDataSource = function(position, heading, label, color, id, ge
 	}); 
 };
 
+/*
 const buildArrow = function(position, heading, height, label, color, id, viewerWrapper, callback) {
 	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
 		
@@ -656,7 +657,6 @@ const buildArrow = function(position, heading, height, label, color, id, viewerW
 		let dataSourcePromise = CzmlDataSource.load(czml).then(function(loadedData){
 			
 			let entity = loadedData.entities.values[0];
-			//entity.id = id;
 			
 			if (heading == undefined || _.isEmpty(heading)) {
 				heading = 0;
@@ -720,6 +720,7 @@ const buildArrow = function(position, heading, height, label, color, id, viewerW
 	    }
 	});
 }
+*/
 
 const updatePositionHeading = function(entity, position, heading, viewerWrapper, callback){
 	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
@@ -760,4 +761,4 @@ const loadKmls = function(kmlUrls, viewerWrapper, callback){
 	}
 }
 
-export {ViewerWrapper, DynamicLines, zoom, heading, buildLineString, buildPin, buildCylinder, buildArrow, buildRectangle, updatePositionHeading, buildSurfaceCircle, loadKml, loadKmls, buildPositionDataSource}
+export {ViewerWrapper, DynamicLines, zoom, heading, buildLineString, buildPin, buildCylinder, buildRectangle, updatePositionHeading, buildSurfaceCircle, loadKml, loadKmls, buildPositionDataSource}
