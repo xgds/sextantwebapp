@@ -10,7 +10,7 @@ buildModuleUrl.setBaseUrl('./');
 import {Viewer, EllipsoidTerrainProvider, Cartesian3, Cartesian2, PolygonGeometry, PolygonHierarchy, CesiumMath, Cartographic, Ellipsoid, Color,
 		sampleTerrain, ScreenSpaceEventHandler, ScreenSpaceEventType, Rectangle, RectangleGeometry, LabelStyle, CzmlDataSource, CustomDataSource,
 		CreateTileMapServiceImageryProvider, CesiumTerrainProvider, CallbackProperty, VerticalOrigin, HorizontalOrigin, Matrix4, ConstantProperty,
-		SceneMode,
+		SceneMode, SampledPositionProperty, JulianDate,
 		PinBuilder, Transforms, HeadingPitchRoll, ColorGeometryInstanceAttribute, GeometryInstance, Primitive, KmlDataSource, Clock} from './cesium_imports'
 
 import viewerCesiumNavigationMixin from './cesium-navigation/viewerCesiumNavigationMixin';
@@ -274,31 +274,31 @@ class ViewerWrapper{
     // returns positions projected on the terrain in Cartesian3, required for entity creation
     // expecting data in dictionaries containing latitude and longitude as keys
     getRaisedPositions(latLongCoords) {
-        //console.log(latLongCoords);
-    	if (latLongCoords.length == 0){
-    		return;
-    	}
-    	const cartographicArray = [];
-    	if (Array.isArray(latLongCoords)) {
-        	if (!('latitude' in latLongCoords[0])){
-        		return this.getRaisedPositionsFromArray(latLongCoords);
-        	}
-        	latLongCoords.forEach(function(p) {
-                let cartographicPoint = Cartographic.fromDegrees(p.longitude, p.latitude);
-                cartographicArray.push(cartographicPoint);
-            });
-    	} else {
-    		let cartographicPoint = Cartographic.fromDegrees(latLongCoords.longitude, latLongCoords.latitude);
-            cartographicArray.push(cartographicPoint);
-    	}
-    	
-        return this.getHeights(cartographicArray);
+	    	//console.log(latLongCoords);
+	    	if (latLongCoords.length == 0){
+	    		return;
+	    	}
+	    	const cartographicArray = [];
+	    	if (Array.isArray(latLongCoords)) {
+	    		if (!('latitude' in latLongCoords[0])){
+	    			return this.getRaisedPositionsFromArray(latLongCoords);
+	    		}
+	    		latLongCoords.forEach(function(p) {
+	    			let cartographicPoint = Cartographic.fromDegrees(p.longitude, p.latitude);
+	    			cartographicArray.push(cartographicPoint);
+	    		});
+	    	} else {
+	    		let cartographicPoint = Cartographic.fromDegrees(latLongCoords.longitude, latLongCoords.latitude);
+	    		cartographicArray.push(cartographicPoint);
+	    	}
+	
+	    	return this.getHeights(cartographicArray);
     };
     
     // returns positions projected on the terrain in Cartesian3, required for entity creation
     // expecting data in array of [[latitude, longitude],[latitude,longitude]]
     getRaisedPositionsFromArray(latLongCoords) {
-    	const cartographicArray = [];
+    		const cartographicArray = [];
         latLongCoords.forEach(function(p) {
             let cartographicPoint = Cartographic.fromDegrees(p[0], p[1]);
             cartographicArray.push(cartographicPoint);
@@ -307,7 +307,7 @@ class ViewerWrapper{
     };
     
     getHeights(cartographicArray) {
-    	return new Promise(function(resolve, reject) {
+    		return new Promise(function(resolve, reject) {
 	        const ellipsoid = this.viewer.scene.globe.ellipsoid;
 	        const terrainExaggeration = this.terrainExaggeration;
 	        // 18 is the level of detail
@@ -609,18 +609,31 @@ const czml = [{
     }
 }];
 
-const buildPositionDataSource = function(position, heading, label, color, id, getPositionFunction, trackSse, viewerWrapper, callback) {
+const getRaisedPointFromFunction = function(getPositionFunction, viewerWrapper, channel) {
+	
+};
+
+const buildPositionDataSource = function(position, heading, label, color, id, getPositionFunction, trackSse, sampledPositionProperty, viewerWrapper, callback) {
 	// This builds a circle on the surface; trackSseUtils currently uses this ellipse to modify the material and rotation of material
 	// and to update position to indicate current position and heading from GPS input.
-	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
+//	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
 		let dataSource = new CustomDataSource(id);
 		
 		if (heading == "") {
 			heading = 0.0;
 		}
 		
+		
 		let ellipseEntity = dataSource.entities.add({
-		   position: raisedPoint[0],
+		   //position: raisedPoint[0],
+//		   position: new CallbackProperty(function(time, result){
+//			   let position = getPositionFunction(label);
+//				if (position == undefined){
+//					return undefined;
+//				}
+//				return viewerWrapper.getRaisedPositions(position);
+//		   }, false),
+		   position: sampledPositionProperty,
 		   label : {
 					text: label,
 					verticalOrigin: VerticalOrigin.CENTER,
@@ -646,7 +659,7 @@ const buildPositionDataSource = function(position, heading, label, color, id, ge
     			callback(dataSource);
 		}
 		
-	}); 
+//	}); 
 };
 
 /*
@@ -761,4 +774,4 @@ const loadKmls = function(kmlUrls, viewerWrapper, callback){
 	}
 }
 
-export {ViewerWrapper, DynamicLines, zoom, heading, buildLineString, buildPin, buildCylinder, buildRectangle, updatePositionHeading, buildSurfaceCircle, loadKml, loadKmls, buildPositionDataSource}
+export {ViewerWrapper, DynamicLines, zoom, heading, buildLineString, buildPin, buildCylinder, buildRectangle, updatePositionHeading, buildSurfaceCircle, loadKml, loadKmls, buildPositionDataSource, JulianDate}

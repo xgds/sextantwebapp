@@ -3,6 +3,7 @@
  */
 import Viewer from 'cesium/Source/Widgets/Viewer/Viewer';
 import EllipsoidTerrainProvider from 'cesium/Source/Core/EllipsoidTerrainProvider';
+import JulianDate from 'cesium/Source/Core/JulianDate';
 import Cartographic from 'cesium/Source/Core/Cartographic';
 import Ellipsoid from 'cesium/Source/Core/Ellipsoid';
 import SceneMode from 'cesium/Source/Scene/SceneMode';
@@ -15,11 +16,13 @@ import Cartesian2 from 'cesium/Source/Core/Cartesian2';
 import Cartesian3 from 'cesium/Source/Core/Cartesian3';
 import CesiumMath from 'cesium/Source/Core/Math';
 import Color from 'cesium/Source/Core/Color';
+import HermitePolynomialApproximation from 'cesium/Source/Core/HermitePolynomialApproximation';
 import Matrix4 from 'cesium/Source/Core/Matrix4';
 import HeadingPitchRoll from 'cesium/Source/Core/HeadingPitchRoll';
 import HeadingPitchRange from 'cesium/Source/Core/HeadingPitchRange';
 import CallbackProperty from 'cesium/Source/DataSources/CallbackProperty';
 import ConstantProperty from 'cesium/Source/DataSources/ConstantProperty';
+import SampledPositionProperty from 'cesium/Source/DataSources/SampledPositionProperty';
 import ImageMaterialProperty from 'cesium/Source/DataSources/ImageMaterialProperty';
 import ColorMaterialProperty from 'cesium/Source/DataSources/ColorMaterialProperty';
 import ColorGeometryInstanceAttribute from 'cesium/Source/Core/ColorGeometryInstanceAttribute';
@@ -53,4 +56,4 @@ export {Viewer, EllipsoidTerrainProvider, Ellipsoid, Cartographic, Transforms, P
     ColorGeometryInstanceAttribute, GeometryInstance, Rectangle, RectangleGeometry, EntityCollection, CzmlDataSource, KmlDataSource,
     CreateTileMapServiceImageryProvider, GroundPrimitive, CesiumTerrainProvider, VerticalOrigin, PinBuilder, HorizontalOrigin, ConstantProperty,
     CylinderGeometry, CylinderGraphics, Primitive, defined, PolygonHierarchy, PolygonGeometry, HeadingPitchRoll, Matrix4, LabelStyle,
-    SceneMode, HeadingPitchRange, Clock}
+    SceneMode, HeadingPitchRange, Clock, SampledPositionProperty, JulianDate, HermitePolynomialApproximation}

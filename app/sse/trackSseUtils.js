@@ -18,8 +18,10 @@ import {config} from './../../config/config_loader';
 const hasSSE = ('xgds' in config);
 
 const moment = require('moment');
-import {Color, ImageMaterialProperty, ColorMaterialProperty, Cartesian2, Cartesian3, CallbackProperty, HeadingPitchRange, Clock} from './../cesium_util/cesium_imports'
-import {DynamicLines, buildCylinder, buildArrow, updatePositionHeading, buildRectangle, buildPositionDataSource} from './../cesium_util/cesiumlib';
+import {Color, ImageMaterialProperty, ColorMaterialProperty, Cartesian2, Cartesian3, CallbackProperty, HeadingPitchRange, 
+		Clock, SampledPositionProperty, JulianDate, HermitePolynomialApproximation} from './../cesium_util/cesium_imports'
+import {DynamicLines, buildCylinder, buildArrow, updatePositionHeading, buildRectangle, buildPositionDataSource
+	    } from './../cesium_util/cesiumlib';
 import {SSE} from './sseUtils'
 
 const hostname = config.xgds.protocol + '://' + config.xgds.name;
@@ -42,6 +44,7 @@ class TrackSSE {
 		this.cTracks =  {};
 		this.cStopped =  {};
 		this.cPosition =  {};
+		this.sampledPositionProperty = {};
 		this.isStopped = [];
 		this.STALE_TIMEOUT= 5000;
 		this.pointerUrl = hostname + '/' + config.server.nginx_prefix + '/icons/pointer.png';
@@ -374,6 +377,13 @@ class TrackSSE {
 		}
 	};
 	*/
+	
+	updateSampledPositionProperty(property, data) {
+		let cdate = JulianDate.fromIso8601(data.timestamp);
+		this.viewerWrapper.getRaisedPositions({longitude:data.lon, latitude:data.lat}).then(function(raisedPoint){
+			property.addSample(cdate, raisedPoint[0]);
+		});
+	}
 
 	renderPosition(channel, data, stopped){
 //		console.log('rendering position');
@@ -390,16 +400,30 @@ class TrackSSE {
 				let retrievedMaterial = this.getMaterial(channel, data);
 //				console.log('building position data source ' + retrievedMaterial.getType());
 				let context = this;
+				
+				let sampledPositionProperty = new SampledPositionProperty();
+				sampledPositionProperty.setInterpolationOptions({
+				    interpolationDegree : 2,
+				    interpolationAlgorithm : HermitePolynomialApproximation
+				});
+				this.updateSampledPositionProperty(sampledPositionProperty, data);
+				this.sampledPositionProperty[channel] = sampledPositionProperty;
 				buildPositionDataSource({longitude:data.lon, latitude:data.lat}, data.heading,
-						channel, retrievedMaterial, channel+'_POSITION', this.getLatestPosition, this, this.viewerWrapper, function(dataSource){
-						this.cPosition[channel] = dataSource;
-						if (this.followPosition){
-							this.zoomToPositionKF(channel);
-						}
+						channel, retrievedMaterial, channel+'_POSITION', this.getLatestPosition.bind(this), this, sampledPositionProperty,
+						this.viewerWrapper, 
+						function(dataSource){
+							this.cPosition[channel] = dataSource;
+							if (this.followPosition){
+								this.zoomToPositionKF(channel);
+							}
+							
 				}.bind(this));
 			}
 		} else {
-			let dataSource = this.cPosition[channel];
+			let sampledPositionProperty = this.sampledPositionProperty[channel];
+			this.updateSampledPositionProperty(sampledPositionProperty, data);
+
+			/*let dataSource = this.cPosition[channel];
 			let pointEntity = dataSource.entities.values[0];
 			
 			if (stopped){
@@ -408,9 +432,10 @@ class TrackSSE {
 					pointEntity.ellipse.material.color = color;
 				}
 				return;
-			}
+			} */
 			
 			// update it
+			/*
 			this.viewerWrapper.getRaisedPositions({longitude:data.lon, latitude:data.lat}).then(function(raisedPoint) {
 				pointEntity.position.setValue(raisedPoint[0]);
 				if (this.followPosition){
@@ -454,6 +479,7 @@ class TrackSSE {
 				} 
 				
 			}.bind(this));
+			*/
 		}
 	}; 
 
