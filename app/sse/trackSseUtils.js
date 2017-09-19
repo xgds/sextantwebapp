@@ -37,6 +37,7 @@ class TrackSSE {
 		this.positions = {};
 		this.tracks =  {};
 		this.colors = {'gray': Color.GRAY.withAlpha(0.75)};
+		this.labelColors = {'gray': Color.GRAY};
 		this.imageMaterials = {};
 		this.colorMaterials = {};
 		this.cTracks =  {};
@@ -224,6 +225,7 @@ class TrackSSE {
 		// make a translucent one
 		let cclone = color.clone().withAlpha(0.4);
 		this.colors[channel] = cclone;
+		this.labelColors[channel] = color;
 		return cclone;
 	};
 	
@@ -307,12 +309,19 @@ class TrackSSE {
 		
 	};
 	
-	getColor(channel) {
+	getColor(channel, forLabel) {
+		if (forLabel === undefined){
+			forLabel = False;
+		}
+		let sourceMap = this.colors;
+		if (forLabel){
+			sourceMap = this.labelColors;
+		}
 		if (channel in this.isStopped) {
-			return this.colors['gray'];
+			return sourceMap['gray'];
 		}
 		if (channel in this.colors){
-			return this.colors[channel];
+			return sourceMap[channel];
 		}
 		return Color.GREEN;
 	}
@@ -391,7 +400,7 @@ class TrackSSE {
 //				console.log('building position data source ' + retrievedMaterial.getType());
 				let context = this;
 				buildPositionDataSource({longitude:data.lon, latitude:data.lat}, data.heading,
-						channel, retrievedMaterial, channel+'_POSITION', this.getLatestPosition, this, this.viewerWrapper, function(dataSource){
+						channel, retrievedMaterial, this.getColor(channel, true), channel+'_POSITION', this.getLatestPosition, this, this.viewerWrapper, function(dataSource){
 						this.cPosition[channel] = dataSource;
 						if (this.followPosition){
 							this.zoomToPositionKF(channel);
