@@ -675,7 +675,7 @@ const buildPositionDataSource = function(position, heading, label, color, id, ge
 					verticalOrigin: VerticalOrigin.CENTER,
 			        horizontalOrigin: HorizontalOrigin.CENTER,
 			        eyeOffset: new Cartesian3(8, 0, 1.0),
-			        fillColor: color,
+			        fillColor: labelColor,
 			        outlineWidth: 3.0
 				},
 		   ellipse : {
