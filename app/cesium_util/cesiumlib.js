@@ -562,6 +562,7 @@ const buildRectangle = function(position, width, height, label, color, id, viewe
 	});
 }
 
+/*
 const getArrowPoints = function(height) {
 	let positions = [];
 	positions.push(new Cartesian2(0, 0));
@@ -612,11 +613,11 @@ const czml = [{
 const getRaisedPointFromFunction = function(getPositionFunction, viewerWrapper, channel) {
 	
 };
+*/
 
-const buildPath = function(label, labelColor, color, id, heading, viewerWrapper, callback){
-	var pathPosition = new SampledPositionProperty();
-	var entityPath = viewerWrapper.viewer.entities.add({
-	    position : pathPosition,
+const buildPath = function(spp, label, labelColor, color, id, heading, viewerWrapper, callback){
+	let entityPath = viewerWrapper.viewer.entities.add({
+	    position : spp,
 	    name : 'path',
 	    path : {
 	        show : true,
@@ -649,6 +650,7 @@ const buildPath = function(label, labelColor, color, id, heading, viewerWrapper,
 	}
 }
 
+/*
 const buildPositionDataSource = function(position, heading, label, color, id, getPositionFunction, trackSse, sampledPositionProperty, viewerWrapper, callback) {
 	// This builds a circle on the surface; trackSseUtils currently uses this ellipse to modify the material and rotation of material
 	// and to update position to indicate current position and heading from GPS input.
@@ -697,6 +699,7 @@ const buildPositionDataSource = function(position, heading, label, color, id, ge
 		
 //	}); 
 };
+*/
 
 /*
 const buildArrow = function(position, heading, height, label, color, id, viewerWrapper, callback) {
@@ -812,4 +815,4 @@ const loadKmls = function(kmlUrls, viewerWrapper, callback){
 }
 
 export {ViewerWrapper, DynamicLines, zoom, heading, buildLineString, buildPin, buildCylinder, buildRectangle, updatePositionHeading, buildSurfaceCircle, 
-		loadKml, loadKmls, buildPositionDataSource, JulianDate, buildPath}
+		loadKml, loadKmls, JulianDate, buildPath}

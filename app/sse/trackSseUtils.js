@@ -20,7 +20,7 @@ const hasSSE = ('xgds' in config);
 const moment = require('moment');
 import {Color, ImageMaterialProperty, ColorMaterialProperty, Cartesian2, Cartesian3, CallbackProperty, HeadingPitchRange, 
 		Clock, SampledPositionProperty, JulianDate, HermitePolynomialApproximation} from './../cesium_util/cesium_imports'
-import {DynamicLines, buildCylinder, buildArrow, updatePositionHeading, buildRectangle, buildPositionDataSource,
+import {DynamicLines, buildCylinder, updatePositionHeading, buildRectangle,
 	    buildPath } from './../cesium_util/cesiumlib';
 import {SSE} from './sseUtils'
 
@@ -42,10 +42,11 @@ class TrackSSE {
 		this.labelColors = {'gray': Color.GRAY};
 		this.imageMaterials = {};
 		this.colorMaterials = {};
-		this.cTracks =  {};
+		//this.cTracks =  {};
 		this.cStopped =  {};
-		this.cPosition =  {};
-		this.sampledPositionProperty = {};
+		//this.cPosition =  {};
+		this.cSampledPositionProperties = {};
+		this.cPaths = {};
 		this.isStopped = [];
 		this.STALE_TIMEOUT= 5000;
 		this.pointerUrl = hostname + '/' + config.server.nginx_prefix + '/icons/pointer.png';
@@ -233,23 +234,47 @@ class TrackSSE {
 	};
 	
 	renderTrack(channel, data){
-		let color = Color.GREEN;
 		if (! channel in this.colors){
 			if (data.color !== undefined) {
 				color = this.addColor(data.color);
 			}
-		} else {
-			color = this.colors[channel];
 		}
 		
-		let coords = data.coords;
-		if (coords.length > 0) {
-			this.cTracks[channel] = new DynamicLines(this.viewerWrapper, coords[0], channel, {'material':color});
+		// update the viewer clock start
+		//Set bounds of our simulation time
+		if (data.times.length > 0){
+			var start = JulianDate.fromIso8601(data.times[0][0]);
+			var stop = JulianDate.addHours(start, 12, new JulianDate());
+
+			//Make sure viewer is at the desired time.
+			this.viewerWrapper.viewer.clock.startTime = start.clone();
+			this.viewerWrapper.viewer.clock.stopTime = stop.clone();
+//			this.viewerWrapper.viewer.clock.currentTime = start.clone();
+			//this.viewerWrapper.viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP; //Loop at the end
+			//this.viewerWrapper.viewer.clock.multiplier = 10;
+
+			//Set timeline to simulation bounds
+//			this.viewerWrapper.viewer.timeline.zoomTo(start, stop);
+			
+			//Set the entity availability to the same interval as the simulation time.
+//		    availability : new TimeIntervalCollection([new TimeInterval({
+//		        start : start,
+//		        stop : stop
+//		    })]),
+
 		}
+		
+		
+		this.updateSampledPositionProperty(channel, data);
+//		let coords = data.coords;
+//		if (coords.length > 0) {
+//			this.cTracks[channel] = new DynamicLines(this.viewerWrapper, coords[0], channel, {'material':color});
+//		}
 	};
 
 	updateTrack(channel, position) {
-		if (!(channel in this.cTracks)){
+		return;
+/*		if (!(channel in this.cTracks)){
 			//TODO render the track ... this should never happen
 		} else {
 			// append the point to the track
@@ -257,7 +282,7 @@ class TrackSSE {
 			ctrack.addPoint(position.lat, position.lon);
 			let track = this.tracks[channel];
 			track.coords.push([position.lon, position.lat]);
-		}
+		} */
 	};
 
 	convertTrackNameToChannel(track_name){
@@ -387,11 +412,40 @@ class TrackSSE {
 	};
 	*/
 	
-	updateSampledPositionProperty(property, data) {
-		let cdate = JulianDate.fromIso8601(data.timestamp);
-		this.viewerWrapper.getRaisedPositions({longitude:data.lon, latitude:data.lat}).then(function(raisedPoint){
-			property.addSample(cdate, raisedPoint[0]);
-		});
+	updateSampledPositionProperty(channel, data) {
+		let property = undefined;
+		if (!(channel in this.cSampledPositionProperties)){
+			property = new SampledPositionProperty();
+			this.cSampledPositionProperties[channel] = property;
+		} else {
+			property = this.cSampledPositionProperties[channel];
+		}
+		if ('lon' in data) {
+			// adding a point
+			let cdate = JulianDate.fromIso8601(data.timestamp);
+			this.viewerWrapper.getRaisedPositions({longitude:data.lon, latitude:data.lat}).then(function(raisedPoint){
+				property.addSample(cdate, raisedPoint[0]);
+			});
+		} else {
+			// adding a track 
+			if (data.coords.length > 0) {
+				// tracks come in blocks of times & coords to handle gaps
+				
+				for (let i=0; i< data.coords.length; i++){
+					let times = data.times[i];
+					let lastI = i;
+					this.viewerWrapper.getRaisedPositions(data.coords[i]).then(function(raisedPoints){
+						console.log(lastI);
+						let julianTimes = [];
+						for (let t=0; t<times.length; t++){
+							julianTimes.push(JulianDate.fromIso8601(times[t]));
+						};
+						property.addSamples(julianTimes, raisedPoints);
+					});
+					
+				}
+			}
+		}
 	}
 
 	renderPosition(channel, data, stopped){
@@ -402,51 +456,52 @@ class TrackSSE {
 		} else {
 			color = this.addColor(channel, data.track_hexcolor);
 		}
-		
-		if (!(channel in this.cPosition)) {
+
+		if (!(channel in this.cSampledPositionProperties)) {
 
 			if (!_.isEmpty(data)){
 				let retrievedMaterial = this.getMaterial(channel, data);
 				let context = this;
-				
+
 //				let sampledPositionProperty = new SampledPositionProperty();
 //				sampledPositionProperty.setInterpolationOptions({
-//				    interpolationDegree : 2,
-//				    interpolationAlgorithm : HermitePolynomialApproximation
+//				interpolationDegree : 2,
+//				interpolationAlgorithm : HermitePolynomialApproximation
 //				});
 //				this.updateSampledPositionProperty(sampledPositionProperty, data);
 //				this.sampledPositionProperty[channel] = sampledPositionProperty;
 //				buildPositionDataSource({longitude:data.lon, latitude:data.lat}, data.heading,
-//						channel, retrievedMaterial, channel+'_POSITION', this.getLatestPosition.bind(this), this, sampledPositionProperty,
-//						this.viewerWrapper, 
-//						function(dataSource){
-//							this.cPosition[channel] = dataSource;
-//							if (this.followPosition){
-//								this.zoomToPositionKF(channel);
-//							}
-//							
-//				}.bind(this));
-				
-				buildPath(channel, retrievedMaterial, this.getColor(channel, true), channel+'_POSITION', this.viewerWrapper, function(entity){
-					let builtPath = entity;
-					this.sampledPositionProperty[channel] = entity.position;
-					//TODO add material modifications with callback property
-				
-//				buildPositionDataSource({longitude:data.lon, latitude:data.lat}, data.heading,
-//						channel, retrievedMaterial, this.getColor(channel, true), channel+'_POSITION', this.getLatestPosition, this, this.viewerWrapper, function(dataSource){
-//						this.cPosition[channel] = dataSource;
-//						if (this.followPosition){
-//							this.zoomToPositionKF(channel);
-//						}
-//				}.bind(this));
-			}
-		} else {
-			let sampledPositionProperty = this.sampledPositionProperty[channel];
-			this.updateSampledPositionProperty(sampledPositionProperty, data);
+//				channel, retrievedMaterial, channel+'_POSITION', this.getLatestPosition.bind(this), this, sampledPositionProperty,
+//				this.viewerWrapper, 
+//				function(dataSource){
+//				this.cPosition[channel] = dataSource;
+//				if (this.followPosition){
+//				this.zoomToPositionKF(channel);
+//				}
 
-			/*let dataSource = this.cPosition[channel];
+//				}.bind(this));
+
+				this.updateSampledPositionProperty(channel, data);
+
+				buildPath(this.cSampledPositionProperties[channel], channel, this.getColor(channel, true), retrievedMaterial, channel+'_POSITION', data.heading, this.viewerWrapper, function(entity){
+					let builtPath = entity;
+					this.cPaths[channel] = builtPath;
+					//TODO add material modifications with callback property
+				}.bind(this));
+
+//				buildPositionDataSource({longitude:data.lon, latitude:data.lat}, data.heading,
+//				channel, retrievedMaterial, this.getColor(channel, true), channel+'_POSITION', this.getLatestPosition, this, this.viewerWrapper, function(dataSource){
+//				this.cPosition[channel] = dataSource;
+//				if (this.followPosition){
+//				this.zoomToPositionKF(channel);
+//				}
+//				}.bind(this));
+			} else {
+				this.updateSampledPositionProperty(channel, data);
+
+				/*let dataSource = this.cPosition[channel];
 			let pointEntity = dataSource.entities.values[0];
-			
+
 			if (stopped){
 				let color = this.colors['gray'];
 				if (!color.getValue().equals(pointEntity.ellipse.material.color.getValue())){
@@ -454,18 +509,18 @@ class TrackSSE {
 				}
 				return;
 			} */
-			
-			// update it
-			/*
+
+				// update it
+				/*
 			this.viewerWrapper.getRaisedPositions({longitude:data.lon, latitude:data.lat}).then(function(raisedPoint) {
 				pointEntity.position.setValue(raisedPoint[0]);
 				if (this.followPosition){
 							this.zoomToPositionKF(channel);
 				}
-				
+
 				let retrievedMaterial = this.getMaterial(channel, data);
 				let material = pointEntity.ellipse.material;
-				
+
 				let hasHeading = (data.heading !== "");
 				if (hasHeading) {
 //					console.log('setting orientation ' + data.heading);
@@ -495,12 +550,13 @@ class TrackSSE {
 								pointEntity.ellipse.material.color = color;
 							}
 						}
-						
+
 					}
 				} 
-				
+
 			}.bind(this));
-			*/
+				 */
+			}
 		}
 	}; 
 
