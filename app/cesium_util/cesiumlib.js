@@ -613,6 +613,42 @@ const getRaisedPointFromFunction = function(getPositionFunction, viewerWrapper, 
 	
 };
 
+const buildPath = function(label, labelColor, color, id, heading, viewerWrapper, callback){
+	var pathPosition = new SampledPositionProperty();
+	var entityPath = viewerWrapper.viewer.entities.add({
+	    position : pathPosition,
+	    name : 'path',
+	    path : {
+	        show : true,
+	        leadTime : 0,
+	        trailTime : 60,
+	        width : 10,
+	        resolution : 1,
+	        material : color
+	    },
+	    label : {
+			text: label,
+			verticalOrigin: VerticalOrigin.CENTER,
+	        horizontalOrigin: HorizontalOrigin.CENTER,
+	        eyeOffset: new Cartesian3(8, 0, 1.0),
+	        fillColor: labelColor,
+	        outlineWidth: 3.0
+		},
+		 ellipse : {
+				semiMinorAxis: 3.5,
+				semiMajorAxis: 3.5,
+				height: 0,
+				extrudedHeight: 0,
+				material: color,
+				stRotation: heading
+		}
+	});
+	
+	if (callback !== undefined){
+		callback(entityPath);
+	}
+}
+
 const buildPositionDataSource = function(position, heading, label, color, id, getPositionFunction, trackSse, sampledPositionProperty, viewerWrapper, callback) {
 	// This builds a circle on the surface; trackSseUtils currently uses this ellipse to modify the material and rotation of material
 	// and to update position to indicate current position and heading from GPS input.
@@ -751,6 +787,7 @@ const updatePositionHeading = function(entity, position, heading, viewerWrapper,
 	});
 };
 
+
 const loadKml = function(kmlUrl, viewerWrapper, callback) {
 	viewerWrapper.viewer.dataSources.add(KmlDataSource.load(kmlUrl, {
 				name: kmlUrl,
@@ -774,4 +811,5 @@ const loadKmls = function(kmlUrls, viewerWrapper, callback){
 	}
 }
 
-export {ViewerWrapper, DynamicLines, zoom, heading, buildLineString, buildPin, buildCylinder, buildRectangle, updatePositionHeading, buildSurfaceCircle, loadKml, loadKmls, buildPositionDataSource, JulianDate}
+export {ViewerWrapper, DynamicLines, zoom, heading, buildLineString, buildPin, buildCylinder, buildRectangle, updatePositionHeading, buildSurfaceCircle, 
+		loadKml, loadKmls, buildPositionDataSource, JulianDate, buildPath}

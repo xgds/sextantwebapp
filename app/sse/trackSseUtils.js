@@ -20,8 +20,8 @@ const hasSSE = ('xgds' in config);
 const moment = require('moment');
 import {Color, ImageMaterialProperty, ColorMaterialProperty, Cartesian2, Cartesian3, CallbackProperty, HeadingPitchRange, 
 		Clock, SampledPositionProperty, JulianDate, HermitePolynomialApproximation} from './../cesium_util/cesium_imports'
-import {DynamicLines, buildCylinder, buildArrow, updatePositionHeading, buildRectangle, buildPositionDataSource
-	    } from './../cesium_util/cesiumlib';
+import {DynamicLines, buildCylinder, buildArrow, updatePositionHeading, buildRectangle, buildPositionDataSource,
+	    buildPath } from './../cesium_util/cesiumlib';
 import {SSE} from './sseUtils'
 
 const hostname = config.xgds.protocol + '://' + config.xgds.name;
@@ -398,25 +398,30 @@ class TrackSSE {
 
 			if (!_.isEmpty(data)){
 				let retrievedMaterial = this.getMaterial(channel, data);
-//				console.log('building position data source ' + retrievedMaterial.getType());
 				let context = this;
 				
-				let sampledPositionProperty = new SampledPositionProperty();
-				sampledPositionProperty.setInterpolationOptions({
-				    interpolationDegree : 2,
-				    interpolationAlgorithm : HermitePolynomialApproximation
-				});
-				this.updateSampledPositionProperty(sampledPositionProperty, data);
-				this.sampledPositionProperty[channel] = sampledPositionProperty;
-				buildPositionDataSource({longitude:data.lon, latitude:data.lat}, data.heading,
-						channel, retrievedMaterial, channel+'_POSITION', this.getLatestPosition.bind(this), this, sampledPositionProperty,
-						this.viewerWrapper, 
-						function(dataSource){
-							this.cPosition[channel] = dataSource;
-							if (this.followPosition){
-								this.zoomToPositionKF(channel);
-							}
-							
+//				let sampledPositionProperty = new SampledPositionProperty();
+//				sampledPositionProperty.setInterpolationOptions({
+//				    interpolationDegree : 2,
+//				    interpolationAlgorithm : HermitePolynomialApproximation
+//				});
+//				this.updateSampledPositionProperty(sampledPositionProperty, data);
+//				this.sampledPositionProperty[channel] = sampledPositionProperty;
+//				buildPositionDataSource({longitude:data.lon, latitude:data.lat}, data.heading,
+//						channel, retrievedMaterial, channel+'_POSITION', this.getLatestPosition.bind(this), this, sampledPositionProperty,
+//						this.viewerWrapper, 
+//						function(dataSource){
+//							this.cPosition[channel] = dataSource;
+//							if (this.followPosition){
+//								this.zoomToPositionKF(channel);
+//							}
+//							
+//				}.bind(this));
+				
+				buildPath(channel, retrievedMaterial, channel+'_POSITION', this.viewerWrapper, function(entity){
+					let builtPath = entity;
+					this.sampledPositionProperty[channel] = entity.position;
+					//TODO add material modifications with callback property
 				}.bind(this));
 			}
 		} else {
