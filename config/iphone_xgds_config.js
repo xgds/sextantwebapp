@@ -18,20 +18,20 @@ module.exports = {
 	// The server that is running this node app 
     server : { port : 3001,
     		   cesium_port: undefined,
-    		   name : '10.131.26.180', //TODO REPLACE THIS WITH YOUR IP ADDRESS 
+    		   name : '128.102.236.78', //TODO REPLACE THIS WITH YOUR IP ADDRESS 
     		   //name : 'tamar-docker.xgds.org', //TODO REPLACE THIS WITH YOUR SSL-CERT NAME
     		   protocol: 'https',
     		   nginx_prefix: 'wristApp'},
     		   
     // This should only exist in xGDS side
     xgds : { port : 443, 
-    		name : '10.131.26.180', //TODO REPLACE THIS WITH YOUR IP ADDRESS 
+    		name : '128.102.236.78', //TODO REPLACE THIS WITH YOUR IP ADDRESS 
 		   //name : 'tamar-docker.xgds.org', //TODO REPLACE THIS WITH YOUR SSL-CERT NAME
     	    protocol : 'https',
     	    ev_channels: ['EV1', 'EV2'],
        	follow_channel: 'EV1',
-       	username: 'TODO put in username',
-       	password: 'TODO put in auth token'
+       	username: 'ev1', //TODO put in username',
+       	password: 'ev1', //TODO put in auth token'
     },
     
     // If we are using web sockets this should only exist in the default side
@@ -47,17 +47,21 @@ module.exports = {
     terrain : { port : 9090 },
     
     // Default geographical site
-    defaultSite : 'Ames',
+    defaultSite : 'HI_Kilauea',
     
     // list of kml links to load
-    kml_urls : ['https://10.131.26.180/notes/notesFeed.kml',
-    	           'https://10.131.26.180/basaltApp/hvnp_so2.kml'], //TODO REPLACE THIS WITH YOUR IP ADDRESS
+    kml_urls : ['https://128.102.236.78/notes/notesFeed.kml',
+    	           'https://128.102.236.78/basaltApp/hvnp_so2.kml'], //TODO REPLACE THIS WITH YOUR IP ADDRESS
     
     // list of various sites we support
     sites : { 'HI_Mauna_Ulu' : { 'imagery' : 'CustomMaps/HI_lowqual_relief',
     							 'elevation' : 'tilesets/HI_highqual',
     							 'centerPoint' : [-155.2118, 19.3647, 5000]
     							},
+				'HI_Kilauea' : { 'imagery' : 'CustomMaps/HI_kilauea',
+					'elevation' : 'tilesets/HI_kilauea',
+					'centerPoint' : [-155.260059,  19.408373, 5000]
+				},
     			  'ID_COTM' : { 'imagery' : 'TODO',
        						'elevation' : 'TODO',
        						'centerPoint' : [-113.5787682, 43.4633101, 5000]
@@ -65,12 +69,12 @@ module.exports = {
        		  'Ames' : { 'imagery': 'TODO',
        			  		 'elevation': 'TODO',
        			  		 'centerPoint' : [-122.064789, 37.419362, 5000]
-       					  
        		  		  },
-			'Black_Point' : { 'imagery' : 'TODO',
-							 'elevation' : 'TODO',
-							 'centerPoint' : [-111.466442, 35.690775, 6000]
-			  }
+       	       'Black_Point' : { 'imagery' : 'TODO',
+ 						 'elevation' : 'TODO',
+ 						 'centerPoint' : [-111.466442, 35.690775, 6000]
+ 		  }
+
     },
     
     // whether or not this is a development server
@@ -98,5 +102,5 @@ module.exports = {
           			   FLIR : 'FLIR', 
           			   FTIR : 'FTIR', 
           			   redCamera2 : 'CAM2', 
-          			   boat2 : 'IV'}
+          			   boat : 'IV'}
 }

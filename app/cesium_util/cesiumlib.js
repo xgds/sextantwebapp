@@ -609,7 +609,7 @@ const czml = [{
     }
 }];
 
-const buildPositionDataSource = function(position, heading, label, color, id, getPositionFunction, trackSse, viewerWrapper, callback) {
+const buildPositionDataSource = function(position, heading, label, color, labelColor, id, getPositionFunction, trackSse, viewerWrapper, callback) {
 	// This builds a circle on the surface; trackSseUtils currently uses this ellipse to modify the material and rotation of material
 	// and to update position to indicate current position and heading from GPS input.
 	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
@@ -626,7 +626,7 @@ const buildPositionDataSource = function(position, heading, label, color, id, ge
 					verticalOrigin: VerticalOrigin.CENTER,
 			        horizontalOrigin: HorizontalOrigin.CENTER,
 			        eyeOffset: new Cartesian3(8, 0, 1.0),
-			        fillColor: color,
+			        fillColor: labelColor,
 			        outlineWidth: 3.0
 				},
 		   ellipse : {

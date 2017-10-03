@@ -35,13 +35,17 @@ module.exports = {
     terrain : { port : 9090 },
     
     // Default geographical site
-    defaultSite : 'HI_Mauna_Ulu',
+    defaultSite : 'HI_Kilauea',
     
     // list of various sites we support
     sites : { 'HI_Mauna_Ulu' : { 'imagery' : 'CustomMaps/HI_lowqual_relief',
     								'elevation' : 'tilesets/HI_highqual',
     								'centerPoint' : [-155.2118, 19.3647, 5000]
     							   },
+				'HI_Kilauea' : { 'imagery' : 'CustomMaps/HI_kilauea',
+					'elevation' : 'tilesets/HI_kilauea',
+					'centerPoint' : [-155.260059,  19.408373, 5000]
+				},
     		      'ID_COTM' : { 'imagery' : 'TODO',
     		    	  				'elevation' : 'TODO',
     		    	  				'centerPoint' : [-113.5787682, 43.4633101, 5000]
