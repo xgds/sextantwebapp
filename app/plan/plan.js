@@ -20,12 +20,11 @@ import {DynamicLines, buildLineString, buildCylinder, buildSurfaceCircle} from '
 import {config} from './../../config/config_loader';
 import {beforeSend} from './../util/xgdsUtils';
 
-const hostname = config.xgds.protocol + '://' + config.xgds.name;
-
 class PlanManager {
-	
+
 	constructor(viewerWrapper) {
 		this.plan = undefined;
+		this.hostname = config.xgds.protocol + '://' + config.xgds.name; //assume this will only load if we have xgds
 		this.neverSaved = true;
 		this.viewerWrapper = viewerWrapper;
 		this.segmentElements = {};

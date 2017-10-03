@@ -22,6 +22,7 @@ if (hasSSE) {
 	planManager = new PlanManager(viewerWrapper);
 } else {
 	gps_tracks = new DynamicLines(viewerWrapper);
+    planManager = new PlanManager(viewerWrapper);
 }
 
 // Load the kml configured if any

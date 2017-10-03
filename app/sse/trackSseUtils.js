@@ -22,11 +22,11 @@ import {Color, ImageMaterialProperty, ColorMaterialProperty, Cartesian2, Cartesi
 import {DynamicLines, buildCylinder, buildArrow, updatePositionHeading, buildRectangle, buildPositionDataSource} from './../cesium_util/cesiumlib';
 import {SSE} from './sseUtils'
 
-const hostname = config.xgds.protocol + '://' + config.xgds.name;
 let sse = undefined;
 let fakeHeading = false;
 
 if (hasSSE){
+    const hostname = config.xgds.protocol + '://' + config.xgds.name;
 	sse = new SSE(hostname);
 }
 
