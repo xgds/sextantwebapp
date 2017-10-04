@@ -18,8 +18,9 @@ import {config} from './../../config/config_loader';
 const hasSSE = ('xgds' in config);
 
 const moment = require('moment');
-import {Color, ImageMaterialProperty, ColorMaterialProperty, Cartesian2, Cartesian3, CallbackProperty, HeadingPitchRange, 
-		Clock, SampledPositionProperty, JulianDate, HermitePolynomialApproximation} from './../cesium_util/cesium_imports'
+import {Color, ImageMaterialProperty, ColorMaterialProperty, Cartesian2, Cartesian3, CallbackProperty, HeadingPitchRange, ClockRange,
+		Clock, SampledPositionProperty, JulianDate, HermitePolynomialApproximation, TimeIntervalCollection, TimeInterval, ClockViewModel,
+		CompositePositionProperty, ConstantPositionProperty, ReferenceFrame} from './../cesium_util/cesium_imports'
 import {DynamicLines, buildCylinder, updatePositionHeading, buildRectangle,
 	    buildPath } from './../cesium_util/cesiumlib';
 import {SSE} from './sseUtils'
@@ -44,7 +45,8 @@ class TrackSSE {
 		this.colorMaterials = {};
 		//this.cTracks =  {};
 		this.cStopped =  {};
-		//this.cPosition =  {};
+//		this.cPosition =  {};
+		this.cLastPosition = {};
 		this.cSampledPositionProperties = {};
 		this.cPaths = {};
 		this.isStopped = [];
@@ -243,24 +245,31 @@ class TrackSSE {
 		// update the viewer clock start
 		//Set bounds of our simulation time
 		if (data.times.length > 0){
-			var start = JulianDate.fromIso8601(data.times[0][0]);
-			var stop = JulianDate.addHours(start, 12, new JulianDate());
+			let start = JulianDate.fromIso8601(data.times[0][0]);
+			let stop = JulianDate.addHours(start, 12, new JulianDate());
 
-			//Make sure viewer is at the desired time.
 			this.viewerWrapper.viewer.clock.startTime = start.clone();
 			this.viewerWrapper.viewer.clock.stopTime = stop.clone();
+			this.viewerWrapper.viewer.clock.shouldAnimate = false;  // this makes cylinder show but not animate
+			
+			// testing
+			//this.viewerWrapper.viewer.clock.clockRange = ClockRange.LOOP_STOP; //Loop at the end
+			//this.viewerWrapper.viewer.clock.currentTime=start.clone();
+
+
+
+			let path = this.cPaths[channel];
+			if (path !== undefined){
+				path.availability =  new TimeIntervalCollection([new TimeInterval({
+			        start : start,
+			        stop : stop
+			    })]);
+			}
+			
 //			this.viewerWrapper.viewer.clock.currentTime = start.clone();
 			//this.viewerWrapper.viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP; //Loop at the end
 			//this.viewerWrapper.viewer.clock.multiplier = 10;
 
-			//Set timeline to simulation bounds
-//			this.viewerWrapper.viewer.timeline.zoomTo(start, stop);
-			
-			//Set the entity availability to the same interval as the simulation time.
-//		    availability : new TimeIntervalCollection([new TimeInterval({
-//		        start : start,
-//		        stop : stop
-//		    })]),
 
 		}
 		
@@ -416,6 +425,14 @@ class TrackSSE {
 		let property = undefined;
 		if (!(channel in this.cSampledPositionProperties)){
 			property = new SampledPositionProperty();
+			let context = this;
+			property.getValue = function(time, result) {
+		        let myresult =  property.getValueInReferenceFrame(time, ReferenceFrame.FIXED, result);
+		        if (myresult === undefined){
+		        		myresult = context.cLastPosition[channel];
+		        }
+		        return myresult;
+		    };
 			this.cSampledPositionProperties[channel] = property;
 		} else {
 			property = this.cSampledPositionProperties[channel];
@@ -425,7 +442,13 @@ class TrackSSE {
 			let cdate = JulianDate.fromIso8601(data.timestamp);
 			this.viewerWrapper.getRaisedPositions({longitude:data.lon, latitude:data.lat}).then(function(raisedPoint){
 				property.addSample(cdate, raisedPoint[0]);
-			});
+				this.cLastPosition[channel]=raisedPoint[0];
+				
+				// compare clock time to this time
+				this.viewerWrapper.viewer.clock.currentTime = cdate.clone();
+				console.log('new data date ' + cdate + ' data.timestamp ' + data.timestamp + ' and data is ' + raisedPoint[0]);
+				//console.log('clock date ' + this.viewerWrapper.viewer.clock.currentTime + ' ' + this.viewerWrapper.viewer.clock.currentTime.toString());
+			}.bind(this));
 		} else {
 			// adding a track 
 			if (data.coords.length > 0) {
@@ -435,11 +458,20 @@ class TrackSSE {
 					let times = data.times[i];
 					let lastI = i;
 					this.viewerWrapper.getRaisedPositions(data.coords[i]).then(function(raisedPoints){
-						console.log(lastI);
 						let julianTimes = [];
 						for (let t=0; t<times.length; t++){
 							julianTimes.push(JulianDate.fromIso8601(times[t]));
 						};
+						console.log('adding samples for ' + lastI + ' time length ' + julianTimes.length + ' point length ' + raisedPoints.length);
+						
+						if (julianTimes.length != raisedPoints.length) {
+							//TODO FIX why is this coming from the server?
+							if (julianTimes.length < raisedPoints.length){
+								raisedPoints = raisedPoints.slice(0, julianTimes.length);
+							} else {
+								julianTimes = julianTimes.slice(0, raisedPoints.length);
+							}
+						}
 						property.addSamples(julianTimes, raisedPoints);
 					});
 					
@@ -457,9 +489,9 @@ class TrackSSE {
 			color = this.addColor(channel, data.track_hexcolor);
 		}
 
-		if (!(channel in this.cSampledPositionProperties)) {
-
-			if (!_.isEmpty(data)){
+		if (!_.isEmpty(data)){
+			if (!(channel in this.cSampledPositionProperties)) {
+			
 				let retrievedMaterial = this.getMaterial(channel, data);
 				let context = this;
 
@@ -483,7 +515,8 @@ class TrackSSE {
 
 				this.updateSampledPositionProperty(channel, data);
 
-				buildPath(this.cSampledPositionProperties[channel], channel, this.getColor(channel, true), retrievedMaterial, channel+'_POSITION', data.heading, this.viewerWrapper, function(entity){
+				let labelColor = this.getColor(channel, true);
+				buildPath(this.cSampledPositionProperties[channel], channel, labelColor, retrievedMaterial, channel+'_POSITION', data.heading, this.viewerWrapper, function(entity){
 					let builtPath = entity;
 					this.cPaths[channel] = builtPath;
 					//TODO add material modifications with callback property

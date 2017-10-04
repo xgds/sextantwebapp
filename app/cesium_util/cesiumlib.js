@@ -615,33 +615,39 @@ const getRaisedPointFromFunction = function(getPositionFunction, viewerWrapper, 
 };
 */
 
-const buildPath = function(spp, label, labelColor, color, id, heading, viewerWrapper, callback){
+const buildPath = function(spp, label, labelColor, ellipseColor, id, heading, viewerWrapper, callback){
+	let theLabelColor = labelColor;
+	if (theLabelColor === undefined){
+		theLabelColor = Color.GREEN;
+	}
+	let theColor = ellipseColor;  // this is the one with texture for the ellipse
+	if (theColor === undefined){
+		theColor = Color.GREEN;
+	}
 	let entityPath = viewerWrapper.viewer.entities.add({
 	    position : spp,
 	    name : 'path',
 	    path : {
-	        show : true,
-	        leadTime : 0,
-	        trailTime : 60,
-	        width : 10,
+	        //leadTime : 0,
+	        //trailTime : 60,
 	        resolution : 1,
-	        material : color
+	        material : theLabelColor
 	    },
 	    label : {
 			text: label,
 			verticalOrigin: VerticalOrigin.CENTER,
 	        horizontalOrigin: HorizontalOrigin.CENTER,
 	        eyeOffset: new Cartesian3(8, 0, 1.0),
-	        fillColor: labelColor,
+	        fillColor: theLabelColor,
 	        outlineWidth: 3.0
 		},
-		 ellipse : {
-				semiMinorAxis: 3.5,
-				semiMajorAxis: 3.5,
+		ellipse : {
+				semiMinorAxis: 2,
+				semiMajorAxis: 2,
 				height: 0,
-				extrudedHeight: 0,
-				material: color,
-				stRotation: heading
+				extrudedHeight: 10,
+				material: theLabelColor
+				//stRotation: heading
 		}
 	});
 	
