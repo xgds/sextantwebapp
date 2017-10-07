@@ -27,7 +27,7 @@ import {SSE} from './sseUtils'
 
 const hostname = config.xgds.protocol + '://' + config.xgds.name;
 let sse = undefined;
-let fakeHeading = false;
+let fakeHeading = true;
 
 if (hasSSE){
 	sse = new SSE(hostname);
@@ -37,39 +37,55 @@ class TrackSSE {
 
 	constructor(viewerWrapper) {
 		this.viewerWrapper = viewerWrapper;
+		
+		// cache of raw data
 		this.positions = {};
 		this.tracks =  {};
+		
+		// cesium renderings
+		this.cLastPosition = {};
+		this.cSampledPositionProperties = {};
+		this.cPaths = {};
+		
+		// colors and materials
 		this.colors = {'gray': Color.GRAY.withAlpha(0.75)};
 		this.labelColors = {'gray': Color.GRAY};
 		this.imageMaterials = {};
 		this.colorMaterials = {};
-		//this.cTracks =  {};
 		this.cStopped =  {};
-//		this.cPosition =  {};
-		this.cLastPosition = {};
-		this.cSampledPositionProperties = {};
-		this.cPaths = {};
-		this.isStopped = [];
-		this.STALE_TIMEOUT= 5000;
 		this.pointerUrl = hostname + '/' + config.server.nginx_prefix + '/icons/pointer.png';
 		this.stoppedCylinderStyle = {material: Color.GRAY};
-		this.getCurrentPositions();
-		this.allChannels(this.subscribe, this);
-		let context = this;
+
+		// various flags
+		this.isStopped = [];
+		this.STALE_TIMEOUT= 5000;
 		this.followPosition = true;
-		setInterval(function() {context.allChannels(context.checkStale, context);}, context.STALE_TIMEOUT);
-		 //Added by Kenneth for Follow position implementaiton 8/13/2017
 		this.isInitialized=false;
 		this.isMoving=false;
-		var self = this;
+		
+		// initialize
+		this.getCurrentPositions();
+		this.allChannels(this.subscribe, this);
+		
+		let context = this;
+		
+		// show timeout state
+		setInterval(function() {context.allChannels(context.checkStale, context);}, context.STALE_TIMEOUT);
+		
 		//Event listeners track when camera is moving or not, to prevent zooming during a move
-		this.viewerWrapper.viewer.camera.moveStart.addEventListener(function(){self.isMoving=true;});
-		this.viewerWrapper.viewer.camera.moveEnd.addEventListener(function(){self.isMoving=false;});
+		this.viewerWrapper.viewer.camera.moveStart.addEventListener(function(){context.isMoving=true;});
+		this.viewerWrapper.viewer.camera.moveEnd.addEventListener(function(){context.isMoving=false;});
 
 	};
 
 	setFollowPosition(value) {
 		this.followPosition = value;
+		// tracked entity does follow it but it mucks with the camera angle
+		if (value){
+			this.viewerWrapper.viewer.trackedEntity = this.cPaths[config.xgds.follow_channel];
+		} else {
+			this.viewerWrapper.viewer.trackedEntity = undefined;
+		}
 	};
 	
 	allChannels(theFunction, context){
@@ -101,7 +117,6 @@ class TrackSSE {
 		}
 		if (!connected){
 			context.isStopped.push(channel);
-			//context.showDisconnected(channel);
 		}
 	};
 
@@ -117,35 +132,29 @@ class TrackSSE {
 		let data = JSON.parse(event.data);
 		let channel = sse.parseEventChannel(event);
 		context.updatePosition(channel, data);
-		context.updateTrack(channel, data);
 	};
 	
-	zoomToPosition(channel){
+	zoomToPositionBadHeight(channel){
 		if (channel === undefined){
-			let keys = Object.keys(this.cPosition);
-			if (keys.length > 0) {
-				channel = keys[0];
-			}
+			channel = config.xgds.follow_channel;
 		}
 		if (channel !== undefined) {
-			let entity = this.cPosition[channel].entities.values[0];
+			let entity = this.cPaths[channel];
 			this.viewerWrapper.viewer.zoomTo(entity, new HeadingPitchRange(0, -Math.PI/2.0, 150.0));
 		}
 	};
 
 	/*
-	This Zoom to position method does not change bearing or height. Made by Kenneth Fang, hence the initals
+	This Zoom to position method does not change bearing or height. 
 	*/
-	zoomToPositionKF(channel){
+	zoomToPosition(channel){
 		if (channel === undefined){
-			let keys = Object.keys(this.cPosition);
-			if (keys.length > 0) {
-				channel = keys[0];
-			}
+			channel = config.xgds.follow_channel;
 		}
-		if (channel !== undefined && !this.isMoving) {
+		
+		if (!this.isMoving) {
 
-			let entity = this.cPosition[channel].entities.values[0];
+			let entity = this.cPaths[channel]; //.ellipse;
             //this was useful: https://groups.google.com/forum/#!topic/cesium-dev/QSFf3RxNRfE
             
 	        let ray = this.viewerWrapper.camera.getPickRay(new Cartesian2(
@@ -172,19 +181,8 @@ class TrackSSE {
 		}
 	};
 	
-	zoomToTracks(channel){
-		if (channel === undefined){
-			let keys = Object.keys(this.cPosition);
-			if (keys.length > 0) {
-				channel = keys[0];
-			}
-		}
-		this.viewerWrapper.viewer.zoomTo(this.cTracks[channel], new HeadingPitchRange(0, Math.PI/2.0, 15.0));
-	};
-
 	createPosition(channel, data, nonSse){
 		// store the data, render the position and get the track
-		//console.log(data);
 		if (nonSse == undefined){
 			nonSse = false;
 		}
@@ -210,22 +208,17 @@ class TrackSSE {
 			this.createPosition(channel, data);
 		} else {
 			this.modifyPosition(channel, data, false);
-			this.updateTrack(channel, data);
 		}
 	};
 
-	clearTracks() {
-		let keys = Object.keys(this.tracks);
-		keys.forEach(function(key){
-			let track = this.tracks[key];
-			if (track.coords.length > 2){
-				track.coords.splice(0, track.coords.length - 2);
-			}
-			let ctrack = this.cTracks[key];
-			ctrack.clearPoints();
-		}, this);
+	toggleTrack(show) {
+		if (show){
+			this.cPaths[config.xgds.follow_channel].path.trailTime = undefined;
+		} else {
+			this.cPaths[config.xgds.follow_channel].path.trailTime = 60;
+		}
 	};
-
+	
 	addColor(channel, newColor) {
 		let color = Color.fromCssColorString('#' + newColor)
 		// make a translucent one
@@ -248,15 +241,18 @@ class TrackSSE {
 			let start = JulianDate.fromIso8601(data.times[0][0]);
 			let stop = JulianDate.addHours(start, 12, new JulianDate());
 
-			this.viewerWrapper.viewer.clock.startTime = start.clone();
-			this.viewerWrapper.viewer.clock.stopTime = stop.clone();
-			this.viewerWrapper.viewer.clock.shouldAnimate = false;  // this makes cylinder show but not animate
+//			this.viewerWrapper.viewer.clock.startTime = start.clone();
+//			this.viewerWrapper.viewer.clock.stopTime = stop.clone();
+//			this.viewerWrapper.viewer.clock.shouldAnimate = false;  // this makes cylinder show but not animate
 			
-			// testing
-			//this.viewerWrapper.viewer.clock.clockRange = ClockRange.LOOP_STOP; //Loop at the end
-			//this.viewerWrapper.viewer.clock.currentTime=start.clone();
+			var clock = new Clock({
+				startTime : start.clone(),
+				clockRange: ClockRange.UNBOUNDED
+				//stopTime : stop.clone()
+				//shouldAnimate: false
+			});
 
-
+			this.viewerWrapper.viewer.clockViewModel = new ClockViewModel(clock);
 
 			let path = this.cPaths[channel];
 			if (path !== undefined){
@@ -266,32 +262,10 @@ class TrackSSE {
 			    })]);
 			}
 			
-//			this.viewerWrapper.viewer.clock.currentTime = start.clone();
-			//this.viewerWrapper.viewer.clock.clockRange = Cesium.ClockRange.LOOP_STOP; //Loop at the end
-			//this.viewerWrapper.viewer.clock.multiplier = 10;
-
-
 		}
 		
 		
 		this.updateSampledPositionProperty(channel, data);
-//		let coords = data.coords;
-//		if (coords.length > 0) {
-//			this.cTracks[channel] = new DynamicLines(this.viewerWrapper, coords[0], channel, {'material':color});
-//		}
-	};
-
-	updateTrack(channel, position) {
-		return;
-/*		if (!(channel in this.cTracks)){
-			//TODO render the track ... this should never happen
-		} else {
-			// append the point to the track
-			let ctrack = this.cTracks[channel];
-			ctrack.addPoint(position.lat, position.lon);
-			let track = this.tracks[channel];
-			track.coords.push([position.lon, position.lat]);
-		} */
 	};
 
 	convertTrackNameToChannel(track_name){
@@ -443,11 +417,14 @@ class TrackSSE {
 			this.viewerWrapper.getRaisedPositions({longitude:data.lon, latitude:data.lat}).then(function(raisedPoint){
 				property.addSample(cdate, raisedPoint[0]);
 				this.cLastPosition[channel]=raisedPoint[0];
-				
+//				if (this.followPosition){
+//					this.zoomToPosition(channel);
+//				}
+
 				// compare clock time to this time
-				this.viewerWrapper.viewer.clock.currentTime = cdate.clone();
-				console.log('new data date ' + cdate + ' data.timestamp ' + data.timestamp + ' and data is ' + raisedPoint[0]);
-				//console.log('clock date ' + this.viewerWrapper.viewer.clock.currentTime + ' ' + this.viewerWrapper.viewer.clock.currentTime.toString());
+				//this.viewerWrapper.viewer.clock.currentTime = cdate.clone();
+				//this.viewerWrapper.viewer.clockViewModel.currentTime = cdate.clone();
+				//console.log('new data date ' + cdate + ' data.timestamp ' + data.timestamp + ' and data is ' + raisedPoint[0]);
 			}.bind(this));
 		} else {
 			// adding a track 
@@ -508,7 +485,7 @@ class TrackSSE {
 //				function(dataSource){
 //				this.cPosition[channel] = dataSource;
 //				if (this.followPosition){
-//				this.zoomToPositionKF(channel);
+//				this.zoomToPosition(channel);
 //				}
 
 //				}.bind(this));
@@ -526,7 +503,7 @@ class TrackSSE {
 //				channel, retrievedMaterial, this.getColor(channel, true), channel+'_POSITION', this.getLatestPosition, this, this.viewerWrapper, function(dataSource){
 //				this.cPosition[channel] = dataSource;
 //				if (this.followPosition){
-//				this.zoomToPositionKF(channel);
+//				this.zoomToPosition(channel);
 //				}
 //				}.bind(this));
 			} else {
