@@ -20,7 +20,7 @@ const hasSSE = ('xgds' in config);
 const moment = require('moment');
 import {Color, ImageMaterialProperty, ColorMaterialProperty, Cartesian2, Cartesian3, CallbackProperty, HeadingPitchRange, ClockRange,
 		Clock, SampledPositionProperty, JulianDate, HermitePolynomialApproximation, TimeIntervalCollection, TimeInterval, ClockViewModel,
-		CompositePositionProperty, ConstantPositionProperty, ReferenceFrame} from './../cesium_util/cesium_imports'
+		CompositePositionProperty, ConstantPositionProperty, ReferenceFrame, SampledProperty, ExtrapolationType} from './../cesium_util/cesium_imports'
 import {DynamicLines, buildCylinder, updatePositionHeading, buildRectangle,
 	    buildPath } from './../cesium_util/cesiumlib';
 import {SSE} from './sseUtils'
@@ -41,10 +41,12 @@ class TrackSSE {
 		// cache of raw data
 		this.positions = {};
 		this.tracks =  {};
+		this.lastHeading = {};
 		
 		// cesium renderings
 		this.cLastPosition = {};
 		this.cSampledPositionProperties = {};
+		this.cHeadings = {};
 		this.cPaths = {};
 		
 		// colors and materials
@@ -79,6 +81,8 @@ class TrackSSE {
 	};
 
 	setFollowPosition(value) {
+		// follow the current position
+		
 		this.followPosition = value;
 		// tracked entity does follow it but it mucks with the camera angle
 		if (value){
@@ -89,6 +93,7 @@ class TrackSSE {
 	};
 	
 	allChannels(theFunction, context){
+		// look up all the channels from the server
 		let channels = sse.getChannels();
 		if (channels !== undefined){
 			for (let i=0; i<channels.length; i++){
@@ -103,6 +108,7 @@ class TrackSSE {
 	};
 
 	checkStale(channel, context) {
+		// check if we have lost our data, gray out.
 		let connected = false
 		if (context.positions[channel] != undefined){
 			let nowmoment =  moment().utc();
@@ -181,21 +187,12 @@ class TrackSSE {
 		}
 	};
 	
-	createPosition(channel, data, nonSse){
-		// store the data, render the position and get the track
-		if (nonSse == undefined){
-			nonSse = false;
-		}
-		this.positions[channel] = data;
-		if (fakeHeading) {
-			data.heading = (Math.random() * (2* Math.PI)); //TODO testing heading, delete
-		}
-		this.renderPosition(channel, data, nonSse);
-		this.getTrack(channel, data);
-	};
-
+	
 	modifyPosition(channel, data, disconnected){
-		//console.log(data);
+		// stores the data & updates so position can be rendered
+		if (disconnected == undefined){
+			disconnected = false;
+		}
 		this.positions[channel] = data;
 		if (fakeHeading) {
 			data.heading = (Math.random() * (2* Math.PI)); //TODO testing heading, delete
@@ -204,14 +201,17 @@ class TrackSSE {
 	};
 
 	updatePosition(channel, data){
+		// updates the position, gets the track if need be
 		if (!(channel in this.positions)){
-			this.createPosition(channel, data);
+			this.modifyPosition(channel, data);
+			this.getTrack(channel, data);
 		} else {
 			this.modifyPosition(channel, data, false);
 		}
 	};
 
 	toggleTrack(show) {
+		// show or hide the full track
 		if (show){
 			this.cPaths[config.xgds.follow_channel].path.trailTime = undefined;
 		} else {
@@ -236,20 +236,13 @@ class TrackSSE {
 		}
 		
 		// update the viewer clock start
-		//Set bounds of our simulation time
 		if (data.times.length > 0){
 			let start = JulianDate.fromIso8601(data.times[0][0]);
 			let stop = JulianDate.addHours(start, 12, new JulianDate());
-
-//			this.viewerWrapper.viewer.clock.startTime = start.clone();
-//			this.viewerWrapper.viewer.clock.stopTime = stop.clone();
-//			this.viewerWrapper.viewer.clock.shouldAnimate = false;  // this makes cylinder show but not animate
 			
 			var clock = new Clock({
 				startTime : start.clone(),
 				clockRange: ClockRange.UNBOUNDED
-				//stopTime : stop.clone()
-				//shouldAnimate: false
 			});
 
 			this.viewerWrapper.viewer.clockViewModel = new ClockViewModel(clock);
@@ -261,7 +254,6 @@ class TrackSSE {
 			        stop : stop
 			    })]);
 			}
-			
 		}
 		
 		
@@ -395,18 +387,39 @@ class TrackSSE {
 	};
 	*/
 	
+	updateHeading(channel, data) {
+		// update the stored heading
+		let property = undefined;
+		if (!(channel in this.cHeadings)){
+			let context = this;
+			property = new SampledProperty(Number);
+			property.forwardExtrapolationType = ExtrapolationType.HOLD;
+			this.cHeadings[channel] = property;
+		} else {
+			property = this.cHeadings[channel];
+		}
+		
+		let cdate = JulianDate.fromIso8601(data.timestamp);
+		property.addSample(cdate, data.heading);
+		this.lastHeading[channel] = data.heading;
+	};
+	
 	updateSampledPositionProperty(channel, data) {
+		// update the stored cesium position
 		let property = undefined;
 		if (!(channel in this.cSampledPositionProperties)){
 			property = new SampledPositionProperty();
-			let context = this;
+			property.forwardExtrapolationType = ExtrapolationType.HOLD;
+
+			/*
 			property.getValue = function(time, result) {
 		        let myresult =  property.getValueInReferenceFrame(time, ReferenceFrame.FIXED, result);
 		        if (myresult === undefined){
-		        		myresult = context.cLastPosition[channel];
+		        		myresult = this.cLastPosition[channel];
 		        }
 		        return myresult;
-		    };
+		    }.bind(this);
+		    */ 
 			this.cSampledPositionProperties[channel] = property;
 		} else {
 			property = this.cSampledPositionProperties[channel];
@@ -421,10 +434,6 @@ class TrackSSE {
 //					this.zoomToPosition(channel);
 //				}
 
-				// compare clock time to this time
-				//this.viewerWrapper.viewer.clock.currentTime = cdate.clone();
-				//this.viewerWrapper.viewer.clockViewModel.currentTime = cdate.clone();
-				//console.log('new data date ' + cdate + ' data.timestamp ' + data.timestamp + ' and data is ' + raisedPoint[0]);
 			}.bind(this));
 		} else {
 			// adding a track 
@@ -439,10 +448,9 @@ class TrackSSE {
 						for (let t=0; t<times.length; t++){
 							julianTimes.push(JulianDate.fromIso8601(times[t]));
 						};
-						console.log('adding samples for ' + lastI + ' time length ' + julianTimes.length + ' point length ' + raisedPoints.length);
 						
 						if (julianTimes.length != raisedPoints.length) {
-							//TODO FIX why is this coming from the server?
+							// this was fixed on the server side but just in case ...
 							if (julianTimes.length < raisedPoints.length){
 								raisedPoints = raisedPoints.slice(0, julianTimes.length);
 							} else {
@@ -458,7 +466,7 @@ class TrackSSE {
 	}
 
 	renderPosition(channel, data, stopped){
-//		console.log('rendering position');
+
 		let color = Color.GREEN; 
 		if (channel in this.colors){
 			color = this.colors[channel];
@@ -472,42 +480,24 @@ class TrackSSE {
 				let retrievedMaterial = this.getMaterial(channel, data);
 				let context = this;
 
-//				let sampledPositionProperty = new SampledPositionProperty();
-//				sampledPositionProperty.setInterpolationOptions({
-//				interpolationDegree : 2,
-//				interpolationAlgorithm : HermitePolynomialApproximation
-//				});
-//				this.updateSampledPositionProperty(sampledPositionProperty, data);
-//				this.sampledPositionProperty[channel] = sampledPositionProperty;
-//				buildPositionDataSource({longitude:data.lon, latitude:data.lat}, data.heading,
-//				channel, retrievedMaterial, channel+'_POSITION', this.getLatestPosition.bind(this), this, sampledPositionProperty,
-//				this.viewerWrapper, 
-//				function(dataSource){
-//				this.cPosition[channel] = dataSource;
-//				if (this.followPosition){
-//				this.zoomToPosition(channel);
-//				}
-
-//				}.bind(this));
-
 				this.updateSampledPositionProperty(channel, data);
+				this.updateHeading(channel, data);
 
-				let labelColor = this.getColor(channel, true);
-				buildPath(this.cSampledPositionProperties[channel], channel, labelColor, retrievedMaterial, channel+'_POSITION', data.heading, this.viewerWrapper, function(entity){
+				let headingCallback = new CallbackProperty(function(time, result) {
+					return this.cHeadings[channel].getValue(time);
+				}.bind(this), false);
+				
+				
+				buildPath(this.cSampledPositionProperties[channel], channel, this.getColor(channel, true), retrievedMaterial, channel+'_POSITION', headingCallback, this.viewerWrapper, function(entity){
 					let builtPath = entity;
 					this.cPaths[channel] = builtPath;
 					//TODO add material modifications with callback property
 				}.bind(this));
 
-//				buildPositionDataSource({longitude:data.lon, latitude:data.lat}, data.heading,
-//				channel, retrievedMaterial, this.getColor(channel, true), channel+'_POSITION', this.getLatestPosition, this, this.viewerWrapper, function(dataSource){
-//				this.cPosition[channel] = dataSource;
-//				if (this.followPosition){
-//				this.zoomToPosition(channel);
-//				}
-//				}.bind(this));
 			} else {
 				this.updateSampledPositionProperty(channel, data);
+				this.updateHeading(channel, data);
+
 
 				/*let dataSource = this.cPosition[channel];
 			let pointEntity = dataSource.entities.values[0];
@@ -581,7 +571,7 @@ class TrackSSE {
 					for (let track_name in data){
 						let channel = this.convertTrackNameToChannel(track_name);
 						if (!(channel in this.positions)){
-							this.createPosition(channel, data[track_name], true);
+							this.updatePosition(channel, data[track_name], true);
 						}
 					}
 				}

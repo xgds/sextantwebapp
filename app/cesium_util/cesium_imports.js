@@ -23,6 +23,7 @@ import HeadingPitchRange from 'cesium/Source/Core/HeadingPitchRange';
 import CallbackProperty from 'cesium/Source/DataSources/CallbackProperty';
 import ConstantProperty from 'cesium/Source/DataSources/ConstantProperty';
 import SampledPositionProperty from 'cesium/Source/DataSources/SampledPositionProperty';
+import SampledProperty from 'cesium/Source/DataSources/SampledProperty';
 import ConstantPositionProperty from 'cesium/Source/DataSources/ConstantPositionProperty';
 import CompositePositionProperty from 'cesium/Source/DataSources/CompositePositionProperty';
 import ImageMaterialProperty from 'cesium/Source/DataSources/ImageMaterialProperty';
@@ -55,6 +56,7 @@ import ClockViewModel from 'cesium/Source/Widgets/ClockViewModel';
 import TimeIntervalCollection from 'cesium/Source/Core/TimeIntervalCollection';
 import TimeInterval from 'cesium/Source/Core/TimeInterval';
 import ReferenceFrame from 'cesium/Source/Core/ReferenceFrame';
+import ExtrapolationType from 'cesium/Source/Core/ExtrapolationType';
 
 
 BingMapsApi.defaultKey = global.config.bing_key;
@@ -65,4 +67,4 @@ export {Viewer, EllipsoidTerrainProvider, Ellipsoid, Cartographic, Transforms, P
     CreateTileMapServiceImageryProvider, GroundPrimitive, CesiumTerrainProvider, VerticalOrigin, PinBuilder, HorizontalOrigin, ConstantProperty,
     CylinderGeometry, CylinderGraphics, Primitive, defined, PolygonHierarchy, PolygonGeometry, HeadingPitchRoll, Matrix4, LabelStyle, ClockRange,
     SceneMode, HeadingPitchRange, Clock, ClockViewModel, SampledPositionProperty, JulianDate, HermitePolynomialApproximation, TimeIntervalCollection, TimeInterval,
-    CompositePositionProperty, ConstantPositionProperty}
+    CompositePositionProperty, ConstantPositionProperty, SampledProperty, ExtrapolationType}

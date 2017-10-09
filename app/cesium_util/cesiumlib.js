@@ -610,12 +610,9 @@ const czml = [{
     }
 }];
 
-const getRaisedPointFromFunction = function(getPositionFunction, viewerWrapper, channel) {
-	
-};
 */
 
-const buildPath = function(spp, label, labelColor, ellipseColor, id, heading, viewerWrapper, callback){
+const buildPath = function(spp, label, labelColor, ellipseColor, id, headingCallback, viewerWrapper, callback){
 	let theLabelColor = labelColor;
 	if (theLabelColor === undefined){
 		theLabelColor = Color.GREEN;
@@ -628,8 +625,6 @@ const buildPath = function(spp, label, labelColor, ellipseColor, id, heading, vi
 	    position : spp,
 	    name : 'path',
 	    path : {
-	        //leadTime : 0,
-	        //trailTime : 60,
 	        resolution : 1,
 	        material : theLabelColor
 	    },
@@ -646,8 +641,8 @@ const buildPath = function(spp, label, labelColor, ellipseColor, id, heading, vi
 				semiMajorAxis: 2,
 				height: 0,
 				extrudedHeight: 10,
-				material: theLabelColor
-				//stRotation: heading
+				material: theLabelColor,
+				stRotation: headingCallback
 		}
 	});
 	
