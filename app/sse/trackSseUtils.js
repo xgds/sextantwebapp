@@ -27,7 +27,7 @@ import {SSE} from './sseUtils'
 
 const hostname = config.xgds.protocol + '://' + config.xgds.name;
 let sse = undefined;
-let fakeHeading = true;
+let fakeHeading = false;
 
 if (hasSSE){
 	sse = new SSE(hostname);
@@ -50,13 +50,12 @@ class TrackSSE {
 		this.cPaths = {};
 		
 		// colors and materials
-		this.colors = {'gray': Color.GRAY.withAlpha(0.75)};
-		this.labelColors = {'gray': Color.GRAY};
+		this.colors = {'gray': Color.PINK.withAlpha(0.75)};
+		this.labelColors = {'gray': Color.PINK};
 		this.imageMaterials = {};
 		this.colorMaterials = {};
-		this.cStopped =  {};
+		this.cEllipseMaterial = {};
 		this.pointerUrl = hostname + '/' + config.server.nginx_prefix + '/icons/pointer.png';
-		this.stoppedCylinderStyle = {material: Color.GRAY};
 
 		// various flags
 		this.isStopped = [];
@@ -118,11 +117,15 @@ class TrackSSE {
 				let index = context.isStopped.indexOf(channel);
 				if (index > -1) {
 					context.isStopped.splice(index, 1);
+					//toggleGray(channel, false);
 				}
 			}
 		}
 		if (!connected){
-			context.isStopped.push(channel);
+			if (!(channel in context.isStopped)){
+				context.isStopped.push(channel);
+			}
+			//toggleGray(channel, true);
 		}
 	};
 
@@ -220,6 +223,9 @@ class TrackSSE {
 	};
 	
 	addColor(channel, newColor) {
+		if (_.isEmpty(newColor)){
+			newColor = '#00FF00'; // green by default
+		}
 		let color = Color.fromCssColorString('#' + newColor)
 		// make a translucent one
 		let cclone = color.clone().withAlpha(0.4);
@@ -268,53 +274,10 @@ class TrackSSE {
 		return track_name;
 	};
 	
-	getLatestPosition(channel) {
-		if (channel in this.positions) {
-			return {'longitude':this.positions[channel].lon, 'latitude':this.positions[channel].lat};
-		}
-		return undefined;
-	};
-	
-	getMaterial(channel, data) {
-		// gets or initializes the material
-		let material = undefined;
-		let color = Color.GREEN;
-		let colorInitialized = false;
-		if (channel in this.colors){
-			color = this.colors[channel];
-			colorInitialized = true;
-		}
-		
-		let hasHeading = (data.heading !== "");
-		if (hasHeading) {
-			// make sure it has the image material
-			if (!(channel in this.imageMaterials)){
-				material = new ImageMaterialProperty({'image': this.pointerUrl, 'transparent': true, 'color': color});
-				if (colorInitialized) {
-					this.imageMaterials[channel] = material;
-				}
-			} else {
-				material = this.imageMaterials[channel];
-			}
-		} else {
-			// make sure it has the color material
-			if (!(channel in this.colorMaterials)){
-				material = new ColorMaterialProperty({'color': color});
-				if (colorInitialized) {
-					this.colorMaterials[channel] = material;
-				}
-			} else {
-				material = this.colorMaterials[channel];
-			}
-		} 
-		
-		return material;
-		
-	};
 	
 	getColor(channel, forLabel) {
 		if (forLabel === undefined){
-			forLabel = False;
+			forLabel = false;
 		}
 		let sourceMap = this.colors;
 		if (forLabel){
@@ -327,65 +290,37 @@ class TrackSSE {
 			return sourceMap[channel];
 		}
 		return Color.GREEN;
-	}
+	};
 	
-	getMaterial2(channel) {
+	
+	getMaterial(channel) {
 		// gets or initializes the material
 		let material = undefined;
-		let data = this.positions[channel];
-		let hasHeading = (data.heading !== "");
-		if (hasHeading) {
-			// make sure it has the image material
-			if (!(channel in this.imageMaterials)){
-				this.imageMaterials[channel] = new ImageMaterialProperty({'image': this.pointerUrl, 'transparent': true, 'color': new CallbackProperty(function() {context.getColor(channel);}, false)});
-			} 
-			material = this.imageMaterials[channel];
+		let context = this;
+		if (!(channel in this.cEllipseMaterial)){
+			let data = this.positions[channel];
+			let hasHeading = (_.isNumber(data.heading));
+			if (hasHeading) {
+				// make sure it has the image material
+				if (!(channel in this.imageMaterials)){
+					this.imageMaterials[channel] = new ImageMaterialProperty({'image': this.pointerUrl, 'transparent': true, 'color': new CallbackProperty(function() {return context.getColor(channel);}, false)});
+				} 
+				material = this.imageMaterials[channel];
+			} else {
+				// make sure it has the color material
+				if (!(channel in this.colorMaterials)){
+					this.colorMaterials[channel] = new ColorMaterialProperty(new CallbackProperty(function(time, result) {return context.getColor(channel);}, false));
+				} 
+				material = this.colorMaterials[channel];
+			}
+			this.cEllipseMaterial[channel] = material;
 		} else {
-			// make sure it has the color material
-			if (!(channel in this.colorMaterials)){
-				this.colorMaterials[channel] = new ColorMaterialProperty({'color': new CallbackProperty(function() {context.getColor(channel);}, false)});
-			} 
-			material = this.colorMaterials[channel];
-		} 
-		
+			material = this.cEllipseMaterial[channel];
+		}
+			
 		return material;
 		
 	};
-	
-	/*
-	renderPosition(channel, data, stopped){
-		console.log('rendering position');
-		if (!(channel in this.cPosition)) {
-			let color = Color.GREEN;
-			if (channel in this.colors){
-				color = this.colors[channel];
-			}
-
-			if (!_.isEmpty(data)){
-//				let retrievedMaterial = this.getMaterial(channel, data);
-				console.log('building position data source');
-				let context = this;
-				let newMaterial = new CallbackProperty(function() {
-					context.getMaterial2(channel);
-					}, false);
-				buildPositionDataSource({longitude:data.lon, latitude:data.lat}, data.heading,
-						channel, newMaterial, channel+'_POSITION', this.getLatestPosition, this, this.viewerWrapper, function(dataSource){
-						console.log('built');
-						this.cPosition[channel] = dataSource;
-				}.bind(this));
-			}
-		} else {
-			let dataSource = this.cPosition[channel];
-			let pointEntity = dataSource.entities.values[0];
-			
-			// update it
-			this.viewerWrapper.getRaisedPositions({longitude:data.lon, latitude:data.lat}).then(function(raisedPoint) {
-				pointEntity.position.setValue(raisedPoint[0]);
-				
-			}.bind(this));
-		}
-	};
-	*/
 	
 	updateHeading(channel, data) {
 		// update the stored heading
@@ -411,15 +346,6 @@ class TrackSSE {
 			property = new SampledPositionProperty();
 			property.forwardExtrapolationType = ExtrapolationType.HOLD;
 
-			/*
-			property.getValue = function(time, result) {
-		        let myresult =  property.getValueInReferenceFrame(time, ReferenceFrame.FIXED, result);
-		        if (myresult === undefined){
-		        		myresult = this.cLastPosition[channel];
-		        }
-		        return myresult;
-		    }.bind(this);
-		    */ 
 			this.cSampledPositionProperties[channel] = property;
 		} else {
 			property = this.cSampledPositionProperties[channel];
@@ -438,8 +364,7 @@ class TrackSSE {
 		} else {
 			// adding a track 
 			if (data.coords.length > 0) {
-				// tracks come in blocks of times & coords to handle gaps
-				
+				// tracks come in blocks of times & coords to handle gaps.  Cesium is doing linear interpolation here.
 				for (let i=0; i< data.coords.length; i++){
 					let times = data.times[i];
 					let lastI = i;
@@ -449,14 +374,6 @@ class TrackSSE {
 							julianTimes.push(JulianDate.fromIso8601(times[t]));
 						};
 						
-						if (julianTimes.length != raisedPoints.length) {
-							// this was fixed on the server side but just in case ...
-							if (julianTimes.length < raisedPoints.length){
-								raisedPoints = raisedPoints.slice(0, julianTimes.length);
-							} else {
-								julianTimes = julianTimes.slice(0, raisedPoints.length);
-							}
-						}
 						property.addSamples(julianTimes, raisedPoints);
 					});
 					
@@ -467,7 +384,7 @@ class TrackSSE {
 
 	renderPosition(channel, data, stopped){
 
-		let color = Color.GREEN; 
+		let color = undefined;
 		if (channel in this.colors){
 			color = this.colors[channel];
 		} else {
@@ -477,26 +394,31 @@ class TrackSSE {
 		if (!_.isEmpty(data)){
 			if (!(channel in this.cSampledPositionProperties)) {
 			
-				let retrievedMaterial = this.getMaterial(channel, data);
-				let context = this;
 
 				this.updateSampledPositionProperty(channel, data);
-				this.updateHeading(channel, data);
+				if (_.isNumber(data.heading)) {
+					this.updateHeading(channel, data);
+				}
+
+				let retrievedMaterial = this.getMaterial(channel);
 
 				let headingCallback = new CallbackProperty(function(time, result) {
-					return this.cHeadings[channel].getValue(time);
+					if (channel in this.cHeadings){
+						return this.cHeadings[channel].getValue(time);
+					}
+					return 0;  // it won't matter because we are not rendering a texture
 				}.bind(this), false);
-				
 				
 				buildPath(this.cSampledPositionProperties[channel], channel, this.getColor(channel, true), retrievedMaterial, channel+'_POSITION', headingCallback, this.viewerWrapper, function(entity){
 					let builtPath = entity;
 					this.cPaths[channel] = builtPath;
-					//TODO add material modifications with callback property
 				}.bind(this));
 
 			} else {
 				this.updateSampledPositionProperty(channel, data);
-				this.updateHeading(channel, data);
+				if (_.isNumber(data.heading)) {
+					this.updateHeading(channel, data);
+				}
 
 
 				/*let dataSource = this.cPosition[channel];
