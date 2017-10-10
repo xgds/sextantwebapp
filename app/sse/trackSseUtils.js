@@ -50,15 +50,15 @@ class TrackSSE {
 		this.cPaths = {};
 		
 		// colors and materials
-		this.colors = {'gray': Color.PINK.withAlpha(0.75)};
-		this.labelColors = {'gray': Color.PINK};
+		this.colors = {'gray': Color.GRAY.withAlpha(0.75)};
+		this.labelColors = {'gray': Color.GRAY};
 		this.imageMaterials = {};
 		this.colorMaterials = {};
 		this.cEllipseMaterial = {};
 		this.pointerUrl = hostname + '/' + config.server.nginx_prefix + '/icons/pointer.png';
 
 		// various flags
-		this.isStopped = [];
+		this.isStopped = {};
 		this.STALE_TIMEOUT= 5000;
 		this.followPosition = true;
 		this.isInitialized=false;
@@ -114,26 +114,17 @@ class TrackSSE {
 			let diff = moment.duration(nowmoment.diff(moment(context.positions[channel].timestamp)));
 			if (diff.asSeconds() <= 10) {
 				connected = true;
-				let index = context.isStopped.indexOf(channel);
-				if (index > -1) {
-					context.isStopped.splice(index, 1);
-					//toggleGray(channel, false);
-				}
+				context.isStopped[channel] = false;
 			}
 		}
 		if (!connected){
-			if (!(channel in context.isStopped)){
-				context.isStopped.push(channel);
-			}
-			//toggleGray(channel, true);
+			console.log('DISCONNECTED ' + channel);
+			context.isStopped[channel] = true;
 		}
 	};
 
-	showDisconnected(channel) {
-		this.renderPosition(channel, undefined, true);
-	};
-
 	subscribe(channel, context) {
+		context.isStopped[channel] = false; //weird, but we want the default colors
 		sse.subscribe('position', context.handlePositionEvent, context, channel);
 	};
 
@@ -283,7 +274,7 @@ class TrackSSE {
 		if (forLabel){
 			sourceMap = this.labelColors;
 		}
-		if (channel in this.isStopped) {
+		if (this.isStopped[channel]) {
 			return sourceMap['gray'];
 		}
 		if (channel in this.colors){
