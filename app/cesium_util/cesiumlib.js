@@ -10,7 +10,7 @@ buildModuleUrl.setBaseUrl('./');
 import {Viewer, EllipsoidTerrainProvider, Cartesian3, Cartesian2, PolygonGeometry, PolygonHierarchy, CesiumMath, Cartographic, Ellipsoid, Color,
 		sampleTerrain, ScreenSpaceEventHandler, ScreenSpaceEventType, Rectangle, RectangleGeometry, LabelStyle, CzmlDataSource, CustomDataSource,
 		CreateTileMapServiceImageryProvider, CesiumTerrainProvider, CallbackProperty, VerticalOrigin, HorizontalOrigin, Matrix4, ConstantProperty,
-		SceneMode, SampledPositionProperty, JulianDate, ColorMaterialProperty,
+		SceneMode, SampledPositionProperty, JulianDate, ColorMaterialProperty, ClockRange, ClockViewModel,
 		Transforms, HeadingPitchRoll, ColorGeometryInstanceAttribute, GeometryInstance, Primitive, KmlDataSource, Clock} from './cesium_imports'
 
 import viewerCesiumNavigationMixin from './cesium-navigation/viewerCesiumNavigationMixin';
@@ -45,6 +45,10 @@ class ViewerWrapper{
             fileExtension : 'jpg'
         });
 
+        let clock = new Clock({
+			clockRange: ClockRange.UNBOUNDED
+		});
+		
         const viewer = new Viewer(this.container, {
             timeline : false,
             animation : false,
@@ -57,7 +61,7 @@ class ViewerWrapper{
             baseLayerPicker : false,
             terrainProvider : terrainProvider,
             sceneMode: SceneMode.SCENE3D,
-            clock: new Clock() //Added by Kenneth 8/12/2017
+            clockViewModel: new ClockViewModel(clock)
             //imageryProvider : imageryProvider
 
         });

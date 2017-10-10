@@ -50,7 +50,7 @@ class TrackSSE {
 		this.cPaths = {};
 		
 		// colors and materials
-		this.colors = {'gray': Color.GRAY.withAlpha(0.75)};
+		this.colors = {'gray': Color.GRAY.withAlpha(0.25)};
 		this.labelColors = {'gray': Color.GRAY};
 		this.imageMaterials = {};
 		this.colorMaterials = {};
@@ -84,11 +84,11 @@ class TrackSSE {
 		
 		this.followPosition = value;
 		// tracked entity does follow it but it mucks with the camera angle
-		if (value){
-			this.viewerWrapper.viewer.trackedEntity = this.cPaths[config.xgds.follow_channel];
-		} else {
-			this.viewerWrapper.viewer.trackedEntity = undefined;
-		}
+//		if (value){
+//			this.viewerWrapper.viewer.trackedEntity = this.cPaths[config.xgds.follow_channel];
+//		} else {
+//			this.viewerWrapper.viewer.trackedEntity = undefined;
+//		}
 	};
 	
 	allChannels(theFunction, context){
@@ -236,18 +236,14 @@ class TrackSSE {
 			let start = JulianDate.fromIso8601(data.times[0][0]);
 			let stop = JulianDate.addHours(start, 12, new JulianDate());
 			
-			var clock = new Clock({
-				startTime : start.clone(),
-				clockRange: ClockRange.UNBOUNDED
-			});
-
-			this.viewerWrapper.viewer.clockViewModel = new ClockViewModel(clock);
+			let cvm = new ClockViewModel(this.viewerWrapper.viewer.clock);
+			cvm.startTime = start.clone();
 
 			let path = this.cPaths[channel];
 			if (path !== undefined){
 				path.availability =  new TimeIntervalCollection([new TimeInterval({
-			        start : start,
-			        stop : stop
+			        start : start.clone(),
+			        stop : stop.clone()
 			    })]);
 			}
 		}
@@ -331,14 +327,11 @@ class TrackSSE {
 	
 	updateSampledPositionProperty(channel, data) {
 		// update the stored cesium position
-		let property = undefined;
-		if (!(channel in this.cSampledPositionProperties)){
+		let property = this.cSampledPositionProperties[channel];;
+		if (_.isUndefined(property)){
 			property = new SampledPositionProperty();
 			property.forwardExtrapolationType = ExtrapolationType.HOLD;
-
 			this.cSampledPositionProperties[channel] = property;
-		} else {
-			property = this.cSampledPositionProperties[channel];
 		}
 		if ('lon' in data) {
 			// adding a point
