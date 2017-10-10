@@ -57,8 +57,6 @@
 	function zoomToTracks(){
 		if (sextant.gps_tracks !== undefined) {
 			sextant.gps_tracks.zoomTo();
-		} else if  (sextant.tsse !== undefined) {
-			sextant.tsse.zoomToTracks();
 		}
 	}
 	
@@ -80,6 +78,13 @@
 			sextant.tsse.setFollowPosition(follow);
 		}
 	}
+	
+	function toggleTrack(show){
+		if (sextant.tsse !== undefined) {
+			sextant.tsse.toggleTrack(show);
+		}
+	}
+
 	
 	function serialstatus(){
 		console.log('serialstatus0')
@@ -126,12 +131,6 @@
 	function reloadPlan() {
 		if (sextant.planManager !== undefined){
 			sextant.planManager.fetchXGDSPlan();
-		}
-	}
-	
-	function clearTracks() {
-		if (sextant.tsse !== undefined){
-			sextant.tsse.clearTracks();
 		}
 	}
 	

@@ -50,6 +50,7 @@
 
     /*Hide silly looking follow checkbox*/
     #follow_checkbox, #follow_label input {display:none;}
+	#track_checkbox, #track_checkbox input {display:none;}
 
     #savePopup{
         position: fixed;
@@ -163,13 +164,13 @@
 <div data-role="footer" data-position="fixed" data-tap-toggle="false" style="text-align:center;" id="viewModeToolbar">
   <div data-role="controlgroup" data-type="horizontal">
     <a href="#" class="ui-btn" onclick="reloadPlan();">Reload Plan</a>
-    <a href="#" class="ui-btn" onclick="clearTracks();">Clear Track</a>
     <!-- Calls toggleEdit from sextant_caller and switches toolbars-->
     <a href="#" class="ui-btn" onclick="followPosition(false); toggleEditMode(); toggleMode();">Edit Plan</a>
     <!--  <a href="#" class="ui-btn" onclick="zoomToPosition();">Zoom to Position</a>  -->
     <a href="#" class="ui-btn" onclick="zoomToPlan();">Zoom to Plan</a>
     <a href="#" class="ui-btn" onclick="reOrient();">ReOrient</a>
-
+    <!-- <a href="#" class="ui-btn" onclick="clearTracks();">Clear Track</a> -->
+    <label id="track_label"><input type="checkbox" onclick="toggleTrack(event.target.checked)" checked id="track_checkbox"></input> Track</label> 
     <label id="follow_label"><input type="checkbox" onclick="followPosition(event.target.checked)" checked id="follow_checkbox"></input> Follow</label> 
   </div>
 </div>
