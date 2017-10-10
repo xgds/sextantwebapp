@@ -118,7 +118,6 @@ class TrackSSE {
 			}
 		}
 		if (!connected){
-			console.log('DISCONNECTED ' + channel);
 			context.isStopped[channel] = true;
 		}
 	};
