@@ -13,25 +13,28 @@
 //CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 //specific language governing permissions and limitations under the License.
 // __END_LICENSE__
+
+let USERNAME = 'TODO:username';
+let PASSWORD = 'TODO:authotoken';
+let SERVER_NAME = 'TODO:YOUR IP ADDRESS';
+
 module.exports = {
 
 	// The server that is running this node app 
     server : { port : 3001,
     		   cesium_port: undefined,
-    		   name : '128.102.236.78', //TODO REPLACE THIS WITH YOUR IP ADDRESS 
-    		   //name : 'tamar-docker.xgds.org', //TODO REPLACE THIS WITH YOUR SSL-CERT NAME
+    		   name : SERVER_NAME,
     		   protocol: 'https',
     		   nginx_prefix: 'wristApp'},
     		   
     // This should only exist in xGDS side
     xgds : { port : 443, 
-    		name : '128.102.236.78', //TODO REPLACE THIS WITH YOUR IP ADDRESS 
-		   //name : 'tamar-docker.xgds.org', //TODO REPLACE THIS WITH YOUR SSL-CERT NAME
+    		name : SERVER_NAME,
     	    protocol : 'https',
     	    ev_channels: ['EV1', 'EV2'],
        	follow_channel: 'EV1',
-       	username: 'ev1', //TODO put in username',
-       	password: 'ev1', //TODO put in auth token'
+       	username: USERNAME,
+       	password: PASSWORD
     },
     
     // If we are using web sockets this should only exist in the default side
@@ -50,8 +53,8 @@ module.exports = {
     defaultSite : 'HI_Kilauea',
     
     // list of kml links to load
-    kml_urls : ['https://128.102.236.78/notes/rest/notesFeed.kml',
-        		    'https://128.102.236.78/basaltApp/rest/hvnp_so2.kml'], //TODO REPLACE THIS WITH YOUR IP ADDRESS
+    kml_urls : ['https://' + USERNAME + ':' + PASSWORD + '@' + SERVER_NAME + '/notes/rest/notesFeed.kml',
+				'https://' + USERNAME + ':' + PASSWORD + '@' + SERVER_NAME + '/basaltApp/rest/hvnp_so2.kml'],
 
     // list of various sites we support
     sites : { 'HI_Mauna_Ulu' : { 'imagery' : 'CustomMaps/HI_lowqual_relief',
@@ -86,17 +89,6 @@ module.exports = {
     // TODO override with your key if using bing.
     bing_key : 'Ak71PK14Ypz2_IuQ2-TGbV-OVYLKeg_KEXFFYiNmEny6aFJVYxUg_pUxZfhaQ2vy',
 
-    //List of Connected Devices TODO replace with your IP
-//    connectedDevices : { url : 'https://10.131.26.180/xgds_status_board/rest/multiSubsystemStatusJson/',
-//
-//                        list : 
-//                          {pXRF : 'pXRF', 
-//                          LIBS : 'LIBS', 
-//                          FLIR : 'FLIR', 
-//                          FTIR : 'FTIR', 
-//                          redCamera2 : 'CAM2', 
-//                          boat2 : 'IV'}
-//                        }
     connectedDevices : {pXRF : 'pXRF', 
           			   LIBS : 'LIBS', 
           			   FLIR : 'FLIR', 
