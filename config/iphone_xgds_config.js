@@ -50,9 +50,9 @@ module.exports = {
     defaultSite : 'HI_Kilauea',
     
     // list of kml links to load
-    kml_urls : ['https://128.102.236.78/notes/notesFeed.kml',
-    	           'https://128.102.236.78/basaltApp/hvnp_so2.kml'], //TODO REPLACE THIS WITH YOUR IP ADDRESS
-    
+    kml_urls : ['https://128.102.236.78/notes/rest/notesFeed.kml',
+        		    'https://128.102.236.78/basaltApp/rest/hvnp_so2.kml'], //TODO REPLACE THIS WITH YOUR IP ADDRESS
+
     // list of various sites we support
     sites : { 'HI_Mauna_Ulu' : { 'imagery' : 'CustomMaps/HI_lowqual_relief',
     							 'elevation' : 'tilesets/HI_highqual',
@@ -87,7 +87,7 @@ module.exports = {
     bing_key : 'Ak71PK14Ypz2_IuQ2-TGbV-OVYLKeg_KEXFFYiNmEny6aFJVYxUg_pUxZfhaQ2vy',
 
     //List of Connected Devices TODO replace with your IP
-//    connectedDevices : { url : 'https://10.131.26.180/xgds_status_board/multiSubsystemStatusJson/',
+//    connectedDevices : { url : 'https://10.131.26.180/xgds_status_board/rest/multiSubsystemStatusJson/',
 //
 //                        list : 
 //                          {pXRF : 'pXRF', 

@@ -15,6 +15,8 @@
 //__END_LICENSE__
 
 import {config} from './../../config/config_loader';
+import {beforeSend} from './../util/xgdsUtils';
+
 const hasSSE = ('xgds' in config);
 
 const moment = require('moment');
@@ -466,10 +468,12 @@ class TrackSSE {
 	}; 
 
 	getCurrentPositions() {
-		let trackPKUrl = hostname + '/track/position/active/json'
+		let trackPKUrl = hostname + '/track/rest/position/active/json'
 		$.ajax({
 			url: trackPKUrl,
 			dataType: 'json',
+			xhrFields: {withCredentials: true},
+			beforeSend: beforeSend,
 			success: $.proxy(function(data) {
 				if (data != null){
 					// should return dictionary of channel: position
@@ -494,10 +498,12 @@ class TrackSSE {
 			return;
 		}
 
-		let trackUrl =  hostname + '/xgds_map_server/mapJson/basaltApp.BasaltTrack/pk:' + data.track_pk
+		let trackUrl =  hostname + '/xgds_map_server/rest/mapJson/basaltApp.BasaltTrack/pk:' + data.track_pk
 		$.ajax({
 			url: trackUrl,
 			dataType: 'json',
+			xhrFields: {withCredentials: true},
+			beforeSend: beforeSend,
 			success: $.proxy(function(data) {
 				if (data != null && data.length == 1){
 					this.tracks[channel] = data[0];

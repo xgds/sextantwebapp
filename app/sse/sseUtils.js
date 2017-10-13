@@ -94,17 +94,18 @@ class SSE{
         if (this.activeChannels === undefined){
         	
             $.ajax({
-                url: this.host + '/xgds_core/sseActiveChannels',
-                dataType: 'json',
-	            beforeSend: beforeSend,
-                async: false,
-                success: $.proxy(function(data) {
+            		url: this.host + '/xgds_core/rest/sseActiveChannels/',
+            		dataType: 'json',
+            		xhrFields: {withCredentials: true},
+            		beforeSend: beforeSend,
+            		async: false,
+            		success: $.proxy(function(data) {
                     this.activeChannels = data;
-                }, this),
-                error: $.proxy(function(data) {
+            		}, this),
+            		error: $.proxy(function(data) {
                     console.log('Could not get active channels');
                     console.log(data);
-                }, this)
+            		}, this)
             });
         }
         return this.activeChannels;

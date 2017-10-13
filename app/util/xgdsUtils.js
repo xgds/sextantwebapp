@@ -17,7 +17,7 @@
 import {config} from './../../config/config_loader';
 
 function beforeSend(xhr) {
-       xhr.setRequestHeader ("Authorization", "Basic " + config.xgds.username + ":" + config.xgds.password);
+       xhr.setRequestHeader ("Authorization", "Basic " + btoa(config.xgds.username + ":" + config.xgds.password));
 }
 
 export {beforeSend}
