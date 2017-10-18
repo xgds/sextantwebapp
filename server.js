@@ -1,5 +1,5 @@
 const express = require('express');
-const cors = require('cors')
+//const cors = require('cors')
 const path = require('path');
 const terrainServer = require('./terrainserver');
 const webpackDevMiddleware = require("webpack-dev-middleware");
@@ -71,7 +71,16 @@ app.use('/font-awesome', express.static(fontAwesomePath));
 //app.set('trust proxy', true);
 //app.set('trust proxy', 'loopback');
 
-app.use(cors())
+// Trying to set up CORS, no joy
+//app.options('*', cors())
+//app.use(cors())
+
+//app.use(function(req, res, next) {
+//	console.log('shoving headers in');
+//	  res.header("Access-Control-Allow-Origin", "*");
+//	  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+//	  next();
+//	});
 
 const port = config.server.port;
 app.listen(port, function () {
