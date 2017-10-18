@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors')
 const path = require('path');
 const terrainServer = require('./terrainserver');
 const webpackDevMiddleware = require("webpack-dev-middleware");
@@ -69,6 +70,8 @@ app.use('/font-awesome', express.static(fontAwesomePath));
 //TODO this seems to work without this but may need it later.
 //app.set('trust proxy', true);
 //app.set('trust proxy', 'loopback');
+
+app.use(cors())
 
 const port = config.server.port;
 app.listen(port, function () {
