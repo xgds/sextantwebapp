@@ -14,8 +14,9 @@
 //specific language governing permissions and limitations under the License.
 // __END_LICENSE__
 
-let USERNAME = 'TODO:username';
-let PASSWORD = 'TODO:authotoken';
+
+let USERNAME = 'TODO:USERNAME';
+let PASSWORD = 'TODO:PASSWORD';
 let SERVER_NAME = 'localhost';
 
 module.exports = {
@@ -55,7 +56,7 @@ module.exports = {
     // list of kml links to load
     kml_urls : ['https://' + USERNAME + ':' + PASSWORD + '@' + SERVER_NAME + '/notes/rest/notesFeed.kml',
     				//'https://' + USERNAME + ':' + PASSWORD + '@' + SERVER_NAME + '/xgds_sample/rest/samplesFeed.kml',
-    				'https://' + USERNAME + ':' + PASSWORD + '@' + XGDS_SERVER_NAME + '/basaltApp/rest/hvnp_so2_link.kml'],
+    				'https://' + USERNAME + ':' + PASSWORD + '@' + SERVER_NAME + '/basaltApp/rest/hvnp_so2_link.kml'],
     
     // list of various sites we support
     sites : { 'HI_Mauna_Ulu' : { 'imagery' : 'CustomMaps/HI_lowqual_relief',

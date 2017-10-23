@@ -54,7 +54,7 @@ module.exports = {
     
     // list of kml links to load
     kml_urls : ['https://' + USERNAME + ':' + PASSWORD + '@' + SERVER_NAME + '/notes/rest/notesFeed.kml',
-    				'https://' + USERNAME + ':' + PASSWORD + '@' + XGDS_SERVER_NAME + '/basaltApp/rest/hvnp_so2_link.kml'],
+    				'https://' + USERNAME + ':' + PASSWORD + '@' + SERVER_NAME + '/basaltApp/rest/hvnp_so2_link.kml'],
 
     // list of various sites we support
     sites : { 'HI_Mauna_Ulu' : { 'imagery' : 'CustomMaps/HI_lowqual_relief',
