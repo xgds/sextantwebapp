@@ -31,6 +31,7 @@
     "markdown-it": "^8.4.0",
     "markdown-it-sanitizer": "^0.4.3",
     "moment": "^2.19.1",
+    "path": "^0.12.7",
     "plotly": "^1.0.6",
     "redux": "^3.7.2",
     "socket.io": "^1.5.1",

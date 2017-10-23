@@ -3,6 +3,9 @@ import {config} from './../../config/config_loader';
 import 'cesium/Source/Widgets/widgets.css';
 import './style.css';
 
+const path = require('path');
+
+
 import buildModuleUrl from 'cesium/Source/Core/buildModuleUrl';
 buildModuleUrl.setBaseUrl('./');
 
@@ -76,7 +79,11 @@ class ViewerWrapper{
             destination: config.destination,
             duration: 3,
             complete: function(){
-                //this.addTerrain('tilesets/HI_highqual');
+            		const terrainPath = config.sites[config.defaultSite].elevation; 
+            		if (terrainPath !== undefined){
+            			this.addTerrain(terrainPath);
+            		}
+            		
                 //this.addImagery('CustomMaps/MU_Pan_Sharp_contrast');
                 //  'https://s3-us-west-2.amazonaws.com/sextantdata'
                 // this.log('zoomed');
@@ -101,19 +108,19 @@ class ViewerWrapper{
     }
 
     serveraddress(){
-    	let result = this.host;
-    	if (this.port !== undefined){
-    		result +=  ':' + this.port;
-    	}
-    	if (this.urlPrefix !== undefined) {
-    		result += '/' + this.urlPrefix;
-    	}
-    	console.log('server address:' + result);
-    	return result;
+    		let result = this.host;
+    		if (this.port !== undefined){
+    			result +=  ':' + this.port;
+    		}
+    		if (this.urlPrefix !== undefined) {
+    			result += '/' + this.urlPrefix;
+    		}
+    		console.log('server address:' + result);
+    		return result;
     };
     
     toLongLatHeight(cartesian) {
-    	const cartographic = Cartographic.fromCartesian(cartesian);
+    		const cartographic = Cartographic.fromCartesian(cartesian);
         const longitude = CesiumMath.toDegrees(cartographic.longitude);
         const latitude = CesiumMath.toDegrees(cartographic.latitude);
         const carto_WGS84 = Ellipsoid.WGS84.cartesianToCartographic(cartesian);
@@ -159,7 +166,7 @@ class ViewerWrapper{
     };
 
     addImagery(folder_location, image_address){
-        if(typeof image_address === 'undefined') {
+        if(_.isUndefined(image_address)) {
             image_address = this.serveraddress();
         }
         this.layerList[folder_location] = this.layers.addImageryProvider(new CreateTileMapServiceImageryProvider({
@@ -168,11 +175,11 @@ class ViewerWrapper{
     };
 
     addTerrain(folder_location, image_address) {
-        if(typeof image_address === 'undefined') {
+        if(_.isUndefined(image_address)) {
             image_address = this.serveraddress();
         }
         const new_terrain_provider = new CesiumTerrainProvider({
-            url : image_address + '/' + folder_location
+            url : path.join(image_address, folder_location)
         });
         this.terrainList[folder_location] = new_terrain_provider;
         this.viewer.scene.terrainProvider = new_terrain_provider;

@@ -60,10 +60,14 @@ const fontAwesomePath = path.resolve(__dirname, 'node_modules', 'font-awesome');
 app.use('/font-awesome', express.static(fontAwesomePath));
 
 // Host terrain tiles
-// TODO: move terrain folder in here?
-//const terrainPath = 'https://s3-us-west-2.amazonaws.com/sextantdata';
-//const terrainPath = 'C:\\Users\\johan\\Dropbox (MIT)\\BASALT\\pextant\\data\\maps\\terrain';
-//app = terrainServer(app, terrainPath);
+try {
+	const terrainPath = config.sites[config.defaultSite].elevation; 
+	if (terrainPath !== undefined){
+		app = terrainServer(app, terrainPath);
+	}
+} catch (e) {
+	// pass
+}
 
 //require("!style!css!./style.css");
 
