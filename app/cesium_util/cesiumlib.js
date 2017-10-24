@@ -81,6 +81,7 @@ class ViewerWrapper{
             complete: function(){
             		const terrainPath = config.sites[config.defaultSite].elevation; 
             		if (terrainPath !== undefined){
+            			// does not currently work for some reason
             			this.addTerrain(terrainPath);
             		}
             		
@@ -178,8 +179,9 @@ class ViewerWrapper{
         if(_.isUndefined(image_address)) {
             image_address = this.serveraddress();
         }
+        let theUrl = path.join(image_address, folder_location);
         const new_terrain_provider = new CesiumTerrainProvider({
-            url : path.join(image_address, folder_location)
+            url : theUrl
         });
         this.terrainList[folder_location] = new_terrain_provider;
         this.viewer.scene.terrainProvider = new_terrain_provider;

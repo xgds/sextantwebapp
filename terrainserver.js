@@ -5,11 +5,12 @@ const path = require('path');
 const url = require('url');
 
 function serveTerrain(app, terrainPath) {
+	console.log('serving terrain');
     console.log(terrainPath);
 
     app.get(terrainPath + '/layer.json', function (req, res) {
     	//app.get('/tilesets/:tileset/layer.json', function (req, res) {
-    	        console.log('sending json layer');
+    	    console.log('sending json layer');
         res.sendFile(path.resolve(__dirname, 'public', 'layer.json'));
     });
 
@@ -30,7 +31,7 @@ function serveTerrain(app, terrainPath) {
         } else {
             const localTerrain = path.resolve(terrainPath, z, x, y + '.terrain');
             //const localTerrain = url.resolve(terrainPath, tileset, z, x, y + '.terrain');
-            console.log(localTerrain);
+            console.log('resolving path ' + localTerrain);
             res.setHeader('Content-Encoding', 'gzip');
             res.sendFile(localTerrain);
             //res.redirect(localTerrain);

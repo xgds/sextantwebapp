@@ -63,9 +63,11 @@ app.use('/font-awesome', express.static(fontAwesomePath));
 try {
 	const terrainPath = config.sites[config.defaultSite].elevation; 
 	if (terrainPath !== undefined){
+		console.log('building terrain server for ' + terrainPath);
 		app = terrainServer(app, terrainPath);
 	}
 } catch (e) {
+	console.log(e);
 	// pass
 }
 
