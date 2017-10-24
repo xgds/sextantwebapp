@@ -30,8 +30,10 @@ function loadDevices(){
 		});
 
 		deviceNames = deviceNames.slice(0,-1);
-
-		setInterval(function(){checkConnectedDevices();},1000);//Start Polling
+		
+		if (!_.isEmpty(deviceNames)){
+			setInterval(function(){checkConnectedDevices();},1000);//Start Polling
+		}
 	}
 	else{
 		$('#connectedDevices').css("display","none");

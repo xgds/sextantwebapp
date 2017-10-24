@@ -58,11 +58,11 @@ module.exports = {
 
     // list of various sites we support
     sites : { 'HI_Mauna_Ulu' : { 'imagery' : 'CustomMaps/HI_lowqual_relief',
-    							 'elevation' : 'tilesets/HI_highqual',
+    							 'elevation' : 'cesium_tilesets/HI_highqual',
     							 'centerPoint' : [-155.2118, 19.3647, 5000]
     							},
 				'HI_Kilauea' : { 'imagery' : 'CustomMaps/HI_kilauea',
-		 			'elevation' : '/cesium_tilesets/HI_kilauea',
+		 			'elevation' : 'cesium_tilesets/HI_kilauea',
 					'centerPoint' : [-155.260059,  19.408373, 5000]
 				},
     			  'ID_COTM' : { 'imagery' : 'TODO',
