@@ -13,23 +13,29 @@
 //CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 //specific language governing permissions and limitations under the License.
 // __END_LICENSE__
+
+
+let USERNAME = 'TODO:USERNAME';
+let PASSWORD = 'TODO:PASSWORD';
+let SERVER_NAME = 'localhost';
+
 module.exports = {
 
 	// The server that is running this node app 
     server : { port : 3001,
     		   cesium_port: undefined,
-    		   name : 'localhost',
+    		   name : SERVER_NAME,
     		   protocol: 'http',
     		   nginx_prefix: 'wristApp'},
     		   
     // This should only exist in xGDS side
     xgds : { port : 443, 
-    	    name : 'localhost',
+    	    name : SERVER_NAME,
     	    protocol : 'https',
     	    ev_channels: ['EV1', 'EV2'],
     	    follow_channel: 'EV1',
-    	    	username: 'TODO put in username',
-    	    	password: 'TODO put in auth token'
+    	    	username: USERNAME,
+    	    	password: PASSWORD
     	    	},
     
     // If we are using web sockets this should only exist in the default side
@@ -48,8 +54,9 @@ module.exports = {
     defaultSite : 'HI_Kilauea',
     
     // list of kml links to load
-    kml_urls : ['https://localhost/notes/notesFeed.kml',
-    	           'https://localhost/basaltApp/hvnp_so2.kml'],
+    kml_urls : ['https://' + USERNAME + ':' + PASSWORD + '@' + SERVER_NAME + '/notes/rest/notesFeed.kml',
+    				//'https://' + USERNAME + ':' + PASSWORD + '@' + SERVER_NAME + '/xgds_sample/rest/samplesFeed.kml',
+    				'https://' + USERNAME + ':' + PASSWORD + '@' + SERVER_NAME + '/basaltApp/rest/hvnp_so2_link.kml'],
     
     // list of various sites we support
     sites : { 'HI_Mauna_Ulu' : { 'imagery' : 'CustomMaps/HI_lowqual_relief',
@@ -57,7 +64,7 @@ module.exports = {
     							 'centerPoint' : [-155.2118, 19.3647, 5000]
     							},
 			  'HI_Kilauea' : { 'imagery' : 'CustomMaps/HI_kilauea',
-				  			  'elevation' : 'tilesets/HI_kilauea',
+		 					   'elevation' : '/cesium_tilesets/HI_kilauea',
 				  			  'centerPoint' : [-155.260059,  19.408373, 5000]
 			  },
     			  'ID_COTM' : { 'imagery' : 'TODO',

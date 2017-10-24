@@ -1,4 +1,5 @@
 const express = require('express');
+//const cors = require('cors')
 const path = require('path');
 const terrainServer = require('./terrainserver');
 const webpackDevMiddleware = require("webpack-dev-middleware");
@@ -59,16 +60,33 @@ const fontAwesomePath = path.resolve(__dirname, 'node_modules', 'font-awesome');
 app.use('/font-awesome', express.static(fontAwesomePath));
 
 // Host terrain tiles
-// TODO: move terrain folder in here?
-//const terrainPath = 'https://s3-us-west-2.amazonaws.com/sextantdata';
-//const terrainPath = 'C:\\Users\\johan\\Dropbox (MIT)\\BASALT\\pextant\\data\\maps\\terrain';
-//app = terrainServer(app, terrainPath);
+try {
+	const terrainPath = config.sites[config.defaultSite].elevation; 
+	if (terrainPath !== undefined){
+		console.log('building terrain server for ' + terrainPath);
+		app = terrainServer(app, terrainPath);
+	}
+} catch (e) {
+	console.log(e);
+	// pass
+}
 
 //require("!style!css!./style.css");
 
 //TODO this seems to work without this but may need it later.
 //app.set('trust proxy', true);
 //app.set('trust proxy', 'loopback');
+
+// Trying to set up CORS, no joy
+//app.options('*', cors())
+//app.use(cors())
+
+//app.use(function(req, res, next) {
+//	console.log('shoving headers in');
+//	  res.header("Access-Control-Allow-Origin", "*");
+//	  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+//	  next();
+//	});
 
 const port = config.server.port;
 app.listen(port, function () {

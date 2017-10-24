@@ -13,12 +13,15 @@
 //CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 //specific language governing permissions and limitations under the License.
 // __END_LICENSE__
+
+let SERVER_NAME = 'localhost';
+
 module.exports = {
 
 	// The server that is running this node app 
     server : { port : 3001, 
     		   cesium_port: 3001,
-    		   name : 'localhost',
+    		   name : SERVER_NAME,
     		   protocol: 'http',
     		   nginx_prefix: 'wristApp'},
     		   

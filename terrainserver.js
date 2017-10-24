@@ -5,14 +5,17 @@ const path = require('path');
 const url = require('url');
 
 function serveTerrain(app, terrainPath) {
+	console.log('serving terrain');
     console.log(terrainPath);
 
-    app.get('/tilesets/:tileset/layer.json', function (req, res) {
-        console.log('sending json layer');
+    app.get(terrainPath + '/layer.json', function (req, res) {
+    	//app.get('/tilesets/:tileset/layer.json', function (req, res) {
+    	    console.log('sending json layer');
         res.sendFile(path.resolve(__dirname, 'public', 'layer.json'));
     });
 
-    app.get('/tilesets/:tileset/:z/:x/:y.terrain', function (req, res) {
+    app.get(terrainPath + '/:z/:x/:y.terrain', function (req, res) {
+    //app.get('/tilesets/:tileset/:z/:x/:y.terrain', function (req, res) {
         const x = req.params.x;
         const y = req.params.y;
         const z = req.params.z;
@@ -26,9 +29,9 @@ function serveTerrain(app, terrainPath) {
             res.set('Content-Encoding', 'gzip');
             res.sendFile(path.resolve(__dirname, 'public', 'smallterrain-blank.terrain'));
         } else {
-            const localTerrain = path.resolve(terrainPath, tileset, z, x, y + '.terrain');
+            const localTerrain = path.resolve(terrainPath, z, x, y + '.terrain');
             //const localTerrain = url.resolve(terrainPath, tileset, z, x, y + '.terrain');
-            console.log(localTerrain);
+            console.log('resolving path ' + localTerrain);
             res.setHeader('Content-Encoding', 'gzip');
             res.sendFile(localTerrain);
             //res.redirect(localTerrain);

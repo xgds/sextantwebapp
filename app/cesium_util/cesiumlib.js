@@ -3,6 +3,9 @@ import {config} from './../../config/config_loader';
 import 'cesium/Source/Widgets/widgets.css';
 import './style.css';
 
+const path = require('path');
+
+
 import buildModuleUrl from 'cesium/Source/Core/buildModuleUrl';
 buildModuleUrl.setBaseUrl('./');
 
@@ -10,16 +13,14 @@ buildModuleUrl.setBaseUrl('./');
 import {Viewer, EllipsoidTerrainProvider, Cartesian3, Cartesian2, PolygonGeometry, PolygonHierarchy, CesiumMath, Cartographic, Ellipsoid, Color,
 		sampleTerrain, ScreenSpaceEventHandler, ScreenSpaceEventType, Rectangle, RectangleGeometry, LabelStyle, CzmlDataSource, CustomDataSource,
 		CreateTileMapServiceImageryProvider, CesiumTerrainProvider, CallbackProperty, VerticalOrigin, HorizontalOrigin, Matrix4, ConstantProperty,
-		SceneMode,
-		PinBuilder, Transforms, HeadingPitchRoll, ColorGeometryInstanceAttribute, GeometryInstance, Primitive, KmlDataSource, Clock} from './cesium_imports'
+		SceneMode, SampledPositionProperty, JulianDate, ColorMaterialProperty, ClockRange, ClockViewModel,
+		Transforms, HeadingPitchRoll, ColorGeometryInstanceAttribute, GeometryInstance, Primitive, KmlDataSource, Clock} from './cesium_imports'
 
 import viewerCesiumNavigationMixin from './cesium-navigation/viewerCesiumNavigationMixin';
 
 if (!('destination' in config)) {
 	config.destination = Cartesian3.fromDegrees(config.siteConfig.centerPoint[0], config.siteConfig.centerPoint[1], config.siteConfig.centerPoint[2]);
 }
-
-const pinBuilder = new PinBuilder();
 
 class ViewerWrapper{
     constructor(host, port, url_prefix, terrainExaggeration, container) {
@@ -47,6 +48,10 @@ class ViewerWrapper{
             fileExtension : 'jpg'
         });
 
+        let clock = new Clock({
+			clockRange: ClockRange.UNBOUNDED
+		});
+		
         const viewer = new Viewer(this.container, {
             timeline : false,
             animation : false,
@@ -59,7 +64,7 @@ class ViewerWrapper{
             baseLayerPicker : false,
             terrainProvider : terrainProvider,
             sceneMode: SceneMode.SCENE3D,
-            clock: new Clock() //Added by Kenneth 8/12/2017
+            clockViewModel: new ClockViewModel(clock)
             //imageryProvider : imageryProvider
 
         });
@@ -74,7 +79,12 @@ class ViewerWrapper{
             destination: config.destination,
             duration: 3,
             complete: function(){
-                //this.addTerrain('tilesets/HI_highqual');
+            		const terrainPath = config.sites[config.defaultSite].elevation; 
+            		if (terrainPath !== undefined){
+            			// does not currently work for some reason
+            			this.addTerrain(terrainPath);
+            		}
+            		
                 //this.addImagery('CustomMaps/MU_Pan_Sharp_contrast');
                 //  'https://s3-us-west-2.amazonaws.com/sextantdata'
                 // this.log('zoomed');
@@ -99,19 +109,19 @@ class ViewerWrapper{
     }
 
     serveraddress(){
-    	let result = this.host;
-    	if (this.port !== undefined){
-    		result +=  ':' + this.port;
-    	}
-    	if (this.urlPrefix !== undefined) {
-    		result += '/' + this.urlPrefix;
-    	}
-    	console.log('server address:' + result);
-    	return result;
+    		let result = this.host;
+    		if (this.port !== undefined){
+    			result +=  ':' + this.port;
+    		}
+    		if (this.urlPrefix !== undefined) {
+    			result += '/' + this.urlPrefix;
+    		}
+    		console.log('server address:' + result);
+    		return result;
     };
     
     toLongLatHeight(cartesian) {
-    	const cartographic = Cartographic.fromCartesian(cartesian);
+    		const cartographic = Cartographic.fromCartesian(cartesian);
         const longitude = CesiumMath.toDegrees(cartographic.longitude);
         const latitude = CesiumMath.toDegrees(cartographic.latitude);
         const carto_WGS84 = Ellipsoid.WGS84.cartesianToCartographic(cartesian);
@@ -157,7 +167,7 @@ class ViewerWrapper{
     };
 
     addImagery(folder_location, image_address){
-        if(typeof image_address === 'undefined') {
+        if(_.isUndefined(image_address)) {
             image_address = this.serveraddress();
         }
         this.layerList[folder_location] = this.layers.addImageryProvider(new CreateTileMapServiceImageryProvider({
@@ -166,11 +176,12 @@ class ViewerWrapper{
     };
 
     addTerrain(folder_location, image_address) {
-        if(typeof image_address === 'undefined') {
+        if(_.isUndefined(image_address)) {
             image_address = this.serveraddress();
         }
+        let theUrl = path.join(image_address, folder_location);
         const new_terrain_provider = new CesiumTerrainProvider({
-            url : image_address + '/' + folder_location
+            url : theUrl
         });
         this.terrainList[folder_location] = new_terrain_provider;
         this.viewer.scene.terrainProvider = new_terrain_provider;
@@ -274,31 +285,31 @@ class ViewerWrapper{
     // returns positions projected on the terrain in Cartesian3, required for entity creation
     // expecting data in dictionaries containing latitude and longitude as keys
     getRaisedPositions(latLongCoords) {
-        //console.log(latLongCoords);
-    	if (latLongCoords.length == 0){
-    		return;
-    	}
-    	const cartographicArray = [];
-    	if (Array.isArray(latLongCoords)) {
-        	if (!('latitude' in latLongCoords[0])){
-        		return this.getRaisedPositionsFromArray(latLongCoords);
-        	}
-        	latLongCoords.forEach(function(p) {
-                let cartographicPoint = Cartographic.fromDegrees(p.longitude, p.latitude);
-                cartographicArray.push(cartographicPoint);
-            });
-    	} else {
-    		let cartographicPoint = Cartographic.fromDegrees(latLongCoords.longitude, latLongCoords.latitude);
-            cartographicArray.push(cartographicPoint);
-    	}
-    	
-        return this.getHeights(cartographicArray);
+	    	//console.log(latLongCoords);
+	    	if (latLongCoords.length == 0){
+	    		return;
+	    	}
+	    	const cartographicArray = [];
+	    	if (Array.isArray(latLongCoords)) {
+	    		if (!('latitude' in latLongCoords[0])){
+	    			return this.getRaisedPositionsFromArray(latLongCoords);
+	    		}
+	    		latLongCoords.forEach(function(p) {
+	    			let cartographicPoint = Cartographic.fromDegrees(p.longitude, p.latitude);
+	    			cartographicArray.push(cartographicPoint);
+	    		});
+	    	} else {
+	    		let cartographicPoint = Cartographic.fromDegrees(latLongCoords.longitude, latLongCoords.latitude);
+	    		cartographicArray.push(cartographicPoint);
+	    	}
+	
+	    	return this.getHeights(cartographicArray);
     };
     
     // returns positions projected on the terrain in Cartesian3, required for entity creation
     // expecting data in array of [[latitude, longitude],[latitude,longitude]]
     getRaisedPositionsFromArray(latLongCoords) {
-    	const cartographicArray = [];
+    		const cartographicArray = [];
         latLongCoords.forEach(function(p) {
             let cartographicPoint = Cartographic.fromDegrees(p[0], p[1]);
             cartographicArray.push(cartographicPoint);
@@ -307,7 +318,7 @@ class ViewerWrapper{
     };
     
     getHeights(cartographicArray) {
-    	return new Promise(function(resolve, reject) {
+    		return new Promise(function(resolve, reject) {
 	        const ellipsoid = this.viewer.scene.globe.ellipsoid;
 	        const terrainExaggeration = this.terrainExaggeration;
 	        // 18 is the level of detail
@@ -323,6 +334,7 @@ class ViewerWrapper{
     };
 }
 
+// We are no longer using this class, we are using path instead.
 class DynamicLines{
 	
 	constructor(viewerWrapper, latLongPoints, name, styleOptions) {
@@ -426,34 +438,6 @@ const heading = function(headingAngle, camera) {
 };
 
 
-// TODO we could use this for notes on map but not good for stations.
-// example usage:
-//buildPin({longitude:station.geometry.coordinates[0], latitude:station.geometry.coordinates[1]}, 
-//station.name, this.stationImageUrl, this.viewerWrapper, function(entity){
-//this.elements[station.id] = entity;
-//}.bind(this));
-
-const buildPin = function(position, label, url, id, viewerWrapper, callback) {
-	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
-		let stationPin = pinBuilder.fromUrl(url, Color.SALMON, 48);
-		let options = {
-		        position: raisedPoint[0],
-		        label: {
-		            text: label,
-		            verticalOrigin: VerticalOrigin.TOP
-		        },
-		        billboard: {
-		            image: stationPin,
-		            verticalOrigin: VerticalOrigin.CENTER
-		        },
-		        id: id
-		}
-		let entity = viewerWrapper.viewer.entities.add(options);
-        if (callback !== undefined){
-        	callback(entity);
-        }
-	});
-};
 
 const buildLineString = function(latlongPoints, styleOptions, id, viewerWrapper, callback) {
     viewerWrapper.getRaisedPositions(latlongPoints).then(function (raisedMidPoints) {
@@ -562,181 +546,41 @@ const buildRectangle = function(position, width, height, label, color, id, viewe
 	});
 }
 
-const getArrowPoints = function(height) {
-	let positions = [];
-	positions.push(new Cartesian2(0, 0));
-	positions.push(new Cartesian2(-1, -0.3));
-	positions.push(new Cartesian2(0, 1));
-	positions.push(new Cartesian2(1, -0.3));
-	positions.push(new Cartesian2(0, 0));
-	return positions;
-}
-
-const getArrowPoints3 = function(height) {
-	let positions = [];
-	positions.push(new Cartesian3(0, 0, 100000));
-	positions.push(new Cartesian3(-10, -3, 100000));
-	positions.push(new Cartesian3(0, 10, 100000));
-	positions.push(new Cartesian3(10, -3, 100000));
-	positions.push(new Cartesian3(0, 0, 100000));
-	return positions;
-}
-
-const czml = [{
-	"id" : "document",
-    "name" : "arrow czml",
-    "version" : "1.0"
-},  {
-    "id" : "arrow",
-    "name" : "arrow",
-    "polygon" : {
-        "positions" : {
-            "cartesian" : [0, 0, 100000,
-                                     -10, -3, 100000,
-                                     0, 10, 100000,
-                                     10, -3, 100000,
-                                     0, 0, 100000
-            ]
-        },
-        "material" : {
-            "solidColor" : {
-                "color" : {
-                    "rgba" : [255, 100, 0, 128]
-                }
-            }
-        },
-        "extrudedHeight" : 50
-    }
-}];
-
-const buildPositionDataSource = function(position, heading, label, color, labelColor, id, getPositionFunction, trackSse, viewerWrapper, callback) {
-	// This builds a circle on the surface; trackSseUtils currently uses this ellipse to modify the material and rotation of material
-	// and to update position to indicate current position and heading from GPS input.
-	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
-		let dataSource = new CustomDataSource(id);
-		
-		if (heading == "") {
-			heading = 0.0;
-		}
-		
-		let ellipseEntity = dataSource.entities.add({
-		   position: raisedPoint[0],
-		   label : {
-					text: label,
-					verticalOrigin: VerticalOrigin.CENTER,
-			        horizontalOrigin: HorizontalOrigin.CENTER,
-			        eyeOffset: new Cartesian3(8, 0, 1.0),
-			        fillColor: labelColor,
-			        outlineWidth: 3.0
-				},
-		   ellipse : {
-					semiMinorAxis: 3.5,
-					semiMajorAxis: 3.5,
-					height: 0,
-					extrudedHeight: 0,
-					material: color,
-					stRotation: heading
-			}
-		});
-		
-		
-		viewerWrapper.viewer.dataSources.add(dataSource);
-		
-		if (callback !== undefined){
-    			callback(dataSource);
-		}
-		
-	}); 
-};
-
-/*
-const buildArrow = function(position, heading, height, label, color, id, viewerWrapper, callback) {
-	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
-		
-		// THIS STUFF WORKS
-		let dataSourcePromise = CzmlDataSource.load(czml).then(function(loadedData){
-			
-			let entity = loadedData.entities.values[0];
-			
-			if (heading == undefined || _.isEmpty(heading)) {
-				heading = 0;
-			}
-			
-			const hpr = new HeadingPitchRoll(heading, 0.0, 0.0);
-			const transform = Transforms.headingPitchRollToFixedFrame(raisedPoint[0], hpr);
-			entity.orientation = transform;  // this doesn't work, nor does using position. endlessly baffling.
-			
-			if (label !== undefined && !_.isEmpty(label)){
-				entity.label = {
-					text: label,
-					verticalOrigin: VerticalOrigin.TOP,
-			        horizontalOrigin: HorizontalOrigin.RIGHT,
-			        fillColor: Color.YELLOW,
-			        outlineWidth: 3.0
-				}
-			}
-
-			viewerWrapper.viewer.entities.add(entity);
-			viewerWrapper.viewer.zoomTo(entity);
-			
-			if (callback !== undefined){
-		    		callback(entity);
-		    }
-
-		});
-		
-		return;
-		
-		// THIS STUFF DOESN'T
-		const options =  {
-		    polygonHierarchy : new PolygonHierarchy(Cartesian3.fromDegreesArray([0, 0.2, -1, -0.15, 0, 1, 1, -0.15, 0,2])),
-			//polygonHierarchy : new PolygonHierarchy(getArrowPoints3()),
-		    extrudedHeight : height
-		  };
-		
-		const hpr = new HeadingPitchRoll(heading, 0.0, 0.0);
-		const transform = Transforms.headingPitchRollToFixedFrame(raisedPoint[0], hpr);
-
-		const pg = new PolygonGeometry(options);
-		
-		const geometryOptions = {
-				geometry: pg,
-				attributes: {
-					color: ColorGeometryInstanceAttribute.fromColor(color),
-				},
-				id: id
-//				modelMatrix: updatedTransform
-		}
-		const instance = new GeometryInstance(geometryOptions);
-		
-		const primitive = viewerWrapper.scene.primitives.add(new Primitive({
-			debugShowBoundingVolume: true,
-	        geometryInstances: [instance],
-	        modelMatrix: transform
-	    }));
+// this is the main function we are using to render a path and an ellipse with the current position.
+const buildPath = function(spp, label, labelColor, ellipseColor, id, headingCallback, viewerWrapper, callback){
 	
-	    if (callback !== undefined){
-	    	callback(primitive);
-	    }
-	});
-}
-*/
-
-const updatePositionHeading = function(entity, position, heading, viewerWrapper, callback){
-	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
-		if (heading == undefined || _.isEmpty(heading)) {
-			heading = 0;
+	let entityPath = viewerWrapper.viewer.entities.add({
+	    position : spp,
+	    name : 'path',
+	    path : {
+	        resolution : 1,
+	        material : labelColor
+	    },
+	    label : {
+			text: label,
+			verticalOrigin: VerticalOrigin.CENTER,
+	        horizontalOrigin: HorizontalOrigin.CENTER,
+	        eyeOffset: new Cartesian3(8, 0, 1.0),
+	        fillColor: labelColor,
+	        outlineWidth: 3.0
+		},
+		ellipse : {
+				semiMinorAxis: 2,
+				semiMajorAxis: 2,
+				height: 1,
+				extrudedHeight: 0,
+				material: ellipseColor,
+				stRotation: headingCallback
 		}
-
-		const hpr = new HeadingPitchRoll(heading, 0.0, 0.0);
-		const transform = Transforms.headingPitchRollToFixedFrame(raisedPoint[0], hpr, result=entity.orientation);
-		entity.orientation = transform;  // this doesn't work, nor does using position. endlessly baffling.
-
-		if (callback !== undefined){
-	    	callback(entity);
-	    }
 	});
-};
+	
+	if (callback !== undefined){
+		callback(entityPath);
+	}
+}
+
+
+
 
 const loadKml = function(kmlUrl, viewerWrapper, callback) {
 	viewerWrapper.viewer.dataSources.add(KmlDataSource.load(kmlUrl, {
@@ -761,4 +605,5 @@ const loadKmls = function(kmlUrls, viewerWrapper, callback){
 	}
 }
 
-export {ViewerWrapper, DynamicLines, zoom, heading, buildLineString, buildPin, buildCylinder, buildRectangle, updatePositionHeading, buildSurfaceCircle, loadKml, loadKmls, buildPositionDataSource}
+export {ViewerWrapper, DynamicLines, zoom, heading, buildLineString, buildCylinder, buildRectangle, buildSurfaceCircle, 
+		loadKml, loadKmls, buildPath}

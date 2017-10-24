@@ -198,10 +198,12 @@ class PlanManager {
 			this.clearPlan();
 		}
 		
-		let currentPlanUrl = hostname + '/xgds_planner2/plans/today/json'
+		let currentPlanUrl = hostname + '/xgds_planner2/rest/plans/today/json'
 		$.ajax({
             url: currentPlanUrl,
             dataType: 'json',
+            xhrFields: {withCredentials: true},
+            beforeSend: beforeSend,
             success: $.proxy(function(data) {
             	if (data != null){
             		let planDict = data;
@@ -445,7 +447,7 @@ class PlanManager {
 			}
 
 
-			let savePlanUrl = hostname + '/xgds_planner2/plan/' + this.plan.serverId + '/' + this.plan.name.replace(/ /g,"_") + '.json';
+			let savePlanUrl = hostname + '/xgds_planner2/rest/plan/' + this.plan.serverId + '/' + this.plan.name.replace(/ /g,"_") + '.json';
 			
 			// save as uses post
 			let method='PUT';
@@ -459,6 +461,7 @@ class PlanManager {
 	            url: savePlanUrl,
 	            method: method,
 	            dataType: 'json',
+	            xhrFields: {withCredentials: true},
 	            beforeSend: beforeSend,
 	            data: JSON.stringify(this.plan),
 	            success: $.proxy(function(data) {
@@ -491,11 +494,12 @@ class PlanManager {
 		// Schedule the current plan to go with the currently active flight.
 		// this makes it the 'active' plan 
 		
-		let schedulePlanUrl = hostname + '/xgds_planner2/schedulePlanActive/' + config.xgds.follow_channel + '/' + this.plan.serverId;
+		let schedulePlanUrl = hostname + '/xgds_planner2/rest/schedulePlanActive/' + config.xgds.follow_channel + '/' + this.plan.serverId;
 		$.ajax({
             url: schedulePlanUrl,
             method: 'POST',
             dataType: 'json',
+            xhrFields: {withCredentials: true},
             beforeSend: beforeSend,
             success: $.proxy(function(data) {
 	            	if (data != null){
@@ -507,11 +511,7 @@ class PlanManager {
             		console.log(data);
             }, this)
           });
-	
 	}
-
-
-
 
 }
 
