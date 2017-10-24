@@ -31,7 +31,7 @@ class PlanManager {
 		this.stationElements = {};
 		this.stationBoundaries = {};
 		this.segmentStyle = {'material':Color.ORANGE};
-		this.stationImageUrl = hostname + '/' + config.server.nginx_prefix + '/icons/station_circle.png';
+		this.stationImageUrl = this.hostname + '/' + config.server.nginx_prefix + '/icons/station_circle.png';
 		//this.stationImageUrl = config.server.protocol + "://" + config.server.name + '/' + config.server.nginx_prefix + '/' + '/icons/station_circle.png';
 		this.stationCylinderStyle = {'material': new ImageMaterialProperty({'image':this.stationImageUrl, 'transparent':true}), 'translucent': true, 'color': new Color(1.0, 1.0, 1.0, 0.5)};
 		this.stationBoundaryStyle = {'material': Color.YELLOW.withAlpha(0.25)};
@@ -198,7 +198,7 @@ class PlanManager {
 			this.clearPlan();
 		}
 		
-		let currentPlanUrl = hostname + '/xgds_planner2/rest/plans/today/json'
+		let currentPlanUrl = this.hostname + '/xgds_planner2/rest/plans/today/json'
 		$.ajax({
             url: currentPlanUrl,
             dataType: 'json',
@@ -447,7 +447,7 @@ class PlanManager {
 			}
 
 
-			let savePlanUrl = hostname + '/xgds_planner2/rest/plan/' + this.plan.serverId + '/' + this.plan.name.replace(/ /g,"_") + '.json';
+			let savePlanUrl = this.hostname + '/xgds_planner2/rest/plan/' + this.plan.serverId + '/' + this.plan.name.replace(/ /g,"_") + '.json';
 			
 			// save as uses post
 			let method='PUT';
@@ -494,7 +494,7 @@ class PlanManager {
 		// Schedule the current plan to go with the currently active flight.
 		// this makes it the 'active' plan 
 		
-		let schedulePlanUrl = hostname + '/xgds_planner2/rest/schedulePlanActive/' + config.xgds.follow_channel + '/' + this.plan.serverId;
+		let schedulePlanUrl = this.hostname + '/xgds_planner2/rest/schedulePlanActive/' + config.xgds.follow_channel + '/' + this.plan.serverId;
 		$.ajax({
             url: schedulePlanUrl,
             method: 'POST',

@@ -185,10 +185,6 @@ class ViewerWrapper{
         //}
         //let theUrl = path.join(image_address, folder_location);
         let theUrl = folder_location;
-//        if (this.urlPrefix !== undefined) {
-//			theUrl = path.join(this.urlPrefix, folder_location);
-//		}
-        debugger;
         const new_terrain_provider = new CesiumTerrainProvider({
             url : theUrl
         });
