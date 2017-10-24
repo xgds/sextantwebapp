@@ -7,6 +7,9 @@ const url = require('url');
 function serveTerrain(app, terrainPath) {
 	console.log('serving terrain');
     console.log(terrainPath);
+    if (terrainPath.charAt(0) !== '/') {
+    		terrainPath = '/' + terrainPath;
+    }
 
     app.get(terrainPath + '/layer.json', function (req, res) {
     	//app.get('/tilesets/:tileset/layer.json', function (req, res) {
@@ -16,6 +19,8 @@ function serveTerrain(app, terrainPath) {
 
     app.get(terrainPath + '/:z/:x/:y.terrain', function (req, res) {
     //app.get('/tilesets/:tileset/:z/:x/:y.terrain', function (req, res) {
+    		console.log('GETTING TERRAIN TILE');
+    		debugger;
         const x = req.params.x;
         const y = req.params.y;
         const z = req.params.z;
