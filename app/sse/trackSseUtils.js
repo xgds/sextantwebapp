@@ -29,9 +29,10 @@ import {SSE} from './sseUtils'
 
 let sse = undefined;
 let fakeHeading = false;
+let hostname = undefined;
 
 if (hasSSE){
-    const hostname = config.xgds.protocol + '://' + config.xgds.name;
+    hostname = config.xgds.protocol + '://' + config.xgds.name;
 	sse = new SSE(hostname);
 }
 
