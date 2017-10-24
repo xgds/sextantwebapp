@@ -79,10 +79,14 @@ class ViewerWrapper{
             destination: config.destination,
             duration: 3,
             complete: function(){
-            		const terrainPath = config.sites[config.defaultSite].elevation; 
-            		if (terrainPath !== undefined){
-            			// does not currently work for some reason
-            			this.addTerrain(terrainPath);
+            		try{
+	            		const terrainPath = config.sites[config.defaultSite].elevation; 
+	            		if (terrainPath !== undefined){
+	            			this.addTerrain(terrainPath);
+	            		}
+            		} catch (e){
+            			// in case there was no terrain
+            			console.log(e);
             		}
             		
                 //this.addImagery('CustomMaps/MU_Pan_Sharp_contrast');
@@ -176,10 +180,15 @@ class ViewerWrapper{
     };
 
     addTerrain(folder_location, image_address) {
-        if(_.isUndefined(image_address)) {
-            image_address = this.serveraddress();
-        }
-        let theUrl = path.join(image_address, folder_location);
+        //if(_.isUndefined(image_address)) {
+        //    image_address = this.serveraddress();
+        //}
+        //let theUrl = path.join(image_address, folder_location);
+        let theUrl = folder_location;
+//        if (this.urlPrefix !== undefined) {
+//			theUrl = path.join(this.urlPrefix, folder_location);
+//		}
+        debugger;
         const new_terrain_provider = new CesiumTerrainProvider({
             url : theUrl
         });
