@@ -1,3 +1,5 @@
 public/CustomMaps
 node_modules
 .idea/
+public/cesium_tilesets
+public/cesium-assets

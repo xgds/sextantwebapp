@@ -66,6 +66,7 @@ class TrackSSE {
 		this.followPosition = true;
 		this.isInitialized=false;
 		this.isMoving=false;
+		this.range = 500; // current camera range
 		
 		// initialize
 		this.getCurrentPositions();
@@ -80,19 +81,46 @@ class TrackSSE {
 		this.viewerWrapper.viewer.camera.moveStart.addEventListener(function(){context.isMoving=true;});
 		this.viewerWrapper.viewer.camera.moveEnd.addEventListener(function(){context.isMoving=false;});
 
+		this.viewerWrapper.viewer.scene.preRender.addEventListener(function(){
+			if(this.followPosition && !this.isMoving){
+				if (!(config.xgds.follow_channel in this.cPaths)){
+					return;
+				}
+                let ray = this.viewerWrapper.camera.getPickRay(new Cartesian2(
+	            Math.round(this.viewerWrapper.viewer.scene.canvas.clientWidth / 2),
+	            Math.round(this.viewerWrapper.viewer.scene.canvas.clientHeight / 2)
+	            ));
+			    let position = this.viewerWrapper.viewer.scene.globe.pick(ray, this.viewerWrapper.viewer.scene);
+			    if(position != undefined){
+				    let newRange = Cartesian3.distance(position, this.viewerWrapper.camera.position);
+				    if(newRange <this.range-5 || newRange > this.range + 5){ //Check if range is different
+				    		this.range = newRange;
+				    }
+				    this.viewerWrapper.viewer.zoomTo(this.cPaths[config.xgds.follow_channel], new HeadingPitchRange(0, -Math.PI/2.0, this.range));
+				
+			}
+			}
+		},this);
 	};
 
 	setFollowPosition(value) {
+		//debugger;
 		// follow the current position
 		
 		this.followPosition = value;
-		// tracked entity does follow it but it mucks with the camera angle
 //		if (value){
-//			this.viewerWrapper.viewer.trackedEntity = this.cPaths[config.xgds.follow_channel];
+//
+//			let entity = this.cPaths[config.xgds.follow_channel];
+//			let entityPosition = entity.position.getValue(JulianDate.now());
+//			entity.viewFrom = new Cartesian3(0,0,this.viewerWrapper.viewer.camera.position.z-entityPosition.z);
+//
+//			this.viewerWrapper.viewer.trackedEntity = entity;
 //		} else {
 //			this.viewerWrapper.viewer.trackedEntity = undefined;
 //		}
 	};
+
+
 	
 	allChannels(theFunction, context){
 		// look up all the channels from the server
