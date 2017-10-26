@@ -59,6 +59,9 @@ app.use('/jquery-mobile', express.static(jqueryMobilePath));
 const fontAwesomePath = path.resolve(__dirname, 'node_modules', 'font-awesome');
 app.use('/font-awesome', express.static(fontAwesomePath));
 
+const imageryPath = path.resolve(__dirname, 'public', 'CustomMaps');
+app.use('/CustomMaps', express.static(imageryPath));
+
 // Host terrain tiles
 try {
 	const terrainPath = config.sites[config.defaultSite].elevation; 

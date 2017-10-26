@@ -88,8 +88,8 @@ class ViewerWrapper{
             			// in case there was no terrain
             			console.log(e);
             		}
-            		
-                //this.addImagery('CustomMaps/MU_Pan_Sharp_contrast');
+				const imageryPath = config.sites[config.defaultSite].imagery;
+                this.addImagery(imageryPath);
                 //  'https://s3-us-west-2.amazonaws.com/sextantdata'
                 // this.log('zoomed');
                 //this.addImagery('CustomMaps/HI_air_imagery_relief_100');
