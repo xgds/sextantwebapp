@@ -64,8 +64,8 @@ class ViewerWrapper{
             baseLayerPicker : false,
             terrainProvider : terrainProvider,
             sceneMode: SceneMode.SCENE3D,
-            clockViewModel: new ClockViewModel(clock)
-            //imageryProvider : imageryProvider
+            clockViewModel: new ClockViewModel(clock),
+            imageryProvider : imageryProvider
 
         });
         
@@ -88,8 +88,15 @@ class ViewerWrapper{
             			// in case there was no terrain
             			console.log(e);
             		}
-				const imageryPath = config.sites[config.defaultSite].imagery;
-                this.addImagery(imageryPath);
+					try{
+                        const imageryPath = config.sites[config.defaultSite].imagery;
+						if (imageryPath !== undefined){
+							this.addImagery(imageryPath);
+						}
+					} catch (e){
+						// in case there was no terrain
+						console.log(e);
+					}
                 //  'https://s3-us-west-2.amazonaws.com/sextantdata'
                 // this.log('zoomed');
                 //this.addImagery('CustomMaps/HI_air_imagery_relief_100');

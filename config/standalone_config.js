@@ -45,7 +45,6 @@ module.exports = {
             'centerPoint' : [-155.2118, 19.3647, 5000]
         },
         'HI_Kilauea' : {
-            'imagery' : 'CustomMaps/HI_kilauea',
             'elevation' : 'cesium_tilesets/HI2',
             'centerPoint' : [-155.260059,  19.408373, 5000]
         },
@@ -54,8 +53,8 @@ module.exports = {
             'elevation' : 'TODO',
             'centerPoint' : [-113.5787682, 43.4633101, 5000]
         },
-        'Ames' : { 'imagery': 'TODO',
-            'elevation': 'TODO',
+        'Ames' : {
+            'elevation': 'cesium_tilesets/triset',
             'centerPoint' : [-122.064789, 37.419362, 5000]
         },
         'Black_Point' : { 'imagery' : 'TODO',
