@@ -37,25 +37,25 @@ module.exports = {
     // Where we get the terrain data from, this was only from default side.
     terrain : { port : 9090 },
     
+    // 	If you have base imagery include it locally or remotely here
+    //baseImagery: {'url': '/cesium-assets/imagery/NaturalEarthII' },
+   
+    
     // Default geographical site
     defaultSite : 'HI_Kilauea',
     
     // list of various sites we support
-    sites : { 'HI_Mauna_Ulu' : { 'imagery' : 'CustomMaps/HI_lowqual_relief',
-    								'elevation' : 'cesium_tilesets/HI_highqual',
-    								'centerPoint' : [-155.2118, 19.3647, 5000]
+    sites : { 'HI_Mauna_Ulu' : { 'centerPoint' : [-155.2118, 19.3647, 5000]
     							   },
-				'HI_Kilauea' : { 'imagery' : 'CustomMaps/HI_kilauea',
-		 			'elevation' : 'cesium_tilesets/HI_kilauea',
+				'HI_Kilauea' : {  //'imagery': {'url': 'https://' + SERVER_NAME + '/data/rest/xgds_map_server/geoTiff/HI_kilauea',
+					//		 	'flipXY': true
+					// 			},
+		 			//'elevation' : 'cesium_tilesets/HI_kilauea',
 					'centerPoint' : [-155.260059,  19.408373, 5000]
 				},
-    		      'ID_COTM' : { 'imagery' : 'TODO',
-    		    	  				'elevation' : 'TODO',
-    		    	  				'centerPoint' : [-113.5787682, 43.4633101, 5000]
+    		      'ID_COTM' : { 'centerPoint' : [-113.5787682, 43.4633101, 5000]
     		      			  },
-    		      'Ames' : { 'imagery': 'TODO',
-    		    	  			 'elevation': 'TODO',
-    		    	  			 'centerPoint' : [-122.064789, 37.419362, 5000]
+    		      'Ames' : {  'centerPoint' : [-122.064789, 37.419362, 5000]
     					   }
     },
 	

@@ -57,14 +57,18 @@ import TimeIntervalCollection from 'cesium/Source/Core/TimeIntervalCollection';
 import TimeInterval from 'cesium/Source/Core/TimeInterval';
 import ReferenceFrame from 'cesium/Source/Core/ReferenceFrame';
 import ExtrapolationType from 'cesium/Source/Core/ExtrapolationType';
+import UrlTemplateImageryProvider from 'cesium/Source/Scene/UrlTemplateImageryProvider';
+import GeographicTilingScheme from 'cesium/Source/Core/GeographicTilingScheme';
+import WebMercatorTilingScheme from 'cesium/Source/Core/WebMercatorTilingScheme';
+import SingleTileImageryProvider from 'cesium/Source/Scene/SingleTileImageryProvider';
 
 
 BingMapsApi.defaultKey = global.config.bing_key;
 
 export {Viewer, EllipsoidTerrainProvider, Ellipsoid, Cartographic, Transforms, PointPrimitiveCollection, sampleTerrain, CustomDataSource, ReferenceFrame,
 	ScreenSpaceEventHandler, ScreenSpaceEventType, Cartesian3, Cartesian2, CesiumMath, Color, CallbackProperty, ImageMaterialProperty, ColorMaterialProperty,
-    ColorGeometryInstanceAttribute, GeometryInstance, Rectangle, RectangleGeometry, EntityCollection, CzmlDataSource, KmlDataSource,
-    CreateTileMapServiceImageryProvider, GroundPrimitive, CesiumTerrainProvider, VerticalOrigin, PinBuilder, HorizontalOrigin, ConstantProperty,
+    ColorGeometryInstanceAttribute, GeometryInstance, Rectangle, RectangleGeometry, EntityCollection, CzmlDataSource, KmlDataSource, WebMercatorTilingScheme,
+    CreateTileMapServiceImageryProvider, GroundPrimitive, CesiumTerrainProvider, VerticalOrigin, PinBuilder, HorizontalOrigin, ConstantProperty, SingleTileImageryProvider,
     CylinderGeometry, CylinderGraphics, Primitive, defined, PolygonHierarchy, PolygonGeometry, HeadingPitchRoll, Matrix4, LabelStyle, ClockRange,
     SceneMode, HeadingPitchRange, Clock, ClockViewModel, SampledPositionProperty, JulianDate, HermitePolynomialApproximation, TimeIntervalCollection, TimeInterval,
-    CompositePositionProperty, ConstantPositionProperty, SampledProperty, ExtrapolationType}
+    CompositePositionProperty, ConstantPositionProperty, SampledProperty, ExtrapolationType, UrlTemplateImageryProvider, GeographicTilingScheme}

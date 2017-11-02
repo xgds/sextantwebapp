@@ -4,6 +4,7 @@ import 'cesium/Source/Widgets/widgets.css';
 import './style.css';
 
 const path = require('path');
+const url = require('url');
 
 
 import buildModuleUrl from 'cesium/Source/Core/buildModuleUrl';
@@ -40,20 +41,13 @@ class ViewerWrapper{
         const terrainProvider = new EllipsoidTerrainProvider();
         this.terrainList['default'] = terrainProvider;
 
-        // Basic texture for the full planet
-        this.layerList['default'] = 'Assets/Textures/NaturalEarthII';
-
-        const imageryProvider = CreateTileMapServiceImageryProvider({
-            url : this.serveraddress() + '/' + this.layerList['default'],
-            fileExtension : 'jpg'
-        });
 
         let clock = new Clock({
 			clockRange: ClockRange.UNBOUNDED
 		});
-		
-        const viewer = new Viewer(this.container, {
-            timeline : false,
+
+        const viewerOptions = {
+    			timeline : false,
             animation : false,
             homeButton : false,
             navigationHelpButton : false,
@@ -64,13 +58,21 @@ class ViewerWrapper{
             baseLayerPicker : false,
             terrainProvider : terrainProvider,
             sceneMode: SceneMode.SCENE3D,
+            imageryProvider : imageryProvider,
             clockViewModel: new ClockViewModel(clock),
-            imageryProvider : imageryProvider
+        };
 
-        });
+        if ('baseImagery' in config){
+            const imageryProvider = this.buildImageryProvider(config.baseImagery);
+            viewerOptions.imageryProvider = imageryProvider;
+        }
+
+        const viewer = new Viewer(this.container, viewerOptions);
         
-        viewer.extend(viewerCesiumNavigationMixin, {enableCompass:true, enableZoomControls:true, enableDistanceLegend:true
-        });
+        viewer.extend(viewerCesiumNavigationMixin, {enableCompass:true,
+        											   enableZoomControls:true,
+        											   enableDistanceLegend:true
+        												});
         
         viewer.infoBox.frame.sandbox = 
         	'allow-same-origin allow-top-navigation allow-pointer-lock allow-popups allow-forms allow-scripts';
@@ -85,9 +87,18 @@ class ViewerWrapper{
 	            			this.addTerrain(terrainPath);
 	            		}
             		} catch (e){
-            			// in case there was no terrain
             			console.log(e);
             		}
+
+            		try {
+            			if ('imagery' in config.sites[config.defaultSite]) {
+        					this.addImagery(config.sites[config.defaultSite].imagery);
+        				}
+            		} catch(e) {
+            			//ulp
+            		}
+
+
 					try{
                         const imageryPath = config.sites[config.defaultSite].imagery;
 						if (imageryPath !== undefined){
@@ -100,7 +111,7 @@ class ViewerWrapper{
                 //  'https://s3-us-west-2.amazonaws.com/sextantdata'
                 // this.log('zoomed');
                 //this.addImagery('CustomMaps/HI_air_imagery_relief_100');
-            	
+
             	this.addLatLongHover();
             }.bind(this)
         });
@@ -117,6 +128,7 @@ class ViewerWrapper{
         this.scene = viewer.scene;
         this.camera = viewer.scene.camera;
         this.layers = viewer.scene.imageryLayers;
+
     }
 
     serveraddress(){
@@ -177,14 +189,23 @@ class ViewerWrapper{
         }.bind(this), ScreenSpaceEventType.MOUSE_MOVE);
     };
 
-    addImagery(folder_location, image_address){
-        if(_.isUndefined(image_address)) {
-            image_address = this.serveraddress();
-        }
-        this.layerList[folder_location] = this.layers.addImageryProvider(new CreateTileMapServiceImageryProvider({
-            url : image_address + '/' + folder_location
-        }));
+    buildImageryProvider(options){
+    		const test = url.parse(options.url);
+		if (test.hostname === null){
+			try {
+				options.url = this.serveraddress() + options.url;
+				console.log(options.url);
+			} catch(e){
+				console.log(e);
+			}
+		}
+		return CreateTileMapServiceImageryProvider(options);
+    }
+
+    addImagery(options){
+    		this.layerList[options.url] = this.layers.addImageryProvider(this.buildImageryProvider(options));
     };
+
 
     addTerrain(folder_location, image_address) {
         //if(_.isUndefined(image_address)) {

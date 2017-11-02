@@ -3,3 +3,5 @@ node_modules
 .idea/
 public/build
 
+public/cesium_tilesets
+public/cesium-assets
