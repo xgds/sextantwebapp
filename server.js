@@ -2,47 +2,16 @@ const express = require('express');
 //const cors = require('cors')
 const path = require('path');
 const terrainServer = require('./terrainserver');
-const webpackDevMiddleware = require("webpack-dev-middleware");
-const webpackHotMiddleware = require("webpack-hot-middleware");
 import {config} from './config/config_loader';
+import {build} from './webpackbuild'
 
 let app = express();
 
-(function() {
-  // Step 1: Create & configure a webpack compiler
-  const webpack = require('webpack');
-  const webpackConfig = require('./webpack.config');
-  const compiler = webpack(webpackConfig);
-
-//  if (config.debug) {
-	  // Step 2: Attach the dev middleware to the compiler & the server
-	  app.use(webpackDevMiddleware(compiler, {
-	    noInfo: true, publicPath: webpackConfig.output.publicPath
-	  }));
-	
-	  // Step 3: Attach the hot middleware to the compiler & the server
-	  app.use(webpackHotMiddleware(compiler, {
-	    log: console.log, path: '/' + config.server.nginx_prefix + '/__webpack_hmr', heartbeat: 10 * 1000
-	  }));
-//  }
-})();
+build(app); //build webpack dev
 
 // Serve static files from the public folder
 const publicPath = path.resolve(__dirname, 'public');
 app.use(express.static(publicPath));
-
-/* // For rendering files to jupyter notebook
-app.get('/CustomMaps/:tileset/:z/:x/:y.png', function (req, res) {
-    const x = req.params.x;
-    let y = req.params.y;
-    const z = req.params.z;
-    y = 2**z-y-1;
-
-    const tileset = req.params.tileset;
-    console.log(path.resolve(__dirname, 'public', 'CustomMaps', tileset, z, x, y + '.png'));
-    //res.set('Content-Encoding', 'gzip');
-    res.sendFile(path.resolve(__dirname, 'public', 'CustomMaps', tileset, z, x, y + '.png'));
-});*/
 
 //TODO might want webpack version of cesium just require it
 const cesiumPath = path.resolve(__dirname, 'node_modules', 'cesium', 'Build','Cesium');
