@@ -1,5 +1,6 @@
 const webpackDevMiddleware = require("webpack-dev-middleware");
 const webpackHotMiddleware = require("webpack-hot-middleware");
+import {config} from './config/config_loader';
 
 function build(app) {
     (function () {
