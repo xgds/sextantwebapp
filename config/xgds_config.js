@@ -14,7 +14,6 @@
 //specific language governing permissions and limitations under the License.
 // __END_LICENSE__
 
-
 let USERNAME = 'TODO:USERNAME';
 let PASSWORD = 'TODO:PASSWORD';
 let SERVER_NAME = 'localhost';
@@ -24,19 +23,19 @@ module.exports = {
 	// The server that is running this node app 
     server : { port : 3001,
     		   cesium_port: undefined,
-    		   name : SERVER_NAME,
-    		   protocol: 'http',
+    		   name : SERVER_NAME, 
+    		   protocol: 'https',
     		   nginx_prefix: 'wristApp'},
     		   
     // This should only exist in xGDS side
     xgds : { port : 443, 
-    	    name : SERVER_NAME,
-    	    protocol : 'https',
-    	    ev_channels: ['EV1', 'EV2'],
+    		name : SERVER_NAME,
+    		protocol : 'https',
+    	    ev_channels: ['EV1'],
     	    follow_channel: 'EV1',
-    	    	username: USERNAME,
-    	    	password: PASSWORD
-    	    	},
+	    	username: USERNAME,
+	    	password: PASSWORD
+    },
     
     // If we are using web sockets this should only exist in the default side
     socket : { protocol : 'http',
@@ -50,33 +49,40 @@ module.exports = {
     // Where we get the terrain data from, this was only from default side.
     terrain : { port : 9090 },
     
-    // If you have base imagery include it locally or remotely here
-    //baseImagery: {'url': '/cesium-assets/imagery/NaturalEarthII' },
-
+    baseImagery: {'url': '/cesium-assets/imagery/NaturalEarthII' },
+    
     // Default geographical site
     defaultSite : 'HI_Kilauea',
     
     // list of kml links to load
     kml_urls : ['https://' + USERNAME + ':' + PASSWORD + '@' + SERVER_NAME + '/notes/rest/notesFeed.kml',
-    				//'https://' + USERNAME + ':' + PASSWORD + '@' + SERVER_NAME + '/xgds_sample/rest/samplesFeed.kml',
-    				'https://' + USERNAME + ':' + PASSWORD + '@' + SERVER_NAME + '/basaltApp/rest/hvnp_so2_link.kml'],
+    				//'https://old-boat.xgds.org/xgds_sample/rest/samplesFeed.kml', //TODO update to boat
+        		    'https://' + USERNAME + ':' + PASSWORD + '@' + SERVER_NAME + '/basaltApp/rest/hvnp_so2_link.kml'],
     
     // list of various sites we support
-    sites : { 'HI_Mauna_Ulu' : { 
-    							 'centerPoint' : [-155.2118, 19.3647, 5000]
+    sites : { 'HI_Mauna_Ulu' : {'imagery': {'url': 'https://' + SERVER_NAME + '/data/rest/xgds_map_server/geoTiff/KI_lidar_slope_tile2',
+    									 				'flipXY': true
+    									 				},
+    								//'elevation' : 'cesium_tilesets/HI_mauna_ulu',
+    								'centerPoint' : [-155.2118, 19.3647, 5000]
     							},
-			  'HI_Kilauea' : { //'imagery': {'url': 'https://' + SERVER_NAME + '/data/rest/xgds_map_server/geoTiff/HI_kilauea',
-					//		 	'flipXY': true
-					// 			},
-		 					   //'elevation' : 'cesium_tilesets/HI_kilauea',
-				  			  'centerPoint' : [-155.260059,  19.408373, 5000]
-			  },
-    			  'ID_COTM' : { 'centerPoint' : [-113.5787682, 43.4633101, 5000]
+			'HI_Kilauea' : { 
+							 'imagery': {'url': 'https://' + SERVER_NAME + '/data/rest/xgds_map_server/geoTiff/Kilauea_True_Color',
+								         'flipXY': true},
+				 			 //'elevation' : 'cesium_tilesets/HI_kilauea',
+				 			 'centerPoint' : [-155.260059,  19.408373, 5000]
+				},
+    			  'ID_COTM' : { 'tileMapResource': {'url': 'https://' + SERVER_NAME + '/data/rest/xgds_map_server/geoTiff/hwy_flow_k',
+		 					'flipXY': true},
+       						'centerPoint' : [-113.5787682, 43.4633101, 5000]
        					  },
-       		  'Ames' : { 'centerPoint' : [-122.064789, 37.419362, 5000]
-       				   },
-			'Black_Point' : { 'centerPoint' : [-111.466442, 35.690775, 6000]
-			  }
+       		  'Ames' : { 'imagery': 'TODO',
+       			  		 'centerPoint' : [-122.064789, 37.419362, 5000]
+       		  		  },
+       	       'Black_Point' : { 'imagery' : 'TODO',
+ 						 'centerPoint' : [-111.466442, 35.690775, 6000]
+ 		  }
+
     },
     
     // whether or not this is a development server
@@ -86,16 +92,13 @@ module.exports = {
     showCoordinates : false,
 
     // TODO override with your key if using bing.
-    bing_key : 'Ak71PK14Ypz2_IuQ2-TGbV-OVYLKeg_KEXFFYiNmEny6aFJVYxUg_pUxZfhaQ2vy',
+    //bing_key : 'PUT YOUR BING KEY HERE',
     
     //List of Connected Devices 
-    connectedDevices : { pXRF : 'pXRF', 
-                          LIBS : 'LIBS', 
-                          FLIR : 'FLIR', 
-                          FTIR : 'FTIR', 
-                          redCamera2 : 'CAM2', 
-                          boat2 : 'IV'
-                        }
-
+    //connectedDevices : {  redCamera1 : 'CAM1', 
+    //                      boat2 : 'IV'
+    //                    }
+    connectedDevices : { 
+      }
 
 }
