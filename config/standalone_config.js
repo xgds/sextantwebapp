@@ -20,14 +20,15 @@ module.exports = {
     		   cesium_port: 3001,
     		   name : 'localhost',
     		   protocol: 'http',
-    		   nginx_prefix: undefined},
+               public_prefix: '/wristApp',
+    		   nginx_prefix: ''},
     		   
     // If we are using web sockets this should only exist in the default side
     socket : { protocol : 'http',
     		   port : 2999 },
     
     // How we talk to the python sextant service
-    sextant : { protocol : 'https',
+    sextant : { protocol : 'http',
     		    nginx_prefix: '',
     	        port : 5000 },
     
@@ -36,19 +37,19 @@ module.exports = {
     
     // If you have base imagery include it locally or remotely here
     //baseImagery: {'url': '/cesium-assets/imagery/NaturalEarthII' },
-    
+
     // Default geographical site
     defaultSite : 'HI_Mauna_Ulu',
     
     // list of various sites we support
     sites : {
         'HI_Mauna_Ulu' : {
-            'imagery' : {'url':'CustomMaps/MU_Pan_Sharp_contrast'},
+            'imagery' : {'url':'/CustomMaps/MU_Pan_Sharp_contrast'},
             'elevation' : 'cesium_tilesets/HI_highqual',
             'centerPoint' : [-155.2118, 19.3647, 5000]
         },
         'HI_Kilauea' : {
-            'imagery' : {'url':'CustomMaps/HI_kilauea'},
+            'imagery' : {'url':'/CustomMaps/HI_kilauea'},
             'elevation' : 'cesium_tilesets/HI2',
             'centerPoint' : [-155.260059,  19.408373, 5000]
         },

@@ -4,6 +4,7 @@
 const path = require('path');
 const url = require('url');
 
+
 function serveTerrain(app, terrainPath) {
 	console.log('serving terrain');
     const terrainPathRouter = terrainPath.charAt(0) !== '/' ? '/' + terrainPath : terrainPath;

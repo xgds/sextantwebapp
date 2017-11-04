@@ -2,7 +2,7 @@ import * as _ from 'lodash';
 import * as $ from 'jquery';
 import 'bootstrap-loader';
 import {config} from './../config/config_loader';
-import {ViewerWrapper, zoom, heading, DynamicLines, loadKmls} from './cesium_util/cesiumlib';
+import {ViewerWrapper, zoom, heading, DynamicLines, loadKmls, buildSurfaceCircle} from './cesium_util/cesiumlib';
 import {Cartesian3, CesiumMath, Color, CallbackProperty} from './cesium_util/cesium_imports'
 
 
@@ -12,14 +12,22 @@ const viewerWrapper = new ViewerWrapper(config.urlPrefix, config.server.cesium_p
 // Set up for SSE or GPS input
 const hasSSE = ('xgds' in config);
 import {TrackSSE} from './sse/trackSseUtils'
-import {PlanManager} from './plan/plan'
+import {PlanManager, xgdsPlanManager} from './plan/plan'
 let gps_tracks = undefined;
 let tsse = undefined;
 let planManager = undefined;
 
+viewerWrapper.scene.camera.flyTo({
+    destination: config.destination,
+    duration: 3,
+    complete: function() {
+        //viewerWrapper.addLatLongHover();
+    }
+});
+
 if (hasSSE) {
 	tsse = new TrackSSE(viewerWrapper);
-	planManager = new PlanManager(viewerWrapper);
+	planManager = new xgdsPlanManager(viewerWrapper);
 } else {
 	gps_tracks = new DynamicLines(viewerWrapper);
     planManager = new PlanManager(viewerWrapper);
@@ -65,9 +73,9 @@ module.exports = {
     '$':$
 };
 
-if (module.hot) {
-  module.hot.accept();
-  module.hot.dispose(function() {
+//if (module.hot) {
+//  module.hot.accept();
+//  module.hot.dispose(function() {
     //clearInterval(timer):
-  });
-}
+//  });
+//}

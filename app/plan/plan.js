@@ -20,11 +20,14 @@ import {DynamicLines, buildLineString, buildCylinder, buildSurfaceCircle} from '
 import {config} from './../../config/config_loader';
 import {beforeSend} from './../util/xgdsUtils';
 
+const hostname = "xgds" in config ? config.xgds.protocol + '://' + config.xgds.name :
+	config.server.protocol + '://' + config.server.name + ':' + config.server.port;
+
 class PlanManager {
 
 	constructor(viewerWrapper) {
 		this.plan = undefined;
-		this.hostname = config.xgds.protocol + '://' + config.xgds.name; //assume this will only load if we have xgds
+		this.hostname = hostname; //assume this will only load if we have xgds
 		this.neverSaved = true;
 		this.viewerWrapper = viewerWrapper;
 		this.segmentElements = {};
@@ -35,7 +38,7 @@ class PlanManager {
 		//this.stationImageUrl = config.server.protocol + "://" + config.server.name + '/' + config.server.nginx_prefix + '/' + '/icons/station_circle.png';
 		this.stationCylinderStyle = {'material': new ImageMaterialProperty({'image':this.stationImageUrl, 'transparent':true}), 'translucent': true, 'color': new Color(1.0, 1.0, 1.0, 0.5)};
 		this.stationBoundaryStyle = {'material': Color.YELLOW.withAlpha(0.25)};
-		this.fetchXGDSPlan();
+		this.fetchPlan();
 		global.editMode = false;
 		this.setupEditing();
 		this.initializedPextant = false;
@@ -68,8 +71,9 @@ class PlanManager {
 		this.editStationHandler.setInputAction(
 				function(movement) {
 					if (global.editMode && (this.selectedStation !== undefined)) {
-						let newPosition = this.viewerWrapper.viewer.scene.camera.pickEllipsoid(movement.endPosition);
-						this.selectedStation.position = newPosition;
+                        const ray = this.viewerWrapper.camera.getPickRay(movement.endPosition);
+                        const cartesian = this.viewerWrapper.scene.globe.pick(ray, this.viewerWrapper.scene);
+						this.selectedStation.position = cartesian;
 					}
 				}.bind(this),
 				ScreenSpaceEventType.MOUSE_MOVE
@@ -192,43 +196,28 @@ class PlanManager {
 			//noop
 		}
 	};
-	
-	fetchXGDSPlan() {
-		if (this.plan !== undefined){
-			this.clearPlan();
+
+    planFromJSON(xpjson){
+		if (xpjson !== undefined) {
+			this.plan = xpjson;
+			this.renderPlan();
+			this.updateSaveAsPopup(true);
 		}
-		
-		let currentPlanUrl = this.hostname + '/xgds_planner2/rest/plans/today/json'
-		$.ajax({
-            url: currentPlanUrl,
-            dataType: 'json',
-            xhrFields: {withCredentials: true},
-            beforeSend: beforeSend,
-            success: $.proxy(function(data) {
-            	if (data != null){
-            		let planDict = data;
-            		let thePlan = undefined;
-            		let sortedKeys = Object.keys(planDict).sort();
-            		// Right now we are just taking the last one.  Might want to give them a list or something.
-            		if (!_.isEmpty(sortedKeys)) {
-            			thePlan = planDict[sortedKeys[sortedKeys.length - 1]];
-	            		if (thePlan !== undefined) {
-	            			this.plan = thePlan;
-	            			this.renderPlan();
-	            			this.updateSaveAsPopup(true);
-	            		}
-            		}
-            	}
-            }, this),
-            error: $.proxy(function(data) {
-            	console.log('Could not get plan for today');
-            	console.log(data);
-            }, this)
-          });
-	};
+    };
+
+	fetchPlan() {
+        if (this.plan !== undefined) {
+            this.clearPlan();
+        }
+        this._fetchPlan();
+    }
+
+    _fetchPlan() {
+        let currentPlanUrl = this.hostname + '/sextant_plans/HI_13Nov16_MD7_A.json';
+        $.getJSON(currentPlanUrl, this.planFromJSON.bind(this));
+    }
 	
 	renderPlan() {
-		
 		$(".planNameSpan").html(this.plan.name);
 		
 		let sequence = this.plan.sequence;
@@ -295,7 +284,11 @@ class PlanManager {
 		if (this.plan === undefined){
 			return;
 		}
-		let sextantUrl = config.sextant.protocol + '://' + config.server.name + '/' + config.sextant.nginx_prefix + '/setwaypoints';
+        let sextantPreUrl = ("xgds" in config) ?
+			config.sextant.protocol + '://' + config.server.name + '/' + config.sextant.nginx_prefix :
+            config.sextant.protocol + '://' + config.server.name + ':' + config.sextant.port;
+		let sextantUrl = sextantPreUrl + '/setwaypoints';
+		console.log(sextantUrl);
 		if (!_.isEmpty(this.plan.sequence)){
 			let data = JSON.stringify({'xp_json':this.plan});
 			$.ajax({
@@ -515,4 +508,135 @@ class PlanManager {
 
 }
 
-export {PlanManager}
+class xgdsPlanManager extends PlanManager {
+    constructor(viewerWrapper) {
+    	super(viewerWrapper)
+    }
+
+    savePlan(newName, newVersion, newNotes){
+        // save the plan or save the plan as a new plan & schedule the new plan.
+        // reloads the saved plan on success.
+
+        let saveAs = false;
+
+        //Setting Plan Name (There are two name properties for some reason)
+        if(this.plan.name !== newName){ //Check if plan name was changed
+            this.plan.planName = newName;
+            this.plan.name = newName;
+            saveAs = true;
+        }
+
+        //Setting plan Version
+        if (newVersion == "" || _.isUndefined(newVersion)){
+            if (saveAs) {
+                newVersion = "A";
+            } else {
+                newVersion = this.plan.planVersion;
+            }
+        } else if (newVersion !== this.plan.planVersion){
+            saveAs = true;
+        }
+
+        if (saveAs) {
+            this.plan.planVersion = newVersion;
+        }
+
+        if(newNotes !== ""){
+            this.plan.notes=newNotes;
+        }
+
+
+        let savePlanUrl = this.hostname + '/xgds_planner2/rest/plan/' + this.plan.serverId + '/' + this.plan.name.replace(/ /g,"_") + '.json';
+
+        // save as uses post
+        let method='PUT';
+        if (saveAs){
+            method = 'POST';
+        }
+
+        this.setSaveMessage('Saving Plan.');
+
+        $.ajax({
+            url: savePlanUrl,
+            method: method,
+            dataType: 'json',
+            xhrFields: {withCredentials: true},
+            beforeSend: beforeSend,
+            data: JSON.stringify(this.plan),
+            success: $.proxy(function(data) {
+                if (data != null){
+                    let oldPlanPK = this.plan.serverId;
+
+                    // load the new plan
+                    this.clearPlan(true);
+                    this.plan = data;
+                    this.renderPlan();
+                    this.hideSaveAsPopup();
+                    this.updateSaveAsPopup(false);
+
+                    // then schedule the plan
+                    if (this.plan.serverId !== oldPlanPK){
+                        this.schedulePlan();
+                    }
+                }
+            }, this),
+            error: $.proxy(function(data) {
+                this.setSaveMessage('Saving Plan Error');
+                console.log('Could not save the plan.');
+                console.log(data);
+            }, this)
+        });
+
+    };
+
+    _fetchPlan() {
+        let currentPlanUrl = this.hostname + '/xgds_planner2/rest/plans/today/json';
+        $.ajax({
+            url: currentPlanUrl,
+            dataType: 'json',
+            xhrFields: {withCredentials: true},
+            beforeSend: beforeSend,
+            success: $.proxy(function(data){
+                if (data !== null){
+                    let planDict = data;
+                    let thePlan = undefined;
+                    let sortedKeys = Object.keys(planDict).sort();
+                    // Right now we are just taking the last one.  Might want to give them a list or something.
+                    if (!_.isEmpty(sortedKeys)) {
+                        thePlan = planDict[sortedKeys[sortedKeys.length - 1]];
+                        this.planFromJSON(thePlan)
+                    }
+                }
+			}, this),
+            error: $.proxy(function(data) {
+                console.log('Could not get plan for today');
+                console.log(data);
+            }, this)
+        });
+    };
+
+    schedulePlan(){
+        // Schedule the current plan to go with the currently active flight.
+        // this makes it the 'active' plan
+
+        let schedulePlanUrl = this.hostname + '/xgds_planner2/rest/schedulePlanActive/' + config.xgds.follow_channel + '/' + this.plan.serverId;
+        $.ajax({
+            url: schedulePlanUrl,
+            method: 'POST',
+            dataType: 'json',
+            xhrFields: {withCredentials: true},
+            beforeSend: beforeSend,
+            success: $.proxy(function(data) {
+                if (data != null){
+                    console.log('plan scheduled.')
+                }
+            }, this),
+            error: $.proxy(function(data) {
+                alert('Scheduling Plan Error');
+                console.log(data);
+            }, this)
+        });
+    }
+}
+
+export {PlanManager, xgdsPlanManager}

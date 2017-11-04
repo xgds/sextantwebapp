@@ -130,7 +130,7 @@
 	
 	function reloadPlan() {
 		if (sextant.planManager !== undefined){
-			sextant.planManager.fetchXGDSPlan();
+			sextant.planManager.fetchPlan();
 		}
 	}
 	

@@ -12,10 +12,10 @@ buildModuleUrl.setBaseUrl('./');
 
 // Load all cesium components required
 import {Viewer, EllipsoidTerrainProvider, Cartesian3, Cartesian2, PolygonGeometry, PolygonHierarchy, CesiumMath, Cartographic, Ellipsoid, Color,
-		sampleTerrain, ScreenSpaceEventHandler, ScreenSpaceEventType, Rectangle, RectangleGeometry, LabelStyle, CzmlDataSource, CustomDataSource,
-		CreateTileMapServiceImageryProvider, CesiumTerrainProvider, CallbackProperty, VerticalOrigin, HorizontalOrigin, Matrix4, ConstantProperty, SingleTileImageryProvider,
-		SceneMode, SampledPositionProperty, JulianDate, ColorMaterialProperty, ClockRange, ClockViewModel, UrlTemplateImageryProvider, GeographicTilingScheme,
-		Transforms, HeadingPitchRoll, ColorGeometryInstanceAttribute, GeometryInstance, Primitive, KmlDataSource, Clock, WebMercatorTilingScheme} from './cesium_imports'
+		sampleTerrain, ScreenSpaceEventHandler, ScreenSpaceEventType, Rectangle, RectangleGeometry, EllipseGeometry, LabelStyle, CzmlDataSource, CustomDataSource,
+		CreateTileMapServiceImageryProvider, CesiumTerrainProvider, CallbackProperty, VerticalOrigin, HorizontalOrigin, Matrix4, ConstantProperty,
+		SceneMode, SampledPositionProperty, JulianDate, ColorMaterialProperty, ClockRange, ClockViewModel, GroundPrimitive,
+		Transforms, HeadingPitchRoll, ColorGeometryInstanceAttribute, GeometryInstance, Primitive, KmlDataSource, Clock} from './cesium_imports'
 
 import viewerCesiumNavigationMixin from './cesium-navigation/viewerCesiumNavigationMixin';
 
@@ -41,7 +41,7 @@ class ViewerWrapper{
         const terrainProvider = new EllipsoidTerrainProvider();
         this.terrainList['default'] = terrainProvider;
 
-        
+
         let clock = new Clock({
 			clockRange: ClockRange.UNBOUNDED
 		});
@@ -58,64 +58,51 @@ class ViewerWrapper{
             baseLayerPicker : false,
             terrainProvider : terrainProvider,
             sceneMode: SceneMode.SCENE3D,
-            clockViewModel: new ClockViewModel(clock),
+            clockViewModel: new ClockViewModel(clock)
         };
 
-        if ('baseImagery' in config){
-            const imageryProvider = this.buildImageryProvider(config.baseImagery);
-            viewerOptions.imageryProvider = imageryProvider;
-        }
-		
         const viewer = new Viewer(this.container, viewerOptions);
-        
-        viewer.extend(viewerCesiumNavigationMixin, {enableCompass:true, 
-        											   enableZoomControls:true, 
-        											   enableDistanceLegend:true
-        												});
-        
-        viewer.infoBox.frame.sandbox = 
-        	'allow-same-origin allow-top-navigation allow-pointer-lock allow-popups allow-forms allow-scripts';
-        
-        const flewTo = viewer.scene.camera.flyTo({
-            destination: config.destination,
-            duration: 3,
-            complete: function(){
-            		try{
-	            		const terrainPath = config.sites[config.defaultSite].elevation; 
-	            		if (terrainPath !== undefined){
-	            			this.addTerrain(terrainPath);
-	            		}
-            		} catch (e){
-            			console.log(e);
-            		}
-            		
-            		try {
-            			if ('imagery' in config.sites[config.defaultSite]) {
-        					this.addImagery(config.sites[config.defaultSite].imagery);
-        				}
-            		} catch(e) {
-            			//ulp
-            		}
-            		
-            		
-            	
-            	this.addLatLongHover();
-            }.bind(this)
-        });
-
-        this.hoverCoordHandler = new ScreenSpaceEventHandler(viewer.scene.canvas);
-        this.hoverCoordHandler.setInputAction(function(movement) {
-            document.getElementById('hovercoord').innerHTML = this.globalpoint['latitude'].toString() + '</br>' 
-            												+ this.globalpoint['longitude'].toString() + '</br>'
-            												+ this.globalpoint['altitude'].toString();
-
-        }.bind(this), ScreenSpaceEventType.LEFT_DOWN);
-        
         this.viewer = viewer;
         this.scene = viewer.scene;
         this.camera = viewer.scene.camera;
         this.layers = viewer.scene.imageryLayers;
+
+        viewer.extend(viewerCesiumNavigationMixin, {enableCompass:true,
+        											   enableZoomControls:true,
+        											   enableDistanceLegend:true
+        												});
+
+        if ('baseImagery' in config){
+            const imageryProvider = this.buildImageryProvider(config.baseImagery);
+            this.imageryProvider = imageryProvider;
+        }
+        try {
+            const terrainPath = config.sites[config.defaultSite].elevation;
+            if (terrainPath !== undefined) {
+                this.addTerrain(terrainPath);
+            }
+        } catch (e) {
+            console.log(e);
+        }
+        try {
+            if ('imagery' in config.sites[config.defaultSite]) {
+                this.addImagery(config.sites[config.defaultSite].imagery);
+            }
+        } catch (e) {
+            //ulp
+        }
         
+        viewer.infoBox.frame.sandbox = 
+        	'allow-same-origin allow-top-navigation allow-pointer-lock allow-popups allow-forms allow-scripts';
+
+        this.hoverCoordHandler = new ScreenSpaceEventHandler(viewer.scene.canvas);
+        this.hoverCoordHandler.setInputAction(function(movement) {
+            document.getElementById('hovercoord').innerHTML = this.globalpoint['latitude'].toString() + '</br>'
+                + this.globalpoint['longitude'].toString() + '</br>'
+                + this.globalpoint['altitude'].toString();
+
+        }.bind(this), ScreenSpaceEventType.LEFT_DOWN);
+
     }
 
     serveraddress(){
@@ -175,7 +162,7 @@ class ViewerWrapper{
             }
         }.bind(this), ScreenSpaceEventType.MOUSE_MOVE);
     };
-    
+
     buildImageryProvider(options){
     		const test = url.parse(options.url);
 		if (test.hostname === null){
@@ -192,8 +179,8 @@ class ViewerWrapper{
     addImagery(options){
     		this.layerList[options.url] = this.layers.addImageryProvider(this.buildImageryProvider(options));
     };
-    
-    	
+
+
     addTerrain(folder_location, image_address) {
         //if(_.isUndefined(image_address)) {
         //    image_address = this.serveraddress();
@@ -515,8 +502,22 @@ const buildCylinder = function(position, height, radius, slices, label, styleOpt
 
 
 const buildSurfaceCircle = function(position, radius, styleOptions, id, viewerWrapper, callback) {
-	
-	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
+    const color = new ColorGeometryInstanceAttribute.fromColor(Color.YELLOW.withAlpha(0.25));
+    const ellipseInstance = new GeometryInstance({
+        geometry : new EllipseGeometry({
+            center : Cartesian3.fromDegrees(position["longitude"], position["latitude"]),
+            semiMinorAxis : radius,
+            semiMajorAxis : radius
+        }),
+        id : 'ellipse',
+        attributes : {
+            color : color
+        }
+    });
+    viewerWrapper.scene.primitives.add(new GroundPrimitive({
+        geometryInstances : ellipseInstance
+    }));
+	/*viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
 		let options = {
 				semiMinorAxis: radius,
 				semiMajorAxis: radius,
@@ -537,7 +538,7 @@ const buildSurfaceCircle = function(position, radius, styleOptions, id, viewerWr
 		if (callback !== undefined){
 			callback(entity);
 		}
-	});
+	});*/
 
 };
 
