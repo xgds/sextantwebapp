@@ -639,4 +639,4 @@ class xgdsPlanManager extends PlanManager {
     }
 }
 
-export {PlanManager}
+export {PlanManager, xgdsPlanManager}
