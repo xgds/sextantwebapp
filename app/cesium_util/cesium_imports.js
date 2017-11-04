@@ -32,6 +32,7 @@ import ColorGeometryInstanceAttribute from 'cesium/Source/Core/ColorGeometryInst
 import GeometryInstance from 'cesium/Source/Core/GeometryInstance';
 import Rectangle from 'cesium/Source/Core/Rectangle';
 import RectangleGeometry from 'cesium/Source/Core/RectangleGeometry';
+import EllipseGeometry from 'cesium/Source/Core/EllipseGeometry';
 import CylinderGeometry from 'cesium/Source/Core/CylinderGeometry';
 import CylinderGraphics from 'cesium/Source/DataSources/CylinderGraphics';
 import EntityCollection from 'cesium/Source/DataSources/EntityCollection';
@@ -71,4 +72,4 @@ export {Viewer, EllipsoidTerrainProvider, Ellipsoid, Cartographic, Transforms, P
     CreateTileMapServiceImageryProvider, GroundPrimitive, CesiumTerrainProvider, VerticalOrigin, PinBuilder, HorizontalOrigin, ConstantProperty, SingleTileImageryProvider,
     CylinderGeometry, CylinderGraphics, Primitive, defined, PolygonHierarchy, PolygonGeometry, HeadingPitchRoll, Matrix4, LabelStyle, ClockRange,
     SceneMode, HeadingPitchRange, Clock, ClockViewModel, SampledPositionProperty, JulianDate, HermitePolynomialApproximation, TimeIntervalCollection, TimeInterval,
-    CompositePositionProperty, ConstantPositionProperty, SampledProperty, ExtrapolationType, UrlTemplateImageryProvider, GeographicTilingScheme}
+    CompositePositionProperty, ConstantPositionProperty, SampledProperty, ExtrapolationType, UrlTemplateImageryProvider, GeographicTilingScheme, EllipseGeometry}
