@@ -16,6 +16,7 @@ public_extension = (public_extension  === undefined) ? '' : public_extension ;
 const rerouting = [
 	['/', path.resolve(__dirname, 'public')],
 	['/', path.resolve(__dirname, 'node_modules', 'cesium', 'Build','Cesium')],
+    ['/cesium-assets/imagery', path.resolve(__dirname, 'node_modules', 'cesium', 'Build','Cesium','Assets','Textures')],
     ['/CustomMaps', path.resolve(__dirname, 'public', 'CustomMaps')],
 	[public_extension + '/jquery', path.resolve(__dirname, 'node_modules', 'jquery', 'dist')],
 	[public_extension + '/jquery-mobile', path.resolve(__dirname, 'node_modules', 'jquery-mobile', 'dist')],

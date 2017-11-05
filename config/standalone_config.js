@@ -16,8 +16,8 @@
 module.exports = {
 
 	// The server that is running this node app 
-    server : { port : 3001, 
-    		   cesium_port: 3001,
+    server : { port : 3002,
+    		   cesium_port: 3002,
     		   name : 'localhost',
     		   protocol: 'http',
                public_prefix: '/wristApp',
