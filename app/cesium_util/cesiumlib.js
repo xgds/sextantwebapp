@@ -47,7 +47,7 @@ class ViewerWrapper{
 		});
 
         const viewerOptions = {
-    			timeline : false,
+            timeline : false,
             animation : false,
             homeButton : false,
             navigationHelpButton : false,
@@ -61,6 +61,11 @@ class ViewerWrapper{
             clockViewModel: new ClockViewModel(clock)
         };
 
+        if ('baseImagery' in config){
+            //const imageryProvider = this.buildImageryProvider(config.baseImagery);
+            viewerOptions["imageryProvider"] = this.buildImageryProvider(config.baseImagery);
+        }
+
         const viewer = new Viewer(this.container, viewerOptions);
         this.viewer = viewer;
         this.scene = viewer.scene;
@@ -72,10 +77,6 @@ class ViewerWrapper{
         											   enableDistanceLegend:true
         												});
 
-        if ('baseImagery' in config){
-            const imageryProvider = this.buildImageryProvider(config.baseImagery);
-            this.imageryProvider = imageryProvider;
-        }
         try {
             const terrainPath = config.sites[config.defaultSite].elevation;
             if (terrainPath !== undefined) {
