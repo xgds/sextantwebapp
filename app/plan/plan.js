@@ -327,6 +327,7 @@ class PlanManager {
             url: sextantUrl,
             data: data,
             type: 'POST',
+            timeout: 1000000,
             dataType: 'json',
             contentType: 'application/json',
             context: this,
