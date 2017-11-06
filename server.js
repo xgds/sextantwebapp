@@ -2,25 +2,26 @@ const express = require('express');
 const path = require('path');
 const terrainServer = require('./terrainserver');
 import {config} from './config/config_loader';
-import {build} from './webpackbuild'
+//import {build} from '../webpackbuild'
 
 let app = express();
 
 //Build webpack dev
-build(app);
+//build(app, false);
 
 // Serve static files from the public folder
 let public_extension = config.server.public_prefix;
 public_extension = (public_extension  === undefined) ? '' : public_extension ;
 
+const root = path.resolve(__dirname);
 const rerouting = [
-	['/', path.resolve(__dirname, 'public')],
-	['/', path.resolve(__dirname, 'node_modules', 'cesium', 'Build','Cesium')],
-    ['/cesium-assets/imagery', path.resolve(__dirname, 'node_modules', 'cesium', 'Build','Cesium','Assets','Textures')],
-    ['/CustomMaps', path.resolve(__dirname, 'public', 'CustomMaps')],
-	[public_extension + '/jquery', path.resolve(__dirname, 'node_modules', 'jquery', 'dist')],
-	[public_extension + '/jquery-mobile', path.resolve(__dirname, 'node_modules', 'jquery-mobile', 'dist')],
-	[public_extension + '/font-awesome', path.resolve(__dirname, 'node_modules', 'font-awesome')]
+	['/', path.resolve(root, 'public')],
+	['/', path.resolve(root, 'node_modules', 'cesium', 'Build','Cesium')],
+    ['/cesium-assets/imagery', path.resolve(root, 'node_modules', 'cesium', 'Build','Cesium','Assets','Textures')],
+    ['/CustomMaps', path.resolve(root, 'public', 'CustomMaps')],
+	[public_extension + '/jquery', path.resolve(root, 'node_modules', 'jquery', 'dist')],
+	[public_extension + '/jquery-mobile', path.resolve(root, 'node_modules', 'jquery-mobile', 'dist')],
+	[public_extension + '/font-awesome', path.resolve(root, 'node_modules', 'font-awesome')]
 ];
 
 for (let route of rerouting){

@@ -67,7 +67,7 @@ Yeah, that's a mouthfull, and when you need twenty other cesium functions your i
 ### The advanced
 With the basics you should now be able to know how to import a certain cesium function. However, to make cesium work there are a couple of other elements needed, but that you don't really need to know about - just make sure you don't delete these items from any of the files. This includes:
 
-1) Some configurations in webpack.config.js
+1) Some configurations in server.webpack.config.js
 2) Some css imports
 3) setBaseUrl
 ``` 

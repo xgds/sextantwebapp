@@ -208,9 +208,9 @@ module.exports = {
   zoomtotracks: zoomtotracks
 };
 
-if (module.hot) {
+/*if (module.hot) {
   module.hot.accept();
   module.hot.dispose(function() {
     clearInterval(timer);
   });
-}
+}*/

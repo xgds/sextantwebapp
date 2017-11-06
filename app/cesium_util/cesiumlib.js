@@ -96,13 +96,13 @@ class ViewerWrapper{
         viewer.infoBox.frame.sandbox = 
         	'allow-same-origin allow-top-navigation allow-pointer-lock allow-popups allow-forms allow-scripts';
 
-        this.hoverCoordHandler = new ScreenSpaceEventHandler(viewer.scene.canvas);
+        /*this.hoverCoordHandler = new ScreenSpaceEventHandler(viewer.scene.canvas);
         this.hoverCoordHandler.setInputAction(function(movement) {
             document.getElementById('hovercoord').innerHTML = this.globalpoint['latitude'].toString() + '</br>'
                 + this.globalpoint['longitude'].toString() + '</br>'
                 + this.globalpoint['altitude'].toString();
 
-        }.bind(this), ScreenSpaceEventType.LEFT_DOWN);
+        }.bind(this), ScreenSpaceEventType.LEFT_DOWN);*/
 
     }
 

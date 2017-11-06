@@ -14,8 +14,6 @@
 //specific language governing permissions and limitations under the License.
 //__END_LICENSE__
 
-const hostname = config.xgds.protocol + '://' + config.xgds.name;
-
 let deviceNames = "";
 
 //If the connected devices are defined, they will be loaded into a toolbar and the polling will be started
@@ -42,7 +40,7 @@ function loadDevices(){
 };
 
 function checkConnectedDevices(){
-
+    const hostname = config.xgds.protocol + '://' + config.xgds.name;
 	let url= hostname + '/xgds_status_board/rest/multiSubsystemStatusJson/';
 	
 	$.ajax({
