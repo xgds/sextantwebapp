@@ -44,7 +44,6 @@ class TrackSSE {
 		// cache of raw data
 		this.positions = {};
 		this.tracks =  {};
-		this.lastHeading = {};
 		
 		// cesium renderings
 		this.cLastPosition = {};
@@ -352,8 +351,9 @@ class TrackSSE {
 		}
 		
 		let cdate = JulianDate.fromIso8601(data.timestamp);
-		property.addSample(cdate, data.heading);
-		this.lastHeading[channel] = data.heading;
+		var radians = ((data.heading/180.0)* Math.PI);
+		property.addSample(cdate, radians);
+		//console.log('HEADING DATA ' + cdate.toString() + ": " + data.heading);
 	};
 	
 	updateSampledPositionProperty(channel, data) {
@@ -361,7 +361,7 @@ class TrackSSE {
 		let property = this.cSampledPositionProperties[channel];;
 		if (_.isUndefined(property)){
 			property = new SampledPositionProperty();
-			property.forwardExtrapolationType = ExtrapolationType.HOLD;
+			//property.forwardExtrapolationType = ExtrapolationType.HOLD;
 			this.cSampledPositionProperties[channel] = property;
 		}
 		if ('lon' in data) {
@@ -418,7 +418,9 @@ class TrackSSE {
 
 				let headingCallback = new CallbackProperty(function(time, result) {
 					if (channel in this.cHeadings){
-						return this.cHeadings[channel].getValue(time);
+						var value = this.cHeadings[channel].getValue(time);
+						//console.log('HEADING CALLBACK: ' + time.toString() + ': ' + value);
+						return value;
 					}
 					return 0;  // it won't matter because we are not rendering a texture
 				}.bind(this), false);
