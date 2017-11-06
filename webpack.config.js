@@ -57,11 +57,10 @@ const config = {
             {test: /node_modules/, loader: 'ify'}
         ]
     },
-    //node: {
-    //    __dirname: true,
-    //    fs: "empty" //bug fix for cannot resolve module fs error
-    //}
-    target: 'node'
+    node: {
+        __dirname: true,
+        fs: "empty" //bug fix for cannot resolve module fs error
+    }
 };
 
 module.exports = config;
