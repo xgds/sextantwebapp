@@ -7,7 +7,7 @@ import {build} from './webpackbuild'
 let app = express();
 
 //Build webpack dev
-build(app);
+//build(app);
 
 // Serve static files from the public folder
 let public_extension = config.server.public_prefix;
