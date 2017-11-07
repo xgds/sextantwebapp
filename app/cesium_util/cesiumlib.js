@@ -71,6 +71,7 @@ class ViewerWrapper{
         this.scene = viewer.scene;
         this.camera = viewer.scene.camera;
         this.layers = viewer.scene.imageryLayers;
+        this.globalrange = undefined;
 
         viewer.extend(viewerCesiumNavigationMixin, {enableCompass:true,
         											   enableZoomControls:true,
@@ -104,7 +105,21 @@ class ViewerWrapper{
 
         }.bind(this), ScreenSpaceEventType.LEFT_DOWN);
 
+        this.scene.preRender.addEventListener(this.getViewRange.bind(this));
+
     }
+
+    getViewRange(){
+        let upper_left = this.camera.getPickRay(new Cartesian2(0, 0));
+        let lower_right = this.camera.getPickRay(new Cartesian2(
+            this.viewer.scene.canvas.clientWidth,
+            this.viewer.scene.canvas.clientHeight
+        ));
+        let position_ul = this.scene.globe.pick(upper_left, this.scene);
+        let position_lr = this.scene.globe.pick(lower_right, this.scene);
+        let range = Cartesian3.distance(position_ul, position_lr);
+        this.globalrange =  range
+	}
 
     serveraddress(){
     		let result = this.host;
