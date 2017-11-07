@@ -503,7 +503,7 @@ const buildCylinder = function(position, height, radius, slices, label, styleOpt
 
 
 const buildSurfaceCircle = function(position, radius, styleOptions, id, viewerWrapper, callback) {
-    const color = new ColorGeometryInstanceAttribute.fromColor(Color.YELLOW.withAlpha(0.25));
+    /*const color = new ColorGeometryInstanceAttribute.fromColor(Color.YELLOW.withAlpha(0.25));
     const ellipseInstance = new GeometryInstance({
         geometry : new EllipseGeometry({
             center : Cartesian3.fromDegrees(position["longitude"], position["latitude"]),
@@ -517,8 +517,8 @@ const buildSurfaceCircle = function(position, radius, styleOptions, id, viewerWr
     });
     viewerWrapper.scene.primitives.add(new GroundPrimitive({
         geometryInstances : ellipseInstance
-    }));
-	/*viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
+    }));*/
+	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
 		let options = {
 				semiMinorAxis: radius,
 				semiMajorAxis: radius,
@@ -539,7 +539,7 @@ const buildSurfaceCircle = function(position, radius, styleOptions, id, viewerWr
 		if (callback !== undefined){
 			callback(entity);
 		}
-	});*/
+	});
 
 };
 
