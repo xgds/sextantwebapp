@@ -71,6 +71,7 @@ class ViewerWrapper{
         this.scene = viewer.scene;
         this.camera = viewer.scene.camera;
         this.layers = viewer.scene.imageryLayers;
+        this.globalrange = undefined;
 
         viewer.extend(viewerCesiumNavigationMixin, {enableCompass:true,
         											   enableZoomControls:true,
@@ -104,7 +105,21 @@ class ViewerWrapper{
 
         }.bind(this), ScreenSpaceEventType.LEFT_DOWN);
 
+        this.scene.preRender.addEventListener(this.getViewRange.bind(this));
+
     }
+
+    getViewRange(){
+        let upper_left = this.camera.getPickRay(new Cartesian2(0, 0));
+        let lower_right = this.camera.getPickRay(new Cartesian2(
+            this.viewer.scene.canvas.clientWidth,
+            this.viewer.scene.canvas.clientHeight
+        ));
+        let position_ul = this.scene.globe.pick(upper_left, this.scene);
+        let position_lr = this.scene.globe.pick(lower_right, this.scene);
+        let range = Cartesian3.distance(position_ul, position_lr);
+        this.globalrange =  range
+	}
 
     serveraddress(){
     		let result = this.host;
@@ -503,7 +518,7 @@ const buildCylinder = function(position, height, radius, slices, label, styleOpt
 
 
 const buildSurfaceCircle = function(position, radius, styleOptions, id, viewerWrapper, callback) {
-    const color = new ColorGeometryInstanceAttribute.fromColor(Color.YELLOW.withAlpha(0.25));
+    /*const color = new ColorGeometryInstanceAttribute.fromColor(Color.YELLOW.withAlpha(0.25));
     const ellipseInstance = new GeometryInstance({
         geometry : new EllipseGeometry({
             center : Cartesian3.fromDegrees(position["longitude"], position["latitude"]),
@@ -517,7 +532,29 @@ const buildSurfaceCircle = function(position, radius, styleOptions, id, viewerWr
     });
     viewerWrapper.scene.primitives.add(new GroundPrimitive({
         geometryInstances : ellipseInstance
-    }));
+    }));*/
+	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
+		let options = {
+				semiMinorAxis: radius,
+				semiMajorAxis: radius,
+				height: 0,
+				extrudedHeight: 0
+		};
+
+		options = Object.assign(options, styleOptions);
+		
+		let surfaceCircleOptions = {
+				position: raisedPoint[0],
+				ellipse: options,
+				id: id,
+			};
+		
+		let entity = viewerWrapper.viewer.entities.add(surfaceCircleOptions);
+
+		if (callback !== undefined){
+			callback(entity);
+		}
+	});
 
 };
 
@@ -546,7 +583,7 @@ const buildRectangle = function(position, width, height, label, color, id, viewe
 	});
 }
 
-// build a simple ellipse.  We will be using this as a trailing ellipse to have a smooth camera when following
+//build a simple ellipse.  We will be using this as a trailing ellipse to have a smooth camera when following
 const buildEllipse = function(spp, color, viewerWrapper, callback) {
 	let entityEllipse = viewerWrapper.viewer.entities.add({
 	    position : spp,
