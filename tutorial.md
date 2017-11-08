@@ -178,3 +178,7 @@ To pack it for production
 webpack -p
 To build it:
 npm run build
+
+## Debugging info:
+jquery-mobile needs version 1.4.x to have a dist folder in the npm_modules
+jquery-mobile depends on jquery version 2. or 1., but will not work with 3. yet.

@@ -272,7 +272,7 @@ class PlanManager {
                 }
             }, false);
 			buildCylinder({longitude:station.geometry.coordinates[0], latitude:station.geometry.coordinates[1]},
-						10.0, radius, 128, station.name, this.stationCylinderStyle, station.id, this.viewerWrapper, function(entity){
+						10.0, 3.0, 128, station.name, this.stationCylinderStyle, station.id, this.viewerWrapper, function(entity){
 				this.stationElements[station.id] = entity;
 			}.bind(this));
 			

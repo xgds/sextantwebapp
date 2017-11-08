@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const terrainServer = require('./terrainserver');
 import {config} from './config/config_loader';
-import {build} from './webpackbuild'
+//import {build} from './webpackbuild'
 
 let app = express();
 
@@ -20,7 +20,8 @@ const rerouting = [
     ['/CustomMaps', path.resolve(__dirname, 'public', 'CustomMaps')],
 	[public_extension + '/jquery', path.resolve(__dirname, 'node_modules', 'jquery', 'dist')],
 	[public_extension + '/jquery-mobile', path.resolve(__dirname, 'node_modules', 'jquery-mobile', 'dist')],
-	[public_extension + '/font-awesome', path.resolve(__dirname, 'node_modules', 'font-awesome')]
+	[public_extension + '/font-awesome', path.resolve(__dirname, 'node_modules', 'font-awesome')],
+    [public_extension + '/bootstrap', path.resolve(__dirname, 'node_modules', 'bootstrap', 'dist')]
 ];
 
 for (let route of rerouting){
