@@ -273,13 +273,6 @@ class TrackSSE {
 			let cvm = new ClockViewModel(this.viewerWrapper.viewer.clock);
 			cvm.startTime = start.clone();
 			
-			// try subtracting 1/2 second to give us a buffer
-/*			let fakeNow = JulianDate.now();
-			JulianDate.addSeconds(fakeNow, -1, fakeNow);
-			cvm.currentTime = fakeNow;
-			*/
-
-
 			let path = this.cPaths[channel];
 			if (path !== undefined){
 				path.availability =  new TimeIntervalCollection([new TimeInterval({

@@ -264,15 +264,24 @@ class PlanManager {
 	
 	renderStation(station){
 		if (!_.isEmpty(station.geometry.coordinates)) {
-			let radius = new CallbackProperty((time, result) => {
-			    if(this.viewerWrapper.globalrange === undefined){
-			        return 3.0
-                }else {
-                    return 0.05 * this.viewerWrapper.globalrange;
-                }
-            }, false);
+			let radius = 3.0;
+			let height = 10.0;
+//			let radius = new CallbackProperty((time, result) => {
+//			    if(this.viewerWrapper.globalrange === undefined){
+//			        return 3.0
+//                }else {
+//                    return 0.05 * this.viewerWrapper.globalrange;
+//                }
+//            }, false);
+//			let height = new CallbackProperty((time, result) => {
+//			    if(this.viewerWrapper.globalrange === undefined){
+//			        return 10.0
+//                }else {
+//                    return 0.05 * this.viewerWrapper.globalrange;
+//                }
+//            }, false);
 			buildCylinder({longitude:station.geometry.coordinates[0], latitude:station.geometry.coordinates[1]},
-						10.0, radius, 128, station.name, this.stationCylinderStyle, station.id, this.viewerWrapper, function(entity){
+						height, radius, 128, station.name, this.stationCylinderStyle, station.id, this.viewerWrapper, function(entity){
 				this.stationElements[station.id] = entity;
 			}.bind(this));
 			

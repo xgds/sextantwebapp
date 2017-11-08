@@ -105,7 +105,7 @@ class ViewerWrapper{
 
         }.bind(this), ScreenSpaceEventType.LEFT_DOWN);
 
-        this.scene.preRender.addEventListener(this.getViewRange.bind(this));
+        //this.scene.preRender.addEventListener(this.getViewRange.bind(this));
 
     }
 
@@ -116,9 +116,12 @@ class ViewerWrapper{
             this.viewer.scene.canvas.clientHeight
         ));
         let position_ul = this.scene.globe.pick(upper_left, this.scene);
+        if (position_ul === undefined){
+        		return;
+        }
         let position_lr = this.scene.globe.pick(lower_right, this.scene);
         let range = Cartesian3.distance(position_ul, position_lr);
-        this.globalrange =  range
+        this.globalrange =  range;
 	}
 
     serveraddress(){
