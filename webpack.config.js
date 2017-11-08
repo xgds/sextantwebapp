@@ -1,28 +1,31 @@
 const path = require('path');
 const webpack = require('webpack');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
-//webpack has a hmr with some more plugins so we don't need the middleware
 // use webpack --watch to watch code to recompile
 // use express in server.js (ie use debug flag)
 
-const nodeModulesPath = path.resolve(__dirname, 'node_modules');
 const buildPath = path.resolve(__dirname, 'public', 'build');
 const mainPath = path.resolve(__dirname, 'app', 'index.js');
+const cesiumSource = path.resolve(__dirname,'node_modules','cesium','Source');
+const cesiumWorkers = path.resolve(__dirname,'node_modules','cesium','Build','Cesium','Workers');
 
 const config = {
+    context: __dirname, //from cesium tutorial
     devtool: "source-map",
     stats: {
     	errorDetails: true
     },
     resolve: {
-        modules: [
-            path.resolve('./node_modules')
-        ]
+        alias: {
+            // Cesium module name
+            cesium: path.resolve(__dirname, cesiumSource)
+        }
     },
     entry: [
-        'webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000',  // this keeps erroring not sure what it is
         mainPath
     ],
+
     output: {
         path: buildPath,
         publicPath: '/build/',
@@ -31,44 +34,55 @@ const config = {
         library: 'sextant', // the name of the library we refer to
         sourcePrefix: '' // required for cesium
     },
+    amd: {
+        // Enable webpack-friendly use of require in cesium
+        toUrlUndefined: true
+    },
+    node: {
+        // Resolve node module use of fs
+        fs: "empty"
+    },
     plugins: [
-        new webpack.optimize.OccurenceOrderPlugin(),
-        new webpack.HotModuleReplacementPlugin(),
-        new webpack.NoErrorsPlugin(),
         new webpack.DefinePlugin({
+            CESIUM_BASE_URL: JSON.stringify(''),
             'process.env.CONFIG_PATH': JSON.stringify(process.env.CONFIG_PATH || undefined)
-        })
+        }),
+        new CopyWebpackPlugin([{from: cesiumWorkers, to: 'Workers'}]),
+        new CopyWebpackPlugin([{from: path.join(cesiumSource, 'Assets'), to: 'Assets'}]),
+        new CopyWebpackPlugin([{from: path.join(cesiumSource, 'Widgets'), to: 'Widgets'}]),
+        /*new webpack.optimize.CommonsChunkPlugin({
+            name: 'cesium',
+            minChunks: function (module) {
+                return module.context && module.context.indexOf('cesium') !== -1;
+            }
+        })*/
 //        new webpack.ProvidePlugin({
 //           $: "jquery",
 //           jQuery: "jquery"
 //       })
     ],
     module: {
-        noParse: [
-            /.pako_inflate.js/ //this module seems to cause some warning apparently
-        ],
-        unknownContextCritical : false,
-        loaders: [
-            {test: /\.json$/, loader: "json-loader"},
+        unknownContextCritical : false, // required for cesium
+        rules: [
             {
-                test: /\.jsx?$/,
-                loader: 'babel-loader',
-                exclude: [nodeModulesPath],
-                query: {
-                    plugins: ['transform-runtime'], //Don't know why needed, but recommended
-                    presets: ['es2015', 'stage-0', 'react']
-                }
-            },
-            {test: /\.js$/, loader: 'babel', exclude: [nodeModulesPath]},
-            {test: /\.css$/, loader: "style!css" },
-            {test: /\.(png|gif|jpg|jpeg|glsl)$/, loader: "file-loader"},
-            {test: /\.(woff|woff2|eot|ttf|svg)$/, loader: 'url?limit=10000' },
-            {test: /node_modules/, loader: 'ify'}
+                test: /\.js$/, 
+                exclude: /(node_modules|bower_components)/,
+                use: {
+                    loader: 'babel-loader',
+                    options: {
+                        //plugins: ['transform-runtime']
+                        presets: ['babel-preset-env'],
+                        plugins: ['transform-runtime']
+                    }
+                  }
+            },{
+                test: /\.css$/, 
+                use: ["style-loader", "css-loader"] 
+            },{
+                test: /\.(png|gif|jpg|jpeg|svg|xml|json)$/,
+                use: ['url-loader']
+            }
         ]
-    },
-    node: {
-    	__dirname: true,
-        fs: "empty" //bug fix for cannot resolve module fs error
     }
 };
 

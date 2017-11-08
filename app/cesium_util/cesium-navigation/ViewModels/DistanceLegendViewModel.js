@@ -1,11 +1,11 @@
 /*global define*/
 define([
-    'cesium/Source/Core/defined',
-    'cesium/Source/Core/DeveloperError',
-    'cesium/Source/Core/EllipsoidGeodesic',
-    'cesium/Source/Core/Cartesian2',
-    'cesium/Source/Core/getTimestamp',
-    'cesium/Source/Core/EventHelper',
+    'cesium/Core/defined',
+    'cesium/Core/DeveloperError',
+    'cesium/Core/EllipsoidGeodesic',
+    'cesium/Core/Cartesian2',
+    'cesium/Core/getTimestamp',
+    'cesium/Core/EventHelper',
     'knockout-es5',
     '../Core/loadView'
     //'leaflet'

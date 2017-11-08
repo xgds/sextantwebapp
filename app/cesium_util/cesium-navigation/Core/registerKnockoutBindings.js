@@ -1,6 +1,6 @@
 /*global require*/
 define([
-    'cesium/Source/Widgets/SvgPathBindingHandler',
+    'cesium/Widgets/SvgPathBindingHandler',
     'knockout-es5',
     './KnockoutMarkdownBinding',
     './KnockoutHammerBinding'

@@ -6,9 +6,9 @@
  import './Styles/style.css';
 
 define([
-    'cesium/Source/Core/defined',
-    'cesium/Source/Core/defineProperties',
-    'cesium/Source/Core/DeveloperError',
+    'cesium/Core/defined',
+    'cesium/Core/defineProperties',
+    'cesium/Core/DeveloperError',
     './CesiumNavigation'
 ], function(
     defined,

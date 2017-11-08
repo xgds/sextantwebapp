@@ -1,70 +1,50 @@
 {
-  "name": "webapp",
+  "name": "sextantwebapp",
   "version": "1.0.0",
   "description": "pextant webapp",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server"
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",
-    "url": "www.github.com/norheim/sextantwebapp"
+    "url": "git+https://github.com/xgds/sextantwebapp.git"
   },
   "author": "Johannes Norheim",
   "license": "ISC",
-  "dependencies": {
-    "bootstrap-loader": "^1.3.0",
-    "cesium": "^1.38.0",
-    "cors": "^2.8.4",
-    "express": "^4.16.2",
-    "font-awesome": "^4.7.0",
-    "geolocation": "^0.2.0",
+  "bugs": {
+    "url": "https://github.com/xgds/sextantwebapp/issues"
+  },
+  "homepage": "https://github.com/xgds/sextantwebapp#readme",
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-env": "^1.6.1",
+    "cesium": "^1.39.0",
+    "copy-webpack-plugin": "^4.2.0",
+    "css-loader": "^0.28.7",
+    "file-loader": "^1.1.5",
     "hammerjs": "^2.0.8",
-    "http": "0.0.0",
-    "ify-loader": "^1.1.0",
-    "jquery": "^2.2.4",
-    "jquery-mobile": "^1.4.1",
     "knockout": "^3.4.2",
     "knockout-es5": "^0.4.5",
-    "lodash": "^4.16.6",
     "markdown-it": "^8.4.0",
     "markdown-it-sanitizer": "^0.4.3",
     "moment": "^2.19.1",
-    "path": "^0.12.7",
-    "plotly": "^1.0.6",
-    "redux": "^3.7.2",
-    "socket.io": "^1.5.1",
-    "socket.io-client": "^1.5.1"
+    "socket.io-client": "^2.0.4",
+    "strip-pragma-loader": "^1.0.0",
+    "style-loader": "^0.19.0",
+    "uglifyjs-webpack-plugin": "^1.0.1",
+    "url-loader": "^0.6.2",
+    "webpack": "^3.8.1",
+    "webpack-dev-server": "^2.9.4"
   },
-  "devDependencies": {
-    "babel-core": "^6.26.0",
-    "babel-loader": "^6.2.7",
-    "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-preset-es2015": "^6.24.1",
-    "babel-preset-react": "^6.23.0",
-    "babel-preset-stage-0": "^6.16.0",
-    "babel-preset-stage-2": "^6.24.1",
-    "babel-runtime": "^6.26.0",
-    "bootstrap-sass": "^3.3.7",
-    "browserify": "^13.1.1",
-    "css-loader": "^0.25.0",
-    "exports-loader": "^0.6.3",
-    "extract-text-webpack-plugin": "^1.0.1",
-    "file-loader": "^0.9.0",
-    "imports-loader": "^0.7.1",
-    "json-loader": "^0.5.7",
-    "node-sass": "^3.11.2",
-    "react": "^15.6.2",
-    "react-dom": "^15.6.2",
-    "react-hot-loader": "^3.1.1",
-    "resolve-url-loader": "^1.6.0",
-    "sass-loader": "^4.0.2",
-    "style-loader": "^0.13.1",
-    "url-loader": "^0.5.9",
-    "watchify": "^3.7.0",
-    "webpack": "^1.15.0",
-    "webpack-dev-middleware": "^1.12.0",
-    "webpack-hot-middleware": "^2.20.0"
+  "dependencies": {
+    "bootstrap": "^3.3.7",
+    "express": "^4.16.2",
+    "font-awesome": "^4.7.0",
+    "jquery": "^2.2.4",
+    "jquery-mobile": "^1.4.1"
   }
 }

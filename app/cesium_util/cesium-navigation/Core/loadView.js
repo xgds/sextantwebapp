@@ -1,6 +1,6 @@
 /*global require*/
 define([
-    'cesium/Source/Widgets/getElement',
+    'cesium/Widgets/getElement',
     'knockout-es5',
     './createFragmentFromTemplate'
 ], function (

@@ -1,8 +1,8 @@
 /*global require*/
 define([
-    'cesium/Source/Core/defined',
-    'cesium/Source/Core/defineProperties',
-    'cesium/Source/Core/DeveloperError',
+    'cesium/Core/defined',
+    'cesium/Core/defineProperties',
+    'cesium/Core/DeveloperError',
     'knockout-es5'
 ], function (
     defined,
