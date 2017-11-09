@@ -31,7 +31,7 @@ let sse = undefined;
 let fakeHeading = false;
 let hostname = undefined;
 const PATH_TRAIL_TIME=60; // for the length of the path
-const TRAIL_SECONDS = 5.0; // for the ellipse trailing behind to help the view
+const TRAIL_SECONDS = 1.0; // for the ellipse trailing behind to help the view
 
 if (hasSSE){
     hostname = config.xgds.protocol + '://' + config.xgds.name;
@@ -46,6 +46,7 @@ class TrackSSE {
 		// cache of raw data
 		this.positions = {};
 		this.tracks =  {};
+		this.loadingTracks = [];
 		
 		// cesium renderings
 		this.cLastPosition = {};
@@ -234,6 +235,9 @@ class TrackSSE {
 			this.getTrack(channel, data);
 		} else {
 			this.modifyPosition(channel, data, false);
+			if (!(channel in this.tracks)) {
+				this.getTrack(channel, data);
+			}
 		}
 	};
 
@@ -391,7 +395,7 @@ class TrackSSE {
 			let trailDate = JulianDate.fromIso8601(data.timestamp);
 			JulianDate.addSeconds(cdate, TRAIL_SECONDS, trailDate);
 			this.viewerWrapper.getRaisedPositions({longitude:data.lon, latitude:data.lat}).then(function(raisedPoint){
-				property.addSample(cdate, raisedPoint[0]);
+				property.addSample(trailDate, raisedPoint[0]);
 				trailingProperty.addSample(trailDate, raisedPoint[0]);
 				this.cLastPosition[channel]=raisedPoint[0];
 //				if (this.followPosition){
@@ -497,6 +501,10 @@ class TrackSSE {
 
 	getTrack(channel, data) {
 		// first check if we already got it
+		if (this.loadingTracks.indexOf(channel) >= 0){
+			return;
+		}
+		this.loadingTracks.push(channel);
 		if (!_.isEmpty(this.tracks[channel])){
 			return;
 		}
