@@ -36,10 +36,10 @@ module.exports = {
     terrain : { port : 9090 },
     
     // If you have base imagery include it locally or remotely here
-    //baseImagery: {'url': '/cesium-assets/imagery/NaturalEarthII' },
+    baseImagery: {'url': '/build/Assets/Textures/NaturalEarthII' },
 
     // Default geographical site
-    defaultSite : 'HI_Mauna_Ulu',
+    defaultSite : 'HI_Kilauea',
     
     // list of various sites we support
     sites : {
@@ -49,8 +49,8 @@ module.exports = {
             'centerPoint' : [-155.2118, 19.3647, 5000]
         },
         'HI_Kilauea' : {
-            'imagery' : {'url':'/CustomMaps/HI_kilauea'},
-            'elevation' : 'cesium_tilesets/HI2',
+            'imagery' : {'url':'/CustomMaps/Kilauea_True_Color'},
+            //'elevation' : 'cesium_tilesets/HI2',
             'centerPoint' : [-155.260059,  19.408373, 5000]
         },
         'ID_COTM' : {'centerPoint' : [-113.5787682, 43.4633101, 5000]
