@@ -16,7 +16,7 @@
 
 import {config} from './../../config/config_loader';
 import * as _ from 'lodash';
-import * as moment from 'moment'
+const moment = require('moment');
 import {
     Color, ImageMaterialProperty, ColorMaterialProperty, Cartesian2, Cartesian3, CallbackProperty,
     HeadingPitchRange, SampledPositionProperty, JulianDate, TimeIntervalCollection, TimeInterval, ClockViewModel,
@@ -40,12 +40,13 @@ class Track {
         this.hasHeading = hasHeading;
         this.cLastPosition = undefined;
         this.cPath = undefined;
+        this.cPathHead = undefined;
         this.name = name;
 
         this.cEllipseMaterial = this.initializeMaterial(resources["pointerUrl"]);
 
-        this.colors = {'track_off': Color.GRAY.withAlpha(0.25), "track_on": Color.GREEN.withAlpha(0.25)};
-        this.labelColors = {'track_off': Color.GRAY, "track_on": Color.GREEN};
+        this.colors = {'track_off': Color.GRAY.withAlpha(0.25), "track_on": Color.YELLOW.withAlpha(0.25)};
+        this.labelColors = {'track_off': Color.GRAY, "track_on": Color.YELLOW};
         this.isStopped = false;
     }
 
@@ -57,12 +58,12 @@ class Track {
         } else if ('track_on' in sourceMap) {
             color = sourceMap['track_on'];
         } else {
-            color = Color.GREEN
+            color = Color.YELLOW
         }
         return color;
     };
 
-    setOnlineTrackColor(colorHexCode = '00FF00') {
+    setOnlineTrackColor(colorHexCode = 'feff06') {
         let color = Color.fromCssColorString('#' + colorHexCode);
         this.labelColors['track_on'] = color;
         this.colors['track_on'] = color.clone().withAlpha(0.4); // make a translucent one
@@ -78,10 +79,13 @@ class Track {
         if ('lon' in data) {    // adding a point
             this.addPoint(data)
         } else if (('coords' in data) && data.coords.length > 0) {    // adding a track
-            this.addTrackChunck(data)
+            this.addTrackChunk(data)
         }
         if (this.cPath === undefined){
             this.buildPath()
+        }else if("times" in data){
+            let start = JulianDate.fromIso8601(data.times[0][0]);
+            this.resetClock(start);
         }
     }
 
@@ -93,7 +97,6 @@ class Track {
             }
             return 0;  // it won't matter because we are not rendering a texture
         }, false);
-
         buildPath(
             this.cSampledPositionProperty,
             this.name,
@@ -103,9 +106,28 @@ class Track {
             headingCallback,
             this.viewerWrapper,
             (entity) => {
-                let builtPath = entity;
-                this.cPaths = entity;
+                this.cPath = entity["path"];
+                this.cPathHead = entity["ellipse"];
+                let start = JulianDate.fromIso8601(moment().toISOString());
+                this.resetClock(start);
             });
+    }
+
+    resetClock(start){
+        let stop = JulianDate.addHours(start, 12, new JulianDate());
+
+        let cvm = new ClockViewModel(this.viewerWrapper.viewer.clock);
+        cvm.startTime = start.clone();
+
+        this.cPath.availability =  new TimeIntervalCollection([new TimeInterval({
+            start : start.clone(),
+            stop : stop.clone()
+        })]);
+
+        this.cPathHead.availability =  new TimeIntervalCollection([new TimeInterval({
+            start : start.clone(),
+            stop : stop.clone()
+        })]);
     }
 
     initializeMaterial(pointerUrl = false) {
@@ -136,13 +158,13 @@ class Track {
         this.viewerWrapper.getRaisedPositions({
             longitude: data.lon,
             latitude: data.lat
-        }).then(function (raisedPoint) {
+        }).then((raisedPoint) => {
             this.cSampledPositionProperty.addSample(cdate, raisedPoint[0]);
-            this.cLastPosition = raisedPoint[0];
-        }.bind(this));
+            //this.cLastPosition = raisedPoint[0];
+        });
     }
 
-    addTrackChunck(data) {
+    addTrackChunk(data) {
         for (let i = 0; i < data.coords.length; i++) {
             let times = data.times[i];
             this.viewerWrapper.getRaisedPositions(data.coords[i]).then(function (raisedPoints) {
@@ -153,7 +175,6 @@ class Track {
                 this.cSampledPositionProperties.addSamples(julianTimes, raisedPoints);
                 //should we udpdate last position?
             });
-
         }
     }
 

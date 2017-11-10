@@ -614,6 +614,7 @@ const buildPath = function(spp, label, labelColor, ellipseColor, id, headingCall
 	    name : 'path',
 	    path : {
 	        resolution : 1,
+            width: 3,
 	        material : labelColor
 	    }
 	});

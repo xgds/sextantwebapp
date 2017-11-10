@@ -4,13 +4,16 @@ import * as $ from 'jquery';
 import {config} from './../config/config_loader';
 import {ViewerWrapper, zoom, heading, DynamicLines, loadKmls, buildSurfaceCircle} from './cesium_util/cesiumlib';
 import {Cartesian3, CesiumMath, Color, CallbackProperty} from './cesium_util/cesium_imports'
-
+import {statusChannel, connectedDevices, gpsChannel, plannerChannel} from './socket/socket'
+const moment = require('moment');
 
 // Configure the Cesium viewer
-const viewerWrapper = new ViewerWrapper(config.urlPrefix, config.server.cesium_port, config.server.nginx_prefix, 1, 'cesiumContainer');
+const viewerWrapper = new ViewerWrapper(config.urlPrefix, config.server.cesium_port,
+	config.server.nginx_prefix, 1, 'cesiumContainer');
 // Set up for SSE or GPS input
 const hasSSE = ('xgds' in config);
 import {TrackSSE} from './sse/trackSseUtils'
+import {TrackManager} from "./cesium_util/cesiumtrack";
 import {PlanManager, xgdsPlanManager} from './plan/plan'
 let gps_tracks = undefined;
 let tsse = undefined;
@@ -28,8 +31,24 @@ if (hasSSE) {
 	tsse = new TrackSSE(viewerWrapper);
 	planManager = new xgdsPlanManager(viewerWrapper);
 } else {
-	gps_tracks = new DynamicLines(viewerWrapper);
-    planManager = new PlanManager(viewerWrapper);
+	let track_manager = new TrackManager(viewerWrapper);
+    let planManager = new PlanManager(viewerWrapper);
+    let hostname = config.server.protocol + '://' + config.server.name + ':' + config.server.port;
+    let resources = {
+        pointerUrl: hostname + '/' + config.server.nginx_prefix + '/icons/pointer.png'
+    };
+
+    track_manager.addTrack("EV1", resources);
+    console.log('track_manager');
+
+    gpsChannel.setonrecieve(function(data){
+        let jsondata = JSON.parse(data);
+        track_manager.updateTrackFromData("EV1", {
+            lat: jsondata["latitude"],
+            lon: jsondata["longitude"],
+            timestamp: moment().toISOString()
+        })
+    })
 }
 
 // Load the kml configured if any

@@ -50,7 +50,7 @@ module.exports = {
         },
         'HI_Kilauea' : {
             'imagery' : {'url':'/CustomMaps/Kilauea_True_Color'},
-            //'elevation' : 'cesium_tilesets/HI2',
+            //'elevation' : 'cesium_tilesets/Kilauea_full_1m',
             'centerPoint' : [-155.260059,  19.408373, 5000]
         },
         'ID_COTM' : {'centerPoint' : [-113.5787682, 43.4633101, 5000]

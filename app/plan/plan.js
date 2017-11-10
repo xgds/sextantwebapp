@@ -213,7 +213,7 @@ class PlanManager {
     }
 
     _fetchPlan() {
-        let currentPlanUrl = this.hostname + '/sextant_plans/HI_13Nov16_MD7_A.json';
+        let currentPlanUrl = this.hostname + '/sextant_plans/KIL1004_A_EVA_A_plan.json';
         $.getJSON(currentPlanUrl, this.planFromJSON.bind(this));
     }
 	
