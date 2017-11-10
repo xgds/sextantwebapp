@@ -6,13 +6,14 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 // use express in server.js (ie use debug flag)
 
 const buildPath = path.resolve(__dirname, 'public', 'build');
-const mainPath = path.resolve(__dirname, 'app', 'index.js');
+//const mainPath = path.resolve(__dirname, 'app', 'index.js');
+const mainPath = path.resolve(__dirname, 'app', 'cesium_util', 'gps_test.js');
 const cesiumSource = path.resolve(__dirname,'node_modules','cesium','Source');
 const cesiumWorkers = path.resolve(__dirname,'node_modules','cesium','Build','Cesium','Workers');
 
 const config = {
     context: __dirname, //from cesium tutorial
-    devtool: "source-map",
+    devtool: "eval",
     stats: {
     	errorDetails: true
     },

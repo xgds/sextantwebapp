@@ -45,7 +45,7 @@ module.exports = {
     sites : {
         'HI_Mauna_Ulu' : {
             'imagery' : {'url':'/CustomMaps/MU_Pan_Sharp_contrast'},
-            'elevation' : 'cesium_tilesets/HI_highqual',
+            //'elevation' : 'cesium_tilesets/HI_highqual',
             'centerPoint' : [-155.2118, 19.3647, 5000]
         },
         'HI_Kilauea' : {

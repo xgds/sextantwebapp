@@ -607,7 +607,7 @@ const buildEllipse = function(spp, color, viewerWrapper, callback) {
 
 // this is the main function we are using to render a path and an ellipse with the current position.
 const buildPath = function(spp, label, labelColor, ellipseColor, id, headingCallback, viewerWrapper, callback){
-	
+	console.log(ellipseColor);
 	let newEntities = {};
 	let entityPath = viewerWrapper.viewer.entities.add({
 	    position : spp,

@@ -15,75 +15,165 @@
 //__END_LICENSE__
 
 import {config} from './../../config/config_loader';
+import * as _ from 'lodash';
 import * as moment from 'moment'
-import {Color, ImageMaterialProperty, ColorMaterialProperty, Cartesian2, Cartesian3, CallbackProperty,
+import {
+    Color, ImageMaterialProperty, ColorMaterialProperty, Cartesian2, Cartesian3, CallbackProperty,
     HeadingPitchRange, SampledPositionProperty, JulianDate, TimeIntervalCollection, TimeInterval, ClockViewModel,
-    SampledProperty, ExtrapolationType} from './../cesium_util/cesium_imports'
+    SampledProperty, ExtrapolationType
+} from './../cesium_util/cesium_imports'
 import {buildPath} from './../cesium_util/cesiumlib';
 
 let fakeHeading = false;
 //data.heading = (Math.random() * (2* Math.PI));
+let hostname = config.server.protocol + '://' + config.server.name + ':' + config.server.port;
 let resources = {
     pointerUrl: hostname + '/' + config.server.nginx_prefix + '/icons/pointer.png'
 };
 
 class Track {
-    constructor (position, heading, color, resources=resources){
-        this.position = position;
-        this.heading = heading;
-
+    constructor(name, resources, viewerWrapper, hasHeading=false, color='00FF00') {
+        this.viewerWrapper = viewerWrapper;
+        this.cSampledPositionProperty = Track.initializeSampledProperty();
+        this.cHeading = Track.initializeSampledProperty();
         this.lastHeading = undefined;
+        this.hasHeading = hasHeading;
         this.cLastPosition = undefined;
-        this.cSampledPositionProperty = undefined;
-        this.cHeading = undefined;
         this.cPath = undefined;
+        this.name = name;
 
-        this.color = color;
-        this.imageMaterials = undefined;
-        this.colorMaterials = undefined;
-        this.cEllipseMaterial = undefined;
-        this.pointerUrl = resources["pointerUrl"];
+        this.cEllipseMaterial = this.initializeMaterial(resources["pointerUrl"]);
 
-        this.colors = {'gray': Color.GRAY.withAlpha(0.25)};
-        this.labelColors = {'gray': Color.GRAY};
+        this.colors = {'track_off': Color.GRAY.withAlpha(0.25), "track_on": Color.GREEN.withAlpha(0.25)};
+        this.labelColors = {'track_off': Color.GRAY, "track_on": Color.GREEN};
+        this.isStopped = false;
     }
 
-    getColor(forLabel = false) {
-        const sourceMap = forLabel ? this.labelColors : this.colors;
-        if (this.isStopped[track_name]) {
-            const color =  sourceMap['gray'];
-        }else if (track_name in this.colors) {
-            const color = sourceMap[track_name];
-        }else{
-            const color = Color.GREEN
+    getColor(getLabelColor = false) {
+        let color = undefined;
+        const sourceMap = getLabelColor ? this.labelColors : this.colors;
+        if (this.isStopped) {
+            color = sourceMap['track_off'];
+        } else if ('track_on' in sourceMap) {
+            color = sourceMap['track_on'];
+        } else {
+            color = Color.GREEN
         }
         return color;
     };
+
+    setOnlineTrackColor(colorHexCode = '00FF00') {
+        let color = Color.fromCssColorString('#' + colorHexCode);
+        this.labelColors['track_on'] = color;
+        this.colors['track_on'] = color.clone().withAlpha(0.4); // make a translucent one
+    };
+
+    loadFromData(data) {
+        if ("track_hexcolor" in data) {
+            this.setOnlineTrackColor(data.track_hexcolor);
+        }
+        if (_.isNumber(data.heading)) {
+            this.updateHeading(data.heading)
+        }
+        if ('lon' in data) {    // adding a point
+            this.addPoint(data)
+        } else if (('coords' in data) && data.coords.length > 0) {    // adding a track
+            this.addTrackChunck(data)
+        }
+        if (this.cPath === undefined){
+            this.buildPath()
+        }
+    }
+
+    buildPath() {
+        this.cPath = true;
+        let headingCallback = new CallbackProperty((time, result) => {
+            if (this.hasHeading) {
+                return this.cHeadings.getValue(time);
+            }
+            return 0;  // it won't matter because we are not rendering a texture
+        }, false);
+
+        buildPath(
+            this.cSampledPositionProperty,
+            this.name,
+            this.getColor(true), // label color
+            this.cEllipseMaterial,
+            this.name + '_POSITION',
+            headingCallback,
+            this.viewerWrapper,
+            (entity) => {
+                let builtPath = entity;
+                this.cPaths = entity;
+            });
+    }
+
+    initializeMaterial(pointerUrl = false) {
+        const colorCallbackProperty = new CallbackProperty(() => {
+            return this.getColor();
+        }, false);
+        if (pointerUrl) { // if it is set to an image, this will evaluate to true
+            return new ImageMaterialProperty({
+                'image': pointerUrl,
+                'transparent': true,
+                'color': colorCallbackProperty
+            });
+        } else {
+            return new ColorMaterialProperty(colorCallbackProperty)
+        }
+    }
+
+    static initializeSampledProperty() {
+        const property = new SampledPositionProperty();
+        property.forwardExtrapolationType = ExtrapolationType.HOLD;
+        return property;
+    }
+
+
+    // update the stored cesium position
+    addPoint(data) {
+        let cdate = JulianDate.fromIso8601(data.timestamp);
+        this.viewerWrapper.getRaisedPositions({
+            longitude: data.lon,
+            latitude: data.lat
+        }).then(function (raisedPoint) {
+            this.cSampledPositionProperty.addSample(cdate, raisedPoint[0]);
+            this.cLastPosition = raisedPoint[0];
+        }.bind(this));
+    }
+
+    addTrackChunck(data) {
+        for (let i = 0; i < data.coords.length; i++) {
+            let times = data.times[i];
+            this.viewerWrapper.getRaisedPositions(data.coords[i]).then(function (raisedPoints) {
+                let julianTimes = [];
+                for (let t = 0; t < times.length; t++) {
+                    julianTimes.push(JulianDate.fromIso8601(times[t]));
+                }
+                this.cSampledPositionProperties.addSamples(julianTimes, raisedPoints);
+                //should we udpdate last position?
+            });
+
+        }
+    }
+
+    updateHeading(data) {
+        // update the stored heading
+        if (_.isNumber(data.heading)) {
+            let cdate = JulianDate.fromIso8601(data.timestamp);
+            this.hasHeading = true;
+            this.cHeading.addSample(cdate, data.heading);
+            this.lastHeading = data.heading;
+        }
+    };
 }
 
-class Tracker {
-
-    constructor(viewerWrapper, resources) {
+class TrackManager {
+    constructor(viewerWrapper) {
         this.viewerWrapper = viewerWrapper;
 
         // cache of raw data
-        this.position_heading = {};
         this.tracks = {};
-        this.lastHeading = {};
-
-        // cesium renderings
-        this.cLastPosition = {};
-        this.cSampledPositionProperties = {};
-        this.cHeadings = {};
-        this.cPaths = {};
-
-        // colors and materials
-        this.colors = {'gray': Color.GRAY.withAlpha(0.25)};
-        this.labelColors = {'gray': Color.GRAY};
-        this.imageMaterials = {};
-        this.colorMaterials = {};
-        this.cEllipseMaterial = {};
-        this.pointerUrl = resources["pointerUrl"];
 
         // various flags
         this.isStopped = {};
@@ -92,17 +182,13 @@ class Tracker {
         this.isMoving = false;
         this.followingTrackName = undefined;
 
-        // initialize
-        this.getCurrentPositions();
-
         //Event listeners track when camera is moving or not, to prevent zooming during a move
         this.viewerWrapper.viewer.camera.moveStart.addEventListener(() => this.isMoving = true);
         this.viewerWrapper.viewer.camera.moveEnd.addEventListener(() => this.isMoving = false);
     };
 
-    handlePositionEvent(track_name, event) {
-        let data = JSON.parse(event.data);
-        context.updatePosition(track_name, data);
+    addTrack(track_name, resources){
+        this.tracks[track_name] = new Track(track_name, resources, this.viewerWrapper)
     };
 
     zoomToPositionBadHeight(track_name) {
@@ -115,14 +201,16 @@ class Tracker {
     */
     zoomToPosition(track_name) {
         if (!this.isMoving) {
-            let entity = this.cPaths[track_name]; //.ellipse;
+            let entity = this.tracks[track_name].cPaths; //.ellipse;
+            let scene = this.viewerWrapper.viewer.scene;
+            let canvas = scene;
             //this was useful: https://groups.google.com/forum/#!topic/cesium-dev/QSFf3RxNRfE
 
             let ray = this.viewerWrapper.camera.getPickRay(new Cartesian2(
-                Math.round(this.viewerWrapper.viewer.scene.canvas.clientWidth / 2),
-                Math.round(this.viewerWrapper.viewer.scene.canvas.clientHeight / 2)
+                Math.round(canvas.clientWidth / 2),
+                Math.round(canvas.clientHeight / 2)
             ));
-            let position = this.viewerWrapper.viewer.scene.globe.pick(ray, this.viewerWrapper.viewer.scene);
+            let position = this.viewerWrapper.viewer.scene.globe.pick(ray, scene);
             let range = Cartesian3.distance(position, this.viewerWrapper.camera.position);
 
             if (this.isInitialized) { //After inital zoom, follows target entity at the viewer's current height
@@ -137,11 +225,29 @@ class Tracker {
         }
     };
 
-    modifyPosition(track_name, data, disconnected = false) {
+    updateTrackFromData(track_name, data, disconnected = false) {
         // stores the data & updates so position can be rendered
-        this.tracks[track_name].position = data["position"];
-        this.renderPosition(track_name, data, disconnected);
+        //this.tracks[track_name].position = data["position"];
+        this.tracks[track_name].loadFromData(data);
     };
+
+    toggleTrack(show) {
+        // show or hide the full track
+        this.tracks[this.followingTrackName].cPath.path.trailTime = show ? undefined : 60
+    };
+}
+
+/*
+tracker = new TrackManager();
+tracker.tracks["EV1"] = new Track("EV1");
+socket.ongps(function(data) {
+    tracker.updateTrackFromData("EV1", data)
+});
+
+class GeneralTracker {
+    constructor() {
+
+    }
 
     updatePosition(track_name, data) {
         // updates the position, gets the track if need be
@@ -153,194 +259,18 @@ class Tracker {
         }
     };
 
-    toggleTrack(show) {
-        // show or hide the full track
-        this.tracks[this.followingTrackName].cPath.path.trailTime = show ? undefined : 60
+    handlePositionEvent(track_name, event) {
+        let data = JSON.parse(event.data);
+        context.updatePosition(track_name, data);
     };
 
-    addColor(track_name, newColor = '#00FF00') {
-        let color = Color.fromCssColorString('#' + newColor);
-        this.labelColors[channel] = color;
-        this.colors[track_name] = color.clone().withAlpha(0.4); // make a translucent one
-    };
-
-    getColor(track_name, forLabel = false) {
-        const sourceMap = forLabel ? this.labelColors : this.colors;
-        if (this.isStopped[track_name]) {
-            const color =  sourceMap['gray'];
-        }else if (track_name in this.colors) {
-            const color = sourceMap[track_name];
-        }else{
-            const color = Color.GREEN
-        }
-        return color;
-    };
-
-    renderTrack(channel, data) {
-        if (!channel in this.colors) {
-            if (data.color !== undefined) {
-                this.addColor(data.color);
-            }
-        }
-
-        // update the viewer clock start
-        if (data.times.length > 0) {
-            let start = JulianDate.fromIso8601(data.times[0][0]);
-            let stop = JulianDate.addHours(start, 12, new JulianDate());
-
-            let cvm = new ClockViewModel(this.viewerWrapper.viewer.clock);
-            cvm.startTime = start.clone();
-
-            let path = this.cPaths[channel];
-            if (path !== undefined) {
-                path.availability = new TimeIntervalCollection([new TimeInterval({
-                    start: start.clone(),
-                    stop: stop.clone()
-                })]);
-            }
-        }
-
-
-        this.updateSampledPositionProperty(channel, data);
-    };
-
-
-    getMaterial(track_name) {
-        // gets or initializes the material
-        let material = undefined;
-        if (!(track_name in this.cEllipseMaterial)) {
-            let data = this.position_heading[track_name];
-            let hasHeading = (_.isNumber(data.heading));
-            if (hasHeading) {
-                // make sure it has the image material
-                if (!(track_name in this.imageMaterials)) {
-                    this.imageMaterials[track_name] = new ImageMaterialProperty({
-                        'image': this.pointerUrl,
-                        'transparent': true,
-                        'color': new CallbackProperty(() => {
-                            return this.getColor(track_name);
-                        }, false)
-                    });
-                }
-                material = this.imageMaterials[track_name];
-            } else {
-                // make sure it has the color material
-                if (!(track_name in this.colorMaterials)) {
-                    this.colorMaterials[track_name] = new ColorMaterialProperty(
-                        new CallbackProperty((time, result) => {
-                        return this.getColor(track_name);
-                    }, false));
-                }
-                material = this.colorMaterials[track_name];
-            }
-            this.cEllipseMaterial[track_name] = material;
+    updatePosition(track_name, data) {
+        // updates the position, gets the track if need be
+        if (!(track_name in this.position_heading)) {
+            this.modifyPosition(track_name, data);
+            this.getTrack(track_name, data);
         } else {
-            material = this.cEllipseMaterial[track_name];
-        }
-        return material;
-    };
-
-    updateHeading(channel, data) {
-        // update the stored heading
-        let property = undefined;
-        if (!(channel in this.cHeadings)) {
-            let context = this;
-            property = new SampledProperty(Number);
-            property.forwardExtrapolationType = ExtrapolationType.HOLD;
-            this.cHeadings[channel] = property;
-        } else {
-            property = this.cHeadings[channel];
-        }
-
-        let cdate = JulianDate.fromIso8601(data.timestamp);
-        property.addSample(cdate, data.heading);
-        this.lastHeading[channel] = data.heading;
-    };
-
-    updateSampledPositionProperty(channel, data) {
-        // update the stored cesium position
-        let property = this.cSampledPositionProperties[channel];
-        ;
-        if (_.isUndefined(property)) {
-            property = new SampledPositionProperty();
-            property.forwardExtrapolationType = ExtrapolationType.HOLD;
-            this.cSampledPositionProperties[channel] = property;
-        }
-        if ('lon' in data) {
-            // adding a point
-            let cdate = JulianDate.fromIso8601(data.timestamp);
-            this.viewerWrapper.getRaisedPositions({
-                longitude: data.lon,
-                latitude: data.lat
-            }).then(function (raisedPoint) {
-                property.addSample(cdate, raisedPoint[0]);
-                this.cLastPosition[channel] = raisedPoint[0];
-//				if (this.followPosition){
-//					this.zoomToPosition(channel);
-//				}
-
-            }.bind(this));
-        } else {
-            // adding a track
-            if (data.coords.length > 0) {
-                // tracks come in blocks of times & coords to handle gaps.  Cesium is doing linear interpolation here.
-                for (let i = 0; i < data.coords.length; i++) {
-                    let times = data.times[i];
-                    let lastI = i;
-                    this.viewerWrapper.getRaisedPositions(data.coords[i]).then(function (raisedPoints) {
-                        let julianTimes = [];
-                        for (let t = 0; t < times.length; t++) {
-                            julianTimes.push(JulianDate.fromIso8601(times[t]));
-                        }
-                        ;
-
-                        property.addSamples(julianTimes, raisedPoints);
-                    });
-
-                }
-            }
-        }
-    }
-
-    renderPosition(track_name, data, stopped) {
-
-        let color = undefined;
-        if (track_name in this.colors) {
-            color = this.colors[track_name];
-        } else {
-            color = this.addColor(track_name, data.track_hexcolor);
-        }
-
-        if (!_.isEmpty(data)) {
-            if (!(track_name in this.cSampledPositionProperties)) {
-
-
-                this.updateSampledPositionProperty(track_name, data);
-                if (_.isNumber(data.heading)) {
-                    this.updateHeading(track_name, data);
-                }
-
-                let retrievedMaterial = this.getMaterial(track_name);
-
-                let headingCallback = new CallbackProperty(function (time, result) {
-                    if (track_name in this.cHeadings) {
-                        return this.cHeadings[track_name].getValue(time);
-                    }
-                    return 0;  // it won't matter because we are not rendering a texture
-                }.bind(this), false);
-
-                buildPath(this.cSampledPositionProperties[track_name], track_name, this.getColor(track_name, true), retrievedMaterial, track_name + '_POSITION', headingCallback, this.viewerWrapper, function (entity) {
-                    let builtPath = entity;
-                    this.cPaths[track_name] = builtPath;
-                }.bind(this));
-
-            } else {
-                this.updateSampledPositionProperty(track_name, data);
-                if (_.isNumber(data.heading)) {
-                    this.updateHeading(track_name, data);
-                }
-
-            }
+            this.modifyPosition(track_name, data, false);
         }
     };
 
@@ -356,34 +286,17 @@ class Tracker {
                 }
             }
         });
-        /*function(data) {
+        function(data) {
             console.log('could not get active track position');
             console.log(data);
-        })*/
+        })
     };
 
-}
-
-class SocketTracker{
-    constructor(){
-
-    }
-
-    updatePosition(track_name, data) {
-        // updates the position, gets the track if need be
-        if (!(track_name in this.position_heading)) {
-            this.modifyPosition(track_name, data);
-            this.getTrack(track_name, data);
-        } else {
-            this.modifyPosition(track_name, data, false);
-        }
-    };
-
-    setFollowPosition(value) {
+    setFollowPosition(value){
         this.followPosition = value;
     };
 
-    convertTrackNameToChannel(track_name) {
+    convertTrackNameToChannel(track_name){
         let splits = track_name.split('_');
         if (splits.length > 1) {
             return splits[1];
@@ -391,32 +304,33 @@ class SocketTracker{
         return track_name;
     };
 
-    _getTrack(data, response_callback){
-        let trackUrl =  hostname + '/xgds_map_server/rest/mapJson/basaltApp.BasaltTrack/pk:' + data.track_pk
+    _getTrack(data, response_callback) {
+        let trackUrl = hostname + '/xgds_map_server/rest/mapJson/basaltApp.BasaltTrack/pk:' + data.track_pk
         $.ajax({
             url: trackUrl,
             dataType: 'json',
             xhrFields: {withCredentials: true},
             beforeSend: beforeSend,
             success: $.proxy(response_callback),
-            error: $.proxy(function(response) {
+            error: $.proxy(function (response) {
                 console.log('could not get track contents for ' + data.track_pk);
                 console.log(response);
             })
         });
     };
+
     getTrack(track_name, data) {
         // first check if we already got it
         if (_.isEmpty(this.tracks[track_name])) {
             // asynchronous callback
             this._getTrack(data, (response_data) => {
                 if (response_data !== null && response_data.length === 1) {
-                    this.tracks[track_name] = response_data[0];
+                    this.tracks[track_name] = Track(); // need to add options
                     this.renderTrack(track_name, response_data[0]);
                 }
             })
         }
     }
 }
-
-export {Tracker}
+*/
+export {TrackManager, Track}
