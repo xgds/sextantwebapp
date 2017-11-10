@@ -43,7 +43,7 @@ socket.on('connect', function(){
     statusChannel.emit('client connection received');
     connectedDevices.emit('');
     gpsChannel.emit({"command": "start", "data": "COM10"});
-    plannerChannel.emit({command: 'listdir'});
+    //plannerChannel.emit({command: 'listdir'});
     //gpsChannel.emit({command: 'start', data:'COM10'});
 }.bind(this));
 
