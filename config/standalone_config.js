@@ -39,7 +39,7 @@ module.exports = {
     baseImagery: {'url': '/build/Assets/Textures/NaturalEarthII' },
 
     // Default geographical site
-    defaultSite : 'HI_Kilauea',
+    defaultSite : 'HI_Mauna_Ulu',
     
     // list of various sites we support
     sites : {

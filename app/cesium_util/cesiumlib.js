@@ -89,6 +89,7 @@ class ViewerWrapper{
         try {
             if ('imagery' in config.sites[config.defaultSite]) {
                 this.addImagery(config.sites[config.defaultSite].imagery);
+                this.addImagery({'url':'/CustomMaps/HI_air_hillshade'});
             }
         } catch (e) {
             //ulp
