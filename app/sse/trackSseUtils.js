@@ -49,7 +49,6 @@ class TrackSSE {
 		this.loadingTracks = [];
 		
 		// cesium renderings
-		this.cLastPosition = {};
 		this.cSampledPositionProperties = {};
 		this.cTrailingSampledPositionProperties = {};
 		this.cHeadings = {};
@@ -75,7 +74,10 @@ class TrackSSE {
 		
 		// initialize
 		this.getCurrentPositions();
-		this.allChannels(this.subscribe, this);
+		
+		for (let channel in config.xgds.ev_channels){
+			this.subscribe(config.xgds.ev_channels[channel], this);
+		}
 		
 		let context = this;
 		
@@ -369,8 +371,11 @@ class TrackSSE {
 		}
 		
 		let cdate = JulianDate.fromIso8601(data.timestamp);
+		let trailDate = JulianDate.fromIso8601(data.timestamp);
+		JulianDate.addSeconds(cdate, TRAIL_SECONDS, trailDate);
 		var radians = ((data.heading/180.0)* Math.PI);
-		property.addSample(cdate, radians);
+		//TODO right now we are trailing everything
+		property.addSample(trailDate, radians);
 	};
 	
 	updateSampledPositionProperty(channel, data) {
@@ -395,13 +400,8 @@ class TrackSSE {
 			let trailDate = JulianDate.fromIso8601(data.timestamp);
 			JulianDate.addSeconds(cdate, TRAIL_SECONDS, trailDate);
 			this.viewerWrapper.getRaisedPositions({longitude:data.lon, latitude:data.lat}).then(function(raisedPoint){
-				property.addSample(trailDate, raisedPoint[0]);
+				property.addSample(cdate, raisedPoint[0]);
 				trailingProperty.addSample(trailDate, raisedPoint[0]);
-				this.cLastPosition[channel]=raisedPoint[0];
-//				if (this.followPosition){
-//					this.zoomToPosition(channel);
-//				}
-
 			}.bind(this));
 		} else {
 			// adding a track 
@@ -486,7 +486,7 @@ class TrackSSE {
 					// should return dictionary of channel: position
 					for (let track_name in data){
 						let channel = this.convertTrackNameToChannel(track_name);
-						if (!(channel in this.positions)){
+						if (!(channel in this.positions) && (channel in config.xgds.ev_channels)){
 							this.updatePosition(channel, data[track_name], true);
 						}
 					}

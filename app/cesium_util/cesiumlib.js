@@ -626,7 +626,7 @@ const buildPath = function(spp, label, labelColor, ellipseColor, id, headingCall
 			text: label,
 			verticalOrigin: VerticalOrigin.CENTER,
 	        horizontalOrigin: HorizontalOrigin.CENTER,
-	        eyeOffset: new Cartesian3(8, 0, 1.0),  //TODO zoom this better so it stays same distance from ellipse
+	        eyeOffset: new Cartesian3(2.0, 0, 1.0),  //TODO zoom this better so it stays same distance from ellipse
 	        fillColor: labelColor,
 	        outlineWidth: 3.0
 		},
