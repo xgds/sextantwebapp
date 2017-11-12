@@ -39,7 +39,7 @@ module.exports = {
     baseImagery: {'url': '/build/Assets/Textures/NaturalEarthII' },
 
     // Default geographical site
-    defaultSite : 'HI_Mauna_Ulu',
+    defaultSite : 'HI_Kilauea',
     
     // list of various sites we support
     sites : {
@@ -62,7 +62,10 @@ module.exports = {
     },
 	
 	// list of kml links to load
-    kml_urls : [],
+    kml_urls : [
+        "/2017_Field_Stations.kml",
+        "/HI2017-03.kml"
+    ],
     
     
     // whether or not this is a development server

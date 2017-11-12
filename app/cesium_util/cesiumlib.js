@@ -90,6 +90,7 @@ class ViewerWrapper{
             if ('imagery' in config.sites[config.defaultSite]) {
                 this.addImagery(config.sites[config.defaultSite].imagery);
                 this.addImagery({'url':'/CustomMaps/HI_air_hillshade'});
+                this.addImagery({'url':'/CustomMaps/Kilauea_True_Color'});
             }
         } catch (e) {
             //ulp
