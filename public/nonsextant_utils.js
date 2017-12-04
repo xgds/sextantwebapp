@@ -23,6 +23,9 @@ let deviceNames = "";
 function loadDevices(){
 	if(sextant.connectedDevices !== undefined){
 
+		if (!_.isEmpty(sextant.connectedDevices)) {
+			$('#connectedDevices').show();
+		}
 		$.each(sextant.connectedDevices, function( key, value ) { //key here is the device name, and value is the displayName corresponding to it.
 			let listEntry="<li "+"id='"+key+"'>"+value+"</li>";
 			$('#deviceList').append(listEntry); //Display all connected devices using their display names from config

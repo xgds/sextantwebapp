@@ -443,11 +443,17 @@ class TrackSSE {
 				}
 
 				let retrievedMaterial = this.getMaterial(channel);
+//				let retrievedMaterial = new CallbackProperty(function(time, result) {
+//					return this.getMaterial(channel);
+//				}.bind(this), false);
+				
+//				let retrievedColor = new CallbackProperty(function(time, result) {
+//					return this.getColor(channel, true);
+//				}.bind(this), false);
 
 				let headingCallback = new CallbackProperty(function(time, result) {
 					if (channel in this.cHeadings){
 						var value = this.cHeadings[channel].getValue(time);
-						//console.log('HEADING CALLBACK: ' + time.toString() + ': ' + value);
 						return value;
 					}
 					return 0;  // it won't matter because we are not rendering a texture

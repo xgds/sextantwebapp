@@ -314,14 +314,14 @@ class PlanManager {
             contentType: 'application/json',
             context: this,
             success: $.proxy(function(data) {
-            	console.log('DATA LOADED IN SEXTANT');
+            		console.log('DATA LOADED IN SEXTANT');
             	if (solve){
             		console.log('CALLING SOLVER');
             		this.calculateNewPath(true);
             	}
             }),
             error: $.proxy(function(data){
-            	console.log('FAILED TO LOAD TO SEXTANT');
+            		console.log('FAILED TO LOAD TO SEXTANT');
             })
             });
 			
@@ -619,7 +619,11 @@ class xgdsPlanManager extends PlanManager {
                     // Right now we are just taking the last one.  Might want to give them a list or something.
                     if (!_.isEmpty(sortedKeys)) {
                         thePlan = planDict[sortedKeys[sortedKeys.length - 1]];
-                        this.planFromJSON(thePlan)
+                        let firstPlan = (this.plan === undefined);
+                        this.planFromJSON(thePlan);
+                        if (firstPlan){
+                        		this.zoomTo();
+                        }
                     }
                 }
 			}, this),
