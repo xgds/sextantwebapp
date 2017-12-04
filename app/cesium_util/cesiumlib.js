@@ -17,7 +17,8 @@ import {Viewer, EllipsoidTerrainProvider, Cartesian3, Cartesian2, PolygonGeometr
 		SceneMode, SampledPositionProperty, JulianDate, ColorMaterialProperty, ClockRange, ClockViewModel, GroundPrimitive,
 		Transforms, HeadingPitchRoll, ColorGeometryInstanceAttribute, GeometryInstance, Primitive, KmlDataSource, Clock} from './cesium_imports'
 
-import viewerCesiumNavigationMixin from './cesium-navigation/viewerCesiumNavigationMixin';
+const cesium_navigation = require('cesium-navigation');
+//import viewerCesiumNavigationMixin from './cesium-navigation/viewerCesiumNavigationMixin';
 
 if (!('destination' in config)) {
 	config.destination = Cartesian3.fromDegrees(config.siteConfig.centerPoint[0], config.siteConfig.centerPoint[1], config.siteConfig.centerPoint[2]);
@@ -73,12 +74,14 @@ class ViewerWrapper{
         this.layers = viewer.scene.imageryLayers;
         this.globalrange = undefined;
 
-        viewer.extend(viewerCesiumNavigationMixin, {enableCompass:true,
-        											   enableZoomControls:true,
-        											   enableDistanceLegend:true
-        												});
+        // viewer.extend(viewerCesiumNavigationMixin, {enableCompass:true,
+        //                                             enableZoomControls:true,
+        //                                             enableDistanceLegend:true
+        //                                             });
 
-        try {
+        viewer.extend(cesium_navigation.viewerCesiumNavigationMixin);
+
+            try {
             const terrainPath = config.sites[config.defaultSite].elevation;
             if (terrainPath !== undefined) {
                 this.addTerrain(terrainPath);

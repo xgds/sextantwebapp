@@ -17,6 +17,7 @@
     "bootstrap-loader": "^1.3.0",
     "cesium": "^1.38.0",
     "cors": "^2.8.4",
+    "cesium-navigation": "https://github.com/alberto-acevedo/cesium-navigation.git#v1.1.7",
     "express": "^4.16.2",
     "font-awesome": "^4.7.0",
     "geolocation": "^0.2.0",
