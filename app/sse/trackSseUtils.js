@@ -24,12 +24,14 @@ import {Color, ImageMaterialProperty, ColorMaterialProperty, Cartesian2, Cartesi
 		Clock, SampledPositionProperty, JulianDate, HermitePolynomialApproximation, TimeIntervalCollection, TimeInterval, ClockViewModel,
 		CompositePositionProperty, ConstantPositionProperty, ReferenceFrame, SampledProperty, ExtrapolationType} from './../cesium_util/cesium_imports'
 import {DynamicLines, buildCylinder, updatePositionHeading, buildRectangle,
-	    buildPath } from './../cesium_util/cesiumlib';
+	    buildPath, buildEllipse } from './../cesium_util/cesiumlib';
 import {SSE} from './sseUtils'
 
 let sse = undefined;
 let fakeHeading = false;
 let hostname = undefined;
+const PATH_TRAIL_TIME=60; // for the length of the path
+const TRAIL_SECONDS = 1.0; // for the ellipse trailing behind to help the view
 
 if (hasSSE){
     hostname = config.xgds.protocol + '://' + config.xgds.name;
@@ -44,13 +46,15 @@ class TrackSSE {
 		// cache of raw data
 		this.positions = {};
 		this.tracks =  {};
-		this.lastHeading = {};
+		this.loadingTracks = [];
 		
 		// cesium renderings
-		this.cLastPosition = {};
 		this.cSampledPositionProperties = {};
+		this.cTrailingSampledPositionProperties = {};
 		this.cHeadings = {};
 		this.cPaths = {};
+		this.cEllipses = {};
+		this.cTrailingEllipses = {};
 		
 		// colors and materials
 		this.colors = {'gray': Color.GRAY.withAlpha(0.25)};
@@ -70,7 +74,10 @@ class TrackSSE {
 		
 		// initialize
 		this.getCurrentPositions();
-		this.allChannels(this.subscribe, this);
+		
+		for (let channel in config.xgds.ev_channels){
+			this.subscribe(config.xgds.ev_channels[channel], this);
+		}
 		
 		let context = this;
 		
@@ -96,7 +103,7 @@ class TrackSSE {
 				    if(newRange <this.range-5 || newRange > this.range + 5){ //Check if range is different
 				    		this.range = newRange;
 				    }
-				    this.viewerWrapper.viewer.zoomTo(this.cPaths[config.xgds.follow_channel], new HeadingPitchRange(0, -Math.PI/2.0, this.range));
+				    this.viewerWrapper.viewer.zoomTo(this.cTrailingEllipses[config.xgds.follow_channel], new HeadingPitchRange(0, -Math.PI/2.0, this.range));
 				
 			}
 			}
@@ -104,7 +111,6 @@ class TrackSSE {
 	};
 
 	setFollowPosition(value) {
-		//debugger;
 		// follow the current position
 		
 		this.followPosition = value;
@@ -169,7 +175,7 @@ class TrackSSE {
 			channel = config.xgds.follow_channel;
 		}
 		if (channel !== undefined) {
-			let entity = this.cPaths[channel];
+			let entity = this.cTrailingEllipses[channel];
 			this.viewerWrapper.viewer.zoomTo(entity, new HeadingPitchRange(0, -Math.PI/2.0, 150.0));
 		}
 	};
@@ -184,7 +190,7 @@ class TrackSSE {
 		
 		if (!this.isMoving) {
 
-			let entity = this.cPaths[channel]; //.ellipse;
+			let entity = this.cTrailingEllipses[channel]; //.ellipse;
             //this was useful: https://groups.google.com/forum/#!topic/cesium-dev/QSFf3RxNRfE
             
 	        let ray = this.viewerWrapper.camera.getPickRay(new Cartesian2(
@@ -231,6 +237,9 @@ class TrackSSE {
 			this.getTrack(channel, data);
 		} else {
 			this.modifyPosition(channel, data, false);
+			if (!(channel in this.tracks)) {
+				this.getTrack(channel, data);
+			}
 		}
 	};
 
@@ -239,7 +248,7 @@ class TrackSSE {
 		if (show){
 			this.cPaths[config.xgds.follow_channel].path.trailTime = undefined;
 		} else {
-			this.cPaths[config.xgds.follow_channel].path.trailTime = 60;
+			this.cPaths[config.xgds.follow_channel].path.trailTime = PATH_TRAIL_TIME;
 		}
 	};
 	
@@ -269,10 +278,20 @@ class TrackSSE {
 			
 			let cvm = new ClockViewModel(this.viewerWrapper.viewer.clock);
 			cvm.startTime = start.clone();
-
+			
 			let path = this.cPaths[channel];
 			if (path !== undefined){
 				path.availability =  new TimeIntervalCollection([new TimeInterval({
+			        start : start.clone(),
+			        stop : stop.clone()
+			    })]);
+				let ellipse = this.cEllipses[channel];
+				ellipse.availability =  new TimeIntervalCollection([new TimeInterval({
+			        start : start.clone(),
+			        stop : stop.clone()
+			    })]);
+				let ellipse2 = this.cTrailingEllipses[channel];
+				ellipse2.availability =  new TimeIntervalCollection([new TimeInterval({
 			        start : start.clone(),
 			        stop : stop.clone()
 			    })]);
@@ -352,28 +371,37 @@ class TrackSSE {
 		}
 		
 		let cdate = JulianDate.fromIso8601(data.timestamp);
-		property.addSample(cdate, data.heading);
-		this.lastHeading[channel] = data.heading;
+		let trailDate = JulianDate.fromIso8601(data.timestamp);
+		JulianDate.addSeconds(cdate, TRAIL_SECONDS, trailDate);
+		var radians = ((data.heading/180.0)* Math.PI);
+		//TODO right now we are trailing everything
+		property.addSample(trailDate, radians);
 	};
 	
 	updateSampledPositionProperty(channel, data) {
 		// update the stored cesium position
-		let property = this.cSampledPositionProperties[channel];;
+		let property = this.cSampledPositionProperties[channel];
+		let trailingProperty = undefined;
 		if (_.isUndefined(property)){
 			property = new SampledPositionProperty();
 			property.forwardExtrapolationType = ExtrapolationType.HOLD;
 			this.cSampledPositionProperties[channel] = property;
+			
+			trailingProperty = new SampledPositionProperty();
+			trailingProperty.forwardExtrapolationType = ExtrapolationType.HOLD;
+			this.cTrailingSampledPositionProperties[channel] = trailingProperty;
+		} else  {
+			trailingProperty = this.cTrailingSampledPositionProperties[channel];
 		}
+		
 		if ('lon' in data) {
 			// adding a point
 			let cdate = JulianDate.fromIso8601(data.timestamp);
+			let trailDate = JulianDate.fromIso8601(data.timestamp);
+			JulianDate.addSeconds(cdate, TRAIL_SECONDS, trailDate);
 			this.viewerWrapper.getRaisedPositions({longitude:data.lon, latitude:data.lat}).then(function(raisedPoint){
 				property.addSample(cdate, raisedPoint[0]);
-				this.cLastPosition[channel]=raisedPoint[0];
-//				if (this.followPosition){
-//					this.zoomToPosition(channel);
-//				}
-
+				trailingProperty.addSample(trailDate, raisedPoint[0]);
 			}.bind(this));
 		} else {
 			// adding a track 
@@ -415,18 +443,32 @@ class TrackSSE {
 				}
 
 				let retrievedMaterial = this.getMaterial(channel);
+//				let retrievedMaterial = new CallbackProperty(function(time, result) {
+//					return this.getMaterial(channel);
+//				}.bind(this), false);
+				
+//				let retrievedColor = new CallbackProperty(function(time, result) {
+//					return this.getColor(channel, true);
+//				}.bind(this), false);
 
 				let headingCallback = new CallbackProperty(function(time, result) {
 					if (channel in this.cHeadings){
-						return this.cHeadings[channel].getValue(time);
+						var value = this.cHeadings[channel].getValue(time);
+						return value;
 					}
 					return 0;  // it won't matter because we are not rendering a texture
 				}.bind(this), false);
 				
-				buildPath(this.cSampledPositionProperties[channel], channel, this.getColor(channel, true), retrievedMaterial, channel+'_POSITION', headingCallback, this.viewerWrapper, function(entity){
-					let builtPath = entity;
-					this.cPaths[channel] = builtPath;
+				buildEllipse(this.cTrailingSampledPositionProperties[channel], Color.TRANSPARENT, this.viewerWrapper, function(ellipse){
+					this.cTrailingEllipses[channel] = ellipse;
 				}.bind(this));
+
+				buildPath(this.cSampledPositionProperties[channel], channel, this.getColor(channel, true), retrievedMaterial, channel+'_POSITION', headingCallback, this.viewerWrapper, function(builtEntities){
+					this.cPaths[channel] = builtEntities['path'];
+					this.cEllipses[channel] = builtEntities['ellipse'];
+					builtEntities['path'].path.trailTime = PATH_TRAIL_TIME;
+				}.bind(this));
+				
 
 			} else {
 				this.updateSampledPositionProperty(channel, data);
@@ -434,64 +476,6 @@ class TrackSSE {
 					this.updateHeading(channel, data);
 				}
 
-
-				/*let dataSource = this.cPosition[channel];
-			let pointEntity = dataSource.entities.values[0];
-
-			if (stopped){
-				let color = this.colors['gray'];
-				if (!color.getValue().equals(pointEntity.ellipse.material.color.getValue())){
-					pointEntity.ellipse.material.color = color;
-				}
-				return;
-			} */
-
-				// update it
-				/*
-			this.viewerWrapper.getRaisedPositions({longitude:data.lon, latitude:data.lat}).then(function(raisedPoint) {
-				pointEntity.position.setValue(raisedPoint[0]);
-				if (this.followPosition){
-							this.zoomToPositionKF(channel);
-				}
-
-				let retrievedMaterial = this.getMaterial(channel, data);
-				let material = pointEntity.ellipse.material;
-
-				let hasHeading = (data.heading !== "");
-				if (hasHeading) {
-//					console.log('setting orientation ' + data.heading);
-					pointEntity.ellipse.stRotation.setValue(data.heading);
-					// make sure it has the image material
-					if (material.getType() == "Color"){
-//						console.log('switching from color to ' + retrievedMaterial.getType());
-						pointEntity.ellipse.material = retrievedMaterial;
-					} else {
-						// it already is, check the color
-						if (!retrievedMaterial.color.getValue().equals(pointEntity.ellipse.material.color.getValue())){
-							pointEntity.ellipse.material.color = color;
-						}
-					}
-				} else {
-					if (material.getType() != "Color"){
-//						console.log('switching from ' + material.getType() + ' to ' + retrievedMaterial.getType());
-						pointEntity.ellipse.material = retrievedMaterial;
-					} else {
-						// it already is, check the color
-						try {
-							if (!color.getValue().equals(pointEntity.ellipse.material.color.getValue())){
-								pointEntity.ellipse.material.color = color;
-							}
-						} catch (err) {
-							if (!color.equals(pointEntity.ellipse.material.color.getValue())){
-								pointEntity.ellipse.material.color = color;
-							}
-						}
-
-					}
-				} 
-
-			}.bind(this));
-				 */
 			}
 		}
 	}; 
@@ -508,7 +492,7 @@ class TrackSSE {
 					// should return dictionary of channel: position
 					for (let track_name in data){
 						let channel = this.convertTrackNameToChannel(track_name);
-						if (!(channel in this.positions)){
+						if (!(channel in this.positions) && (channel in config.xgds.ev_channels)){
 							this.updatePosition(channel, data[track_name], true);
 						}
 					}
@@ -523,6 +507,10 @@ class TrackSSE {
 
 	getTrack(channel, data) {
 		// first check if we already got it
+		if (this.loadingTracks.indexOf(channel) >= 0){
+			return;
+		}
+		this.loadingTracks.push(channel);
 		if (!_.isEmpty(this.tracks[channel])){
 			return;
 		}

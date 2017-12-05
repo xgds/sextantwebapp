@@ -71,6 +71,7 @@ class ViewerWrapper{
         this.scene = viewer.scene;
         this.camera = viewer.scene.camera;
         this.layers = viewer.scene.imageryLayers;
+        this.globalrange = undefined;
 
         viewer.extend(viewerCesiumNavigationMixin, {enableCompass:true,
         											   enableZoomControls:true,
@@ -104,7 +105,24 @@ class ViewerWrapper{
 
         }.bind(this), ScreenSpaceEventType.LEFT_DOWN);*/
 
+        //this.scene.preRender.addEventListener(this.getViewRange.bind(this));
+
     }
+
+    getViewRange(){
+        let upper_left = this.camera.getPickRay(new Cartesian2(0, 0));
+        let lower_right = this.camera.getPickRay(new Cartesian2(
+            this.viewer.scene.canvas.clientWidth,
+            this.viewer.scene.canvas.clientHeight
+        ));
+        let position_ul = this.scene.globe.pick(upper_left, this.scene);
+        if (position_ul === undefined){
+        		return;
+        }
+        let position_lr = this.scene.globe.pick(lower_right, this.scene);
+        let range = Cartesian3.distance(position_ul, position_lr);
+        this.globalrange =  range;
+	}
 
     serveraddress(){
     		let result = this.host;
@@ -503,7 +521,7 @@ const buildCylinder = function(position, height, radius, slices, label, styleOpt
 
 
 const buildSurfaceCircle = function(position, radius, styleOptions, id, viewerWrapper, callback) {
-    const color = new ColorGeometryInstanceAttribute.fromColor(Color.YELLOW.withAlpha(0.25));
+    /*const color = new ColorGeometryInstanceAttribute.fromColor(Color.YELLOW.withAlpha(0.25));
     const ellipseInstance = new GeometryInstance({
         geometry : new EllipseGeometry({
             center : Cartesian3.fromDegrees(position["longitude"], position["latitude"]),
@@ -517,8 +535,8 @@ const buildSurfaceCircle = function(position, radius, styleOptions, id, viewerWr
     });
     viewerWrapper.scene.primitives.add(new GroundPrimitive({
         geometryInstances : ellipseInstance
-    }));
-	/*viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
+    }));*/
+	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
 		let options = {
 				semiMinorAxis: radius,
 				semiMajorAxis: radius,
@@ -539,7 +557,7 @@ const buildSurfaceCircle = function(position, radius, styleOptions, id, viewerWr
 		if (callback !== undefined){
 			callback(entity);
 		}
-	});*/
+	});
 
 };
 
@@ -568,21 +586,47 @@ const buildRectangle = function(position, width, height, label, color, id, viewe
 	});
 }
 
+//build a simple ellipse.  We will be using this as a trailing ellipse to have a smooth camera when following
+const buildEllipse = function(spp, color, viewerWrapper, callback) {
+	let entityEllipse = viewerWrapper.viewer.entities.add({
+	    position : spp,
+	    name : 'ellipse',
+		ellipse : {
+				semiMinorAxis: 2,
+				semiMajorAxis: 2,
+				height: 1,
+				extrudedHeight: 0,
+				material: color
+		}
+	});
+	
+	if (callback !== undefined){
+		callback(entityEllipse);
+	}
+}
+
 // this is the main function we are using to render a path and an ellipse with the current position.
 const buildPath = function(spp, label, labelColor, ellipseColor, id, headingCallback, viewerWrapper, callback){
 	
+	let newEntities = {};
 	let entityPath = viewerWrapper.viewer.entities.add({
 	    position : spp,
 	    name : 'path',
 	    path : {
 	        resolution : 1,
 	        material : labelColor
-	    },
+	    }
+	});
+	newEntities['path'] = entityPath;
+	
+	let entityEllipse = viewerWrapper.viewer.entities.add({
+	    position : spp,
+	    name : 'ellipse',
 	    label : {
 			text: label,
 			verticalOrigin: VerticalOrigin.CENTER,
 	        horizontalOrigin: HorizontalOrigin.CENTER,
-	        eyeOffset: new Cartesian3(8, 0, 1.0),
+	        eyeOffset: new Cartesian3(2.0, 0, 1.0),  //TODO zoom this better so it stays same distance from ellipse
 	        fillColor: labelColor,
 	        outlineWidth: 3.0
 		},
@@ -595,9 +639,10 @@ const buildPath = function(spp, label, labelColor, ellipseColor, id, headingCall
 				stRotation: headingCallback
 		}
 	});
+	newEntities['ellipse'] = entityEllipse;
 	
 	if (callback !== undefined){
-		callback(entityPath);
+		callback(newEntities);
 	}
 }
 
@@ -628,4 +673,4 @@ const loadKmls = function(kmlUrls, viewerWrapper, callback){
 }
 
 export {ViewerWrapper, DynamicLines, zoom, heading, buildLineString, buildCylinder, buildRectangle, buildSurfaceCircle, 
-		loadKml, loadKmls, buildPath}
+		loadKml, loadKmls, buildPath, buildEllipse}

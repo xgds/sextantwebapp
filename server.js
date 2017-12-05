@@ -40,12 +40,14 @@ try {
 }
 const port = config.server.port;
 
-app.use(function(req, res, next) {
-	console.log('shoving headers in');
-	  res.header("Access-Control-Allow-Origin", "*");
-	  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-	  next();
-	});
+if (config.cors !== undefined) {
+    app.use(function (req, res, next) {
+        console.log('shoving headers in');
+        res.header("Access-Control-Allow-Origin", "*");
+        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+        next();
+    });
+}
 
 app.listen(port, function () {
   console.log('Example app listening on port ' + port);

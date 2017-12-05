@@ -264,9 +264,24 @@ class PlanManager {
 	
 	renderStation(station){
 		if (!_.isEmpty(station.geometry.coordinates)) {
-			
+			let radius = 3.0;
+			let height = 10.0;
+//			let radius = new CallbackProperty((time, result) => {
+//			    if(this.viewerWrapper.globalrange === undefined){
+//			        return 3.0
+//                }else {
+//                    return 0.05 * this.viewerWrapper.globalrange;
+//                }
+//            }, false);
+//			let height = new CallbackProperty((time, result) => {
+//			    if(this.viewerWrapper.globalrange === undefined){
+//			        return 10.0
+//                }else {
+//                    return 0.05 * this.viewerWrapper.globalrange;
+//                }
+//            }, false);
 			buildCylinder({longitude:station.geometry.coordinates[0], latitude:station.geometry.coordinates[1]},
-						10.0, 3.0, 128, station.name, this.stationCylinderStyle, station.id, this.viewerWrapper, function(entity){
+						height, radius, 128, station.name, this.stationCylinderStyle, station.id, this.viewerWrapper, function(entity){
 				this.stationElements[station.id] = entity;
 			}.bind(this));
 			
@@ -299,14 +314,14 @@ class PlanManager {
             contentType: 'application/json',
             context: this,
             success: $.proxy(function(data) {
-            	console.log('DATA LOADED IN SEXTANT');
+            		console.log('DATA LOADED IN SEXTANT');
             	if (solve){
             		console.log('CALLING SOLVER');
             		this.calculateNewPath(true);
             	}
             }),
             error: $.proxy(function(data){
-            	console.log('FAILED TO LOAD TO SEXTANT');
+            		console.log('FAILED TO LOAD TO SEXTANT');
             })
             });
 			
@@ -605,7 +620,11 @@ class xgdsPlanManager extends PlanManager {
                     // Right now we are just taking the last one.  Might want to give them a list or something.
                     if (!_.isEmpty(sortedKeys)) {
                         thePlan = planDict[sortedKeys[sortedKeys.length - 1]];
-                        this.planFromJSON(thePlan)
+                        let firstPlan = (this.plan === undefined);
+                        this.planFromJSON(thePlan);
+                        if (firstPlan){
+                        		this.zoomTo();
+                        }
                     }
                 }
 			}, this),
