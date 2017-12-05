@@ -7,21 +7,26 @@ const path = require('path');
 const url = require('url');
 
 
-import buildModuleUrl from 'cesium/Source/Core/buildModuleUrl';
-buildModuleUrl.setBaseUrl('./');
+//import buildModuleUrl from 'cesium/Source/Core/buildModuleUrl';
+
+const Cesium = require('cesium');
+
+BingMapsApi.defaultKey = global.config.bing_key;
+Cesium.buildModuleUrl.setBaseUrl('./');
 
 // Load all cesium components required
-import {Viewer, EllipsoidTerrainProvider, Cartesian3, Cartesian2, PolygonGeometry, PolygonHierarchy, CesiumMath, Cartographic, Ellipsoid, Color,
-		sampleTerrain, ScreenSpaceEventHandler, ScreenSpaceEventType, Rectangle, RectangleGeometry, EllipseGeometry, LabelStyle, CzmlDataSource, CustomDataSource,
-		CreateTileMapServiceImageryProvider, CesiumTerrainProvider, CallbackProperty, VerticalOrigin, HorizontalOrigin, Matrix4, ConstantProperty,
-		SceneMode, SampledPositionProperty, JulianDate, ColorMaterialProperty, ClockRange, ClockViewModel, GroundPrimitive,
-		Transforms, HeadingPitchRoll, ColorGeometryInstanceAttribute, GeometryInstance, Primitive, KmlDataSource, Clock} from './cesium_imports'
+// import {Viewer, EllipsoidTerrainProvider, Cartesian3, Cartesian2, PolygonGeometry, PolygonHierarchy, CesiumMath, Cartographic, Ellipsoid, Color,
+// 		sampleTerrain, ScreenSpaceEventHandler, ScreenSpaceEventType, Rectangle, RectangleGeometry, EllipseGeometry, LabelStyle, CzmlDataSource, CustomDataSource,
+// 		CreateTileMapServiceImageryProvider, CesiumTerrainProvider, CallbackProperty, VerticalOrigin, HorizontalOrigin, Matrix4, ConstantProperty,
+// 		SceneMode, SampledPositionProperty, JulianDate, ColorMaterialProperty, ClockRange, ClockViewModel, GroundPrimitive,
+// 		Transforms, HeadingPitchRoll, ColorGeometryInstanceAttribute, GeometryInstance, Primitive, KmlDataSource, Clock} from './cesium_imports'
 
-const cesium_navigation = require('cesium-navigation');
+//const cesium_navigation = require('cesium-navigation');
+
 //import viewerCesiumNavigationMixin from './cesium-navigation/viewerCesiumNavigationMixin';
 
 if (!('destination' in config)) {
-	config.destination = Cartesian3.fromDegrees(config.siteConfig.centerPoint[0], config.siteConfig.centerPoint[1], config.siteConfig.centerPoint[2]);
+	config.destination = Cesium.Cartesian3.fromDegrees(config.siteConfig.centerPoint[0], config.siteConfig.centerPoint[1], config.siteConfig.centerPoint[2]);
 }
 
 class ViewerWrapper{
@@ -39,12 +44,12 @@ class ViewerWrapper{
         this.mesh_rowcol = [];
 
         // Set simple geometry for the full planet
-        const terrainProvider = new EllipsoidTerrainProvider();
+        const terrainProvider = new Cesium.EllipsoidTerrainProvider();
         this.terrainList['default'] = terrainProvider;
 
 
-        let clock = new Clock({
-			clockRange: ClockRange.UNBOUNDED
+        let clock = new Cesium.Clock({
+			clockRange: Cesium.ClockRange.UNBOUNDED
 		});
 
         const viewerOptions = {
@@ -59,7 +64,7 @@ class ViewerWrapper{
             baseLayerPicker : false,
             terrainProvider : terrainProvider,
             sceneMode: SceneMode.SCENE3D,
-            clockViewModel: new ClockViewModel(clock)
+            clockViewModel: new Cesium.ClockViewModel(clock)
         };
 
         if ('baseImagery' in config){
@@ -67,7 +72,7 @@ class ViewerWrapper{
             viewerOptions["imageryProvider"] = this.buildImageryProvider(config.baseImagery);
         }
 
-        const viewer = new Viewer(this.container, viewerOptions);
+        const viewer = new Cesium.Viewer(this.container, viewerOptions);
         this.viewer = viewer;
         this.scene = viewer.scene;
         this.camera = viewer.scene.camera;
@@ -79,9 +84,9 @@ class ViewerWrapper{
         //                                             enableDistanceLegend:true
         //                                             });
 
-        viewer.extend(cesium_navigation.viewerCesiumNavigationMixin);
+        //viewer.extend(cesium_navigation.viewerCesiumNavigationMixin);
 
-            try {
+        try {
             const terrainPath = config.sites[config.defaultSite].elevation;
             if (terrainPath !== undefined) {
                 this.addTerrain(terrainPath);
@@ -113,8 +118,8 @@ class ViewerWrapper{
     }
 
     getViewRange(){
-        let upper_left = this.camera.getPickRay(new Cartesian2(0, 0));
-        let lower_right = this.camera.getPickRay(new Cartesian2(
+        let upper_left = this.camera.getPickRay(new Cesium.Cartesian2(0, 0));
+        let lower_right = this.camera.getPickRay(new Cesium.Cartesian2(
             this.viewer.scene.canvas.clientWidth,
             this.viewer.scene.canvas.clientHeight
         ));
@@ -123,7 +128,7 @@ class ViewerWrapper{
         		return;
         }
         let position_lr = this.scene.globe.pick(lower_right, this.scene);
-        let range = Cartesian3.distance(position_ul, position_lr);
+        let range = Cesium.Cartesian3.distance(position_ul, position_lr);
         this.globalrange =  range;
 	}
 
@@ -140,10 +145,10 @@ class ViewerWrapper{
     };
     
     toLongLatHeight(cartesian) {
-    		const cartographic = Cartographic.fromCartesian(cartesian);
-        const longitude = CesiumMath.toDegrees(cartographic.longitude);
-        const latitude = CesiumMath.toDegrees(cartographic.latitude);
-        const carto_WGS84 = Ellipsoid.WGS84.cartesianToCartographic(cartesian);
+    		const cartographic = Cesium.Cartographic.fromCartesian(cartesian);
+        const longitude = Cesium.CesiumMath.toDegrees(cartographic.longitude);
+        const latitude = Cesium.CesiumMath.toDegrees(cartographic.latitude);
+        const carto_WGS84 = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian);
         const height = carto_WGS84.height/this.terrainExaggeration;  //TODO need to look up the height from the terrain
         return [longitude, latitude, height];
     };
@@ -157,7 +162,7 @@ class ViewerWrapper{
         });
 
         const scene = viewer.scene;
-        const handler = new ScreenSpaceEventHandler(scene.canvas);
+        const handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
         handler.setInputAction(function(movement) {
             const ray = viewer.camera.getPickRay(movement.endPosition);
             const cartesian= viewer.scene.globe.pick(ray, viewer.scene);
@@ -182,7 +187,7 @@ class ViewerWrapper{
 
                 vizsocket.add(object);
             }
-        }.bind(this), ScreenSpaceEventType.MOUSE_MOVE);
+        }.bind(this), Cesium.ScreenSpaceEventType.MOUSE_MOVE);
     };
 
     buildImageryProvider(options){
@@ -195,7 +200,7 @@ class ViewerWrapper{
 				console.log(e);
 			}
 		}
-		return CreateTileMapServiceImageryProvider(options);
+		return Cesium.CreateTileMapServiceImageryProvider(options);
     }
 
     addImagery(options){
@@ -209,7 +214,7 @@ class ViewerWrapper{
         //}
         //let theUrl = path.join(image_address, folder_location);
         let theUrl = folder_location;
-        const new_terrain_provider = new CesiumTerrainProvider({
+        const new_terrain_provider = new Cesium.CesiumTerrainProvider({
             url : theUrl
         });
         this.terrainList[folder_location] = new_terrain_provider;
@@ -255,8 +260,8 @@ class ViewerWrapper{
 //                        console.log(dem[j][i]);
                         let entity = this.viewer.entities.add({
                             rectangle: {
-                                coordinates: Rectangle.fromDegrees(lon, lat, lon + lonstep, lat + latstep),
-                                material: Color.fromRandom({alpha: 0.5})
+                                coordinates: Cesium.Rectangle.fromDegrees(lon, lat, lon + lonstep, lat + latstep),
+                                material: Cesium.Color.fromRandom({alpha: 0.5})
                             }
                         });
                         this.mesh_entities.push(entity);
@@ -285,15 +290,15 @@ class ViewerWrapper{
         });
 
         const scene = viewer.scene;
-        const handler = new ScreenSpaceEventHandler(scene.canvas);
+        const handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
         handler.setInputAction(function(movement) {
             const ray = viewer.camera.getPickRay(movement.endPosition);
             const cartesian= viewer.scene.globe.pick(ray, viewer.scene);
             if (cartesian) {
-                const cartographic = Cartographic.fromCartesian(cartesian);
-                const longitudeString = CesiumMath.toDegrees(cartographic.longitude).toFixed(4);
-                const latitudeString = CesiumMath.toDegrees(cartographic.latitude).toFixed(4);
-                const carto_WGS84 = Ellipsoid.WGS84.cartesianToCartographic(cartesian);
+                const cartographic = Cesium.Cartographic.fromCartesian(cartesian);
+                const longitudeString = Cesium.CesiumMath.toDegrees(cartographic.longitude).toFixed(4);
+                const latitudeString = Cesium.CesiumMath.toDegrees(cartographic.latitude).toFixed(4);
+                const carto_WGS84 = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian);
                 const heightString = carto_WGS84.height.toFixed(4)/this.terrainExaggeration;
 
                 this.globalpoint = {
@@ -308,7 +313,7 @@ class ViewerWrapper{
                 	entity.label.text = '(' + longitudeString + ', ' + latitudeString + ', ' + heightString + ')';
                 }
             }
-        }.bind(this), ScreenSpaceEventType.MOUSE_MOVE);
+        }.bind(this), Cesium.ScreenSpaceEventType.MOUSE_MOVE);
     };
 
     // returns positions projected on the terrain in Cartesian3, required for entity creation
@@ -324,11 +329,11 @@ class ViewerWrapper{
 	    			return this.getRaisedPositionsFromArray(latLongCoords);
 	    		}
 	    		latLongCoords.forEach(function(p) {
-	    			let cartographicPoint = Cartographic.fromDegrees(p.longitude, p.latitude);
+	    			let cartographicPoint = Cesium.Cartographic.fromDegrees(p.longitude, p.latitude);
 	    			cartographicArray.push(cartographicPoint);
 	    		});
 	    	} else {
-	    		let cartographicPoint = Cartographic.fromDegrees(latLongCoords.longitude, latLongCoords.latitude);
+	    		let cartographicPoint = Cesium.Cartographic.fromDegrees(latLongCoords.longitude, latLongCoords.latitude);
 	    		cartographicArray.push(cartographicPoint);
 	    	}
 	
@@ -340,7 +345,7 @@ class ViewerWrapper{
     getRaisedPositionsFromArray(latLongCoords) {
     		const cartographicArray = [];
         latLongCoords.forEach(function(p) {
-            let cartographicPoint = Cartographic.fromDegrees(p[0], p[1]);
+            let cartographicPoint = Cesium.Cartographic.fromDegrees(p[0], p[1]);
             cartographicArray.push(cartographicPoint);
         });
         return this.getHeights(cartographicArray);
@@ -431,7 +436,7 @@ class DynamicLines{
 			if (this.entity === undefined) {
 				const polylineArguments = Object.assign({positions: new CallbackProperty(this.getPoints.bind(this), false),
 					 width: 2,
-					 material : Color.GREEN}, this.styleOptions);
+					 material : Cesium.Color.GREEN}, this.styleOptions);
 				
 				this.entity = this.viewerWrapper.viewer.entities.add({
 				    name : this.name,
@@ -458,8 +463,8 @@ const heading = function(headingAngle, camera) {
         camera.setView({
             destination: config.destination,
             orientation: {
-                heading: CesiumMath.toRadians(headingAngle),
-                pitch: -CesiumMath.toRadians(90),
+                heading: Cesium.CesiumMath.toRadians(headingAngle),
+                pitch: -Cesium.CesiumMath.toRadians(90),
                 roll: 0.0
             }
         })
@@ -506,11 +511,11 @@ const buildCylinder = function(position, height, radius, slices, label, styleOpt
 		if (label !== undefined && !_.isEmpty(label)){
 			cylinderOptions['label'] = {
 				text: label,
-				verticalOrigin: VerticalOrigin.TOP,
-		        horizontalOrigin: HorizontalOrigin.RIGHT,
-		        fillColor: Color.YELLOW,
+				verticalOrigin: Cesium.VerticalOrigin.TOP,
+		        horizontalOrigin: Cesium.HorizontalOrigin.RIGHT,
+		        fillColor: Cesium.Color.YELLOW,
 		        outlineWidth: 3.0,
-		        eyeOffset: new Cartesian3(radius + 2, 0, 1.0)
+		        eyeOffset: new Cesium.Cartesian3(radius + 2, 0, 1.0)
 			}
 		}
 		let cylinderEntity = viewerWrapper.viewer.entities.add(cylinderOptions);
@@ -568,17 +573,17 @@ const buildSurfaceCircle = function(position, radius, styleOptions, id, viewerWr
 //this was a debugging function, if you ever need to build a rectangle have to use the parameters
 const buildRectangle = function(position, width, height, label, color, id, viewerWrapper, callback) {
 	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
-		const rectangleInstance = new GeometryInstance({
-			  geometry : new RectangleGeometry({
-			    rectangle : Rectangle.fromDegrees(-140.0, 30.0, -100.0, 40.0)
+		const rectangleInstance = new Cesium.GeometryInstance({
+			  geometry : new Cesium.RectangleGeometry({
+			    rectangle : Cesium.Rectangle.fromDegrees(-140.0, 30.0, -100.0, 40.0)
 			  }),
 			  id : id,
 			  attributes : {
-			    color : new ColorGeometryInstanceAttribute(0.0, 1.0, 1.0, 0.5)
+			    color : new Cesium.ColorGeometryInstanceAttribute(0.0, 1.0, 1.0, 0.5)
 			  }
 			});
 		
-		const primitive = viewerWrapper.viewer.scene.primitives.add(new Primitive({
+		const primitive = viewerWrapper.viewer.scene.primitives.add(new Cesium.Primitive({
 			  geometryInstances : [rectangleInstance],
 			  debugShowBoundingVolume: true
 			}));
@@ -627,9 +632,9 @@ const buildPath = function(spp, label, labelColor, ellipseColor, id, headingCall
 	    name : 'ellipse',
 	    label : {
 			text: label,
-			verticalOrigin: VerticalOrigin.CENTER,
-	        horizontalOrigin: HorizontalOrigin.CENTER,
-	        eyeOffset: new Cartesian3(2.0, 0, 1.0),  //TODO zoom this better so it stays same distance from ellipse
+			verticalOrigin: Cesium.VerticalOrigin.CENTER,
+	        horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+	        eyeOffset: new Cesium.Cartesian3(2.0, 0, 1.0),  //TODO zoom this better so it stays same distance from ellipse
 	        fillColor: labelColor,
 	        outlineWidth: 3.0
 		},
@@ -653,7 +658,7 @@ const buildPath = function(spp, label, labelColor, ellipseColor, id, headingCall
 
 
 const loadKml = function(kmlUrl, viewerWrapper, callback) {
-	viewerWrapper.viewer.dataSources.add(KmlDataSource.load(kmlUrl, {
+	viewerWrapper.viewer.dataSources.add(Cesium.KmlDataSource.load(kmlUrl, {
 				name: kmlUrl,
 		        camera: viewerWrapper.viewer.camera,
 		        canvas: viewerWrapper.viewer.canvas

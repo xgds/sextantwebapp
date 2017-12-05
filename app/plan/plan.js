@@ -15,7 +15,9 @@
 // __END_LICENSE__
 
 const moment = require('moment');
-import {Color, defined, ScreenSpaceEventHandler, ScreenSpaceEventType, ImageMaterialProperty, HeadingPitchRange,Cartesian3, CesiumMath, CallbackProperty, EntityCollection, Clock } from './../cesium_util/cesium_imports'
+const Cesium = require('cesium');
+
+//import {Color, defined, ScreenSpaceEventHandler, ScreenSpaceEventType, ImageMaterialProperty, HeadingPitchRange,Cartesian3, CesiumMath, CallbackProperty, EntityCollection, Clock } from './../cesium_util/cesium_imports'
 import {DynamicLines, buildLineString, buildCylinder, buildSurfaceCircle} from './../cesium_util/cesiumlib';
 import {config} from './../../config/config_loader';
 import {beforeSend} from './../util/xgdsUtils';
@@ -33,11 +35,11 @@ class PlanManager {
 		this.segmentElements = {};
 		this.stationElements = {};
 		this.stationBoundaries = {};
-		this.segmentStyle = {'material':Color.ORANGE};
+		this.segmentStyle = {'material':Cesium.Color.ORANGE};
 		this.stationImageUrl = this.hostname + '/' + config.server.nginx_prefix + '/icons/station_circle.png';
 		//this.stationImageUrl = config.server.protocol + "://" + config.server.name + '/' + config.server.nginx_prefix + '/' + '/icons/station_circle.png';
-		this.stationCylinderStyle = {'material': new ImageMaterialProperty({'image':this.stationImageUrl, 'transparent':true}), 'translucent': true, 'color': new Color(1.0, 1.0, 1.0, 0.5)};
-		this.stationBoundaryStyle = {'material': Color.YELLOW.withAlpha(0.25)};
+		this.stationCylinderStyle = {'material': new Cesium.ImageMaterialProperty({'image':this.stationImageUrl, 'transparent':true}), 'translucent': true, 'color': new Cesium.Color(1.0, 1.0, 1.0, 0.5)};
+		this.stationBoundaryStyle = {'material': Cesium.Color.YELLOW.withAlpha(0.25)};
 		this.fetchPlan();
 		global.editMode = false;
 		this.setupEditing();
@@ -54,7 +56,7 @@ class PlanManager {
 	};
 	
 	setupEditing() {
-		this.editStationHandler = new ScreenSpaceEventHandler(this.viewerWrapper.viewer.scene.canvas);
+		this.editStationHandler = new Cesium.ScreenSpaceEventHandler(this.viewerWrapper.viewer.scene.canvas);
 		this.editStationHandler.setInputAction(function(movement) {
 			if (global.editMode) {
 				// get an array of all primitives at the mouse position
@@ -66,7 +68,7 @@ class PlanManager {
 					}
 				}
 			}
-		}.bind(this), ScreenSpaceEventType.LEFT_DOWN);
+		}.bind(this), Cesium.ScreenSpaceEventType.LEFT_DOWN);
 		
 		this.editStationHandler.setInputAction(
 				function(movement) {
@@ -76,7 +78,7 @@ class PlanManager {
 						this.selectedStation.position = cartesian;
 					}
 				}.bind(this),
-				ScreenSpaceEventType.MOUSE_MOVE
+				Cesium.ScreenSpaceEventType.MOUSE_MOVE
 		);
 
 		this.editStationHandler.setInputAction(
@@ -91,7 +93,7 @@ class PlanManager {
 						this.selectedStation = undefined;
 					}
 				}.bind(this),
-				ScreenSpaceEventType.LEFT_UP
+				Cesium.ScreenSpaceEventType.LEFT_UP
 		);
 
 	};
@@ -153,7 +155,7 @@ class PlanManager {
 	 			//console.log(y2);
 			}
 
-			this.viewerWrapper.viewer.zoomTo(entityGroup, new HeadingPitchRange(0, -Math.PI/2.0, 150.0));
+			this.viewerWrapper.viewer.zoomTo(entityGroup, new Cesium.HeadingPitchRange(0, -Math.PI/2.0, 150.0));
 		}
 	};
 	

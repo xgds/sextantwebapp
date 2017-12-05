@@ -3,7 +3,7 @@ import * as $ from 'jquery';
 import 'bootstrap-loader';
 import {config} from './../config/config_loader';
 import {ViewerWrapper, zoom, heading, DynamicLines, loadKmls, buildSurfaceCircle} from './cesium_util/cesiumlib';
-import {Cartesian3, CesiumMath, Color, CallbackProperty} from './cesium_util/cesium_imports'
+//import {Cartesian3, CesiumMath, Color, CallbackProperty} from './cesium_util/cesium_imports'
 
 
 // Configure the Cesium viewer

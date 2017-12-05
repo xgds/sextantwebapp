@@ -16,10 +16,12 @@
 
 import {config} from './../../config/config_loader';
 import * as moment from 'moment'
-import {Color, ImageMaterialProperty, ColorMaterialProperty, Cartesian2, Cartesian3, CallbackProperty,
-    HeadingPitchRange, SampledPositionProperty, JulianDate, TimeIntervalCollection, TimeInterval, ClockViewModel,
-    SampledProperty, ExtrapolationType} from './../cesium_util/cesium_imports'
+// import {Color, ImageMaterialProperty, ColorMaterialProperty, Cartesian2, Cartesian3, CallbackProperty,
+//     HeadingPitchRange, SampledPositionProperty, JulianDate, TimeIntervalCollection, TimeInterval, ClockViewModel,
+//     SampledProperty, ExtrapolationType} from './../cesium_util/cesium_imports'
 import {buildPath} from './../cesium_util/cesiumlib';
+
+const Cesium = require('cesium');
 
 let fakeHeading = false;
 
@@ -41,8 +43,8 @@ class Tracker {
         this.cPaths = {};
 
         // colors and materials
-        this.colors = {'gray': Color.GRAY.withAlpha(0.25)};
-        this.labelColors = {'gray': Color.GRAY};
+        this.colors = {'gray': Cesium.Color.GRAY.withAlpha(0.25)};
+        this.labelColors = {'gray': Cesium.Color.GRAY};
         this.imageMaterials = {};
         this.colorMaterials = {};
         this.cEllipseMaterial = {};
@@ -155,13 +157,13 @@ class Tracker {
             let range = Cartesian3.distance(position, this.viewerWrapper.camera.position);
 
             if(this.isInitialized){ //After inital zoom, follows target entity at the viewer's current height
-                this.viewerWrapper.viewer.zoomTo(entity, new HeadingPitchRange(0, -Math.PI/2.0, range));
+                this.viewerWrapper.viewer.zoomTo(entity, new Cesium.HeadingPitchRange(0, -Math.PI/2.0, range));
 
             }
 
             else{ //Initial zoom to entity
 
-                this.viewerWrapper.viewer.zoomTo(entity, new HeadingPitchRange(0, -Math.PI/2.0, 150.0));
+                this.viewerWrapper.viewer.zoomTo(entity, new Cesium.HeadingPitchRange(0, -Math.PI/2.0, 150.0));
 
                 if(range<155.0 && range>145.0){
                     this.isInitialized = true;
@@ -207,7 +209,7 @@ class Tracker {
         if (_.isEmpty(newColor)){
             newColor = '#00FF00'; // green by default
         }
-        let color = Color.fromCssColorString('#' + newColor)
+        let color = Cesium.Color.fromCssColorString('#' + newColor)
         // make a translucent one
         let cclone = color.clone().withAlpha(0.4);
         this.colors[channel] = cclone;
@@ -224,15 +226,15 @@ class Tracker {
 
         // update the viewer clock start
         if (data.times.length > 0){
-            let start = JulianDate.fromIso8601(data.times[0][0]);
-            let stop = JulianDate.addHours(start, 12, new JulianDate());
+            let start = Cesium.JulianDate.fromIso8601(data.times[0][0]);
+            let stop = Cesium.JulianDate.addHours(start, 12, new JulianDate());
 
-            let cvm = new ClockViewModel(this.viewerWrapper.viewer.clock);
+            let cvm = new Cesium.ClockViewModel(this.viewerWrapper.viewer.clock);
             cvm.startTime = start.clone();
 
             let path = this.cPaths[channel];
             if (path !== undefined){
-                path.availability =  new TimeIntervalCollection([new TimeInterval({
+                path.availability =  new Cesium.TimeIntervalCollection([new Cesium.TimeInterval({
                     start : start.clone(),
                     stop : stop.clone()
                 })]);
@@ -280,13 +282,15 @@ class Tracker {
             if (hasHeading) {
                 // make sure it has the image material
                 if (!(channel in this.imageMaterials)){
-                    this.imageMaterials[channel] = new ImageMaterialProperty({'image': this.pointerUrl, 'transparent': true, 'color': new CallbackProperty(function() {return context.getColor(channel);}, false)});
+                    this.imageMaterials[channel] = new Cesium.ImageMaterialProperty({'image': this.pointerUrl,
+                        'transparent': true,
+                        'color': new Cesium.CallbackProperty(function() {return context.getColor(channel);}, false)});
                 }
                 material = this.imageMaterials[channel];
             } else {
                 // make sure it has the color material
                 if (!(channel in this.colorMaterials)){
-                    this.colorMaterials[channel] = new ColorMaterialProperty(new CallbackProperty(function(time, result) {return context.getColor(channel);}, false));
+                    this.colorMaterials[channel] = new Cesium.ColorMaterialProperty(new Cesium.CallbackProperty(function(time, result) {return context.getColor(channel);}, false));
                 }
                 material = this.colorMaterials[channel];
             }
@@ -304,14 +308,14 @@ class Tracker {
         let property = undefined;
         if (!(channel in this.cHeadings)){
             let context = this;
-            property = new SampledProperty(Number);
-            property.forwardExtrapolationType = ExtrapolationType.HOLD;
+            property = new Cesium.SampledProperty(Number);
+            property.forwardExtrapolationType = Cesium.ExtrapolationType.HOLD;
             this.cHeadings[channel] = property;
         } else {
             property = this.cHeadings[channel];
         }
 
-        let cdate = JulianDate.fromIso8601(data.timestamp);
+        let cdate = Cesium.JulianDate.fromIso8601(data.timestamp);
         property.addSample(cdate, data.heading);
         this.lastHeading[channel] = data.heading;
     };
@@ -320,8 +324,8 @@ class Tracker {
         // update the stored cesium position
         let property = this.cSampledPositionProperties[channel];;
         if (_.isUndefined(property)){
-            property = new SampledPositionProperty();
-            property.forwardExtrapolationType = ExtrapolationType.HOLD;
+            property = new Cesium.SampledPositionProperty();
+            property.forwardExtrapolationType = Cesium.ExtrapolationType.HOLD;
             this.cSampledPositionProperties[channel] = property;
         }
         if ('lon' in data) {
@@ -345,7 +349,7 @@ class Tracker {
                     this.viewerWrapper.getRaisedPositions(data.coords[i]).then(function(raisedPoints){
                         let julianTimes = [];
                         for (let t=0; t<times.length; t++){
-                            julianTimes.push(JulianDate.fromIso8601(times[t]));
+                            julianTimes.push(Cesium.JulianDate.fromIso8601(times[t]));
                         };
 
                         property.addSamples(julianTimes, raisedPoints);
@@ -376,7 +380,7 @@ class Tracker {
 
                 let retrievedMaterial = this.getMaterial(channel);
 
-                let headingCallback = new CallbackProperty(function(time, result) {
+                let headingCallback = new Cesium.CallbackProperty(function(time, result) {
                     if (channel in this.cHeadings){
                         return this.cHeadings[channel].getValue(time);
                     }
