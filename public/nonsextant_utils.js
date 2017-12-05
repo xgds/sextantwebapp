@@ -14,8 +14,6 @@
 //specific language governing permissions and limitations under the License.
 //__END_LICENSE__
 
-const hostname = config.xgds.protocol + '://' + config.xgds.name;
-
 let deviceNames = "";
 
 //If the connected devices are defined, they will be loaded into a toolbar and the polling will be started
@@ -23,6 +21,9 @@ let deviceNames = "";
 function loadDevices(){
 	if(sextant.connectedDevices !== undefined){
 
+		if (!_.isEmpty(sextant.connectedDevices)) {
+			$('#connectedDevices').show();
+		}
 		$.each(sextant.connectedDevices, function( key, value ) { //key here is the device name, and value is the displayName corresponding to it.
 			let listEntry="<li "+"id='"+key+"'>"+value+"</li>";
 			$('#deviceList').append(listEntry); //Display all connected devices using their display names from config
@@ -42,7 +43,7 @@ function loadDevices(){
 };
 
 function checkConnectedDevices(){
-
+    const hostname = config.xgds.protocol + '://' + config.xgds.name;
 	let url= hostname + '/xgds_status_board/rest/multiSubsystemStatusJson/';
 	
 	$.ajax({

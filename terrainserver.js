@@ -31,7 +31,7 @@ function serveTerrain(app, terrainPath) {
             res.set('Content-Encoding', 'gzip');
             res.sendFile(blankPath);
         } else {
-            const localTerrain = path.resolve(__dirname, 'public', terrainPath, z, x, y + '.terrain');
+            const localTerrain = path.resolve(__dirname, terrainPath, z, x, y + '.terrain');
             console.log('resolving path ' + localTerrain);
             res.setHeader('Content-Encoding', 'gzip');
             res.sendFile(localTerrain);
