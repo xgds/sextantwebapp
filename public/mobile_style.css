@@ -1,0 +1,79 @@
+#connected_div{
+position:absolute;
+z-index:2;
+bottom:15px;
+left:5px;
+}
+
+#containerConnected_div {
+    position: absolute;
+    top:80px;
+    right:80px;
+    /*width:30px;
+    height:15px;*/
+    background-color:white;
+    z-index:2;
+    //border:1px solid black;
+    border-radius:12px;
+}
+
+#connectedDevices{
+    position: fixed;
+    top:50px;
+    left:30px;
+    width:auto;
+    height:auto;
+    z-index:2;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/*Hide silly looking follow checkbox*/
+#follow_checkbox, #follow_label input {display:none;}
+#track_checkbox, #track_checkbox input {display:none;}
+
+#savePopup{
+    position: fixed;
+    top: 50px;
+    left: calc(50vw - 125px);
+    width: 250px;
+    height:auto;
+    z-index: 5;
+    display:none;
+    background:white;
+    border-radius: 5px;
+    box-shadow: 0 10px 10px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+#savePopup p{
+    padding:10px;
+}
+#savePopup tr:nth-child(odd) {
+    background-color: #eee;
+}
+#savePopup th, td {
+        padding: 10px;
+}
+
+/* Handles Mobile Phone Scrollbars- Left it in as it may prove useful if we add more features*/
+
+/* !important is needed sometimes */
+::-webkit-scrollbar {
+    width: 12px !important;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+   -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3) !important;
+   -webkit-border-radius: 10px !important;
+   border-radius: 10px !important;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    -webkit-border-radius: 10px !important;
+    border-radius: 10px !important;
+    background: #41617D !important;
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5) !important;
+}
+::-webkit-scrollbar-thumb:window-inactive {
+    background: #41617D !important;
+}
