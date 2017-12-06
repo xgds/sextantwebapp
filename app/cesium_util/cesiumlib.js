@@ -86,6 +86,12 @@ class ViewerWrapper{
             viewerOptions["imageryProvider"] = this.buildImageryProvider(config.baseImagery);
         }
 
+        if ('ellipsoid' in config){
+            if (config.ellipsoid == 'MOON') {
+                viewerOptions['globe'] = new Cesium.Globe(Cesium.Ellipsoid.MOON);
+            }
+        }
+
         const viewer = new Cesium.Viewer(this.container, viewerOptions);
         this.viewer = viewer;
         this.scene = viewer.scene;
@@ -206,16 +212,20 @@ class ViewerWrapper{
     };
 
     buildImageryProvider(options){
-        const test = url.parse(options.url);
-		if (test.hostname === null){
-			try {
-				options.url = this.serveraddress() + options.url;
-				console.log('Loading imagery from: ' + options.url);
-			} catch(e){
-				console.log(e);
-			}
-		}
-		return Cesium.createTileMapServiceImageryProvider(options);
+        if ('url' in options) {
+            const test = url.parse(options.url);
+            if (test.hostname === null) {
+                try {
+                    options.url = this.serveraddress() + options.url;
+                    console.log('Loading imagery from: ' + options.url);
+                } catch (e) {
+                    console.log(e);
+                }
+            }
+            return Cesium.createTileMapServiceImageryProvider(options);
+        } else if ('wms' in options){
+            return new Cesium.WebMapServiceImageryProvider(options.wms);
+        }
     }
 
     addImagery(options){
