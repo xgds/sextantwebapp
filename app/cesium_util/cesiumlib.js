@@ -23,13 +23,15 @@ import '../css/style.css';
 const path = require('path');
 const url = require('url');
 
-
-//import buildModuleUrl from 'cesium/Source/Core/buildModuleUrl';
+if (config.server.nginx_prefix !== undefined) {
+    window.CESIUM_BASE_URL = '/' + config.server.nginx_prefix + '/';
+} else {
+    window.CESIUM_BASE_URL = '../';  // TODO have not tested this running outside of nginx
+}
 
 const Cesium = require('cesium/Cesium');
 
 Cesium.BingMapsApi.defaultKey = global.config.bing_key;
-//Cesium.buildModuleUrl.setBaseUrl('./');
 
 
 //const cesium_navigation = require('cesium-navigation/amd/viewerCesiumNavigationMixin');
@@ -79,7 +81,6 @@ class ViewerWrapper{
         };
 
         if ('baseImagery' in config){
-            //const imageryProvider = this.buildImageryProvider(config.baseImagery);
             viewerOptions["imageryProvider"] = this.buildImageryProvider(config.baseImagery);
         }
 
@@ -202,11 +203,12 @@ class ViewerWrapper{
     };
 
     buildImageryProvider(options){
-    		const test = url.parse(options.url);
+        debugger;
+        const test = url.parse(options.url);
 		if (test.hostname === null){
 			try {
 				options.url = this.serveraddress() + options.url;
-				console.log(options.url);
+				console.log('Loading imagery from: ' + options.url);
 			} catch(e){
 				console.log(e);
 			}

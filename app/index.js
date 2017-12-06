@@ -4,11 +4,10 @@ import 'bootstrap-loader';
 import {config} from './../config/config_loader';
 import {ViewerWrapper, zoom, heading, DynamicLines, loadKmls, buildSurfaceCircle} from './cesium_util/cesiumlib';
 
-//require("css!./css/style.css");
-//import './css/style.css';
 
 // Configure the Cesium viewer
 const viewerWrapper = new ViewerWrapper(config.urlPrefix, config.server.cesium_port, config.server.nginx_prefix, 1, 'cesiumContainer');
+
 // Set up for SSE or GPS input
 const hasSSE = ('xgds' in config);
 import {TrackSSE} from './sse/trackSseUtils'
@@ -36,10 +35,6 @@ if (hasSSE) {
 // Load the kml configured if any
 loadKmls(config.kml_urls, viewerWrapper);
 
-////GPS utility functions
-//function zoomToGPSTracks(){
-//	return gps_tracks.zoomTo();
-//}
 
 function addGPSLocation(data){
 	const coords = JSON.parse(data);
@@ -73,9 +68,3 @@ module.exports = {
     '$':$
 };
 
-//if (module.hot) {
-//  module.hot.accept();
-//  module.hot.dispose(function() {
-    //clearInterval(timer):
-//  });
-//}

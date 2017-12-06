@@ -50,14 +50,16 @@ module.exports = {
     terrain : { port : 9090 },
     
     baseImagery: {'url': '/cesium-assets/imagery/NaturalEarthII' },
-    
+    //baseImagery: {'url': '/Assets/Textures/NaturalEarthII' },
+
     // Default geographical site
     defaultSite : 'HI_Kilauea',
     
     // list of kml links to load
-    kml_urls : ['https://' + USERNAME + ':' + PASSWORD + '@' + SERVER_NAME + '/notes/rest/notesFeed.kml',
-    				//'https://old-boat.xgds.org/xgds_sample/rest/samplesFeed.kml', //TODO update to boat
-        		    'https://' + USERNAME + ':' + PASSWORD + '@' + SERVER_NAME + '/basaltApp/rest/hvnp_so2_link.kml'],
+    kml_urls : ['https://'  + SERVER_NAME + '/notes/rest/notesFeed.kml',
+    				'https://'  + SERVER_NAME + '/xgds_sample/rest/samplesFeed.kml',
+    				//'https://'  + SERVER_NAME + '/xgds_map_server/rest/maplayer/kml/765f45be-bb57-4695-af40-36d5b86eb728.kml',
+        		    'https://'  + SERVER_NAME + '/basaltApp/rest/https_hvnp_so2_link.kml'],
     
     // list of various sites we support
     sites : { 'HI_Mauna_Ulu' : {'imagery': {'url': 'https://' + SERVER_NAME + '/data/rest/xgds_map_server/geoTiff/KI_lidar_slope_tile2',
