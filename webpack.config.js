@@ -13,6 +13,9 @@ const mainPath = path.resolve(__dirname, 'app', 'index.js');
 const cesiumSource = path.resolve(__dirname,'node_modules', 'cesium', 'Source');
 const cesiumWorkers = '../Build/Cesium/Workers';
 
+// Cesium Navigation includes
+const cesiumNavigationPath = path.resolve(__dirname,'node_modules', 'cesium-navigation', 'dist', 'amd');
+
 const config = {
     devtool: "source-map",
     stats: {
@@ -21,7 +24,8 @@ const config = {
     resolve: {
         alias: {
 			// Cesium module name
-			cesium: path.resolve(__dirname, cesiumSource)
+			cesium: path.resolve(__dirname, cesiumSource),
+            cesiumNavigation: path.resolve(__dirname, cesiumNavigationPath)
 		},
         modules: [
             path.resolve('./node_modules')

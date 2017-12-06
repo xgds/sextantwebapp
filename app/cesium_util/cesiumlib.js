@@ -34,9 +34,11 @@ const Cesium = require('cesium/Cesium');
 Cesium.BingMapsApi.defaultKey = global.config.bing_key;
 
 
-//const cesium_navigation = require('cesium-navigation/amd/viewerCesiumNavigationMixin');
+//const CesiumNavigation = require('cesiumNavigation/viewerCesiumNavigationMixin');
+//const cesium_navigation = require('cesium-navigation/dist/amd/viewerCesiumNavigationMixin');
 
-//import viewerCesiumNavigationMixin from './cesium-navigation/viewerCesiumNavigationMixin';
+//import viewerCesiumNavigationMixin from './viewerCesiumNavigationMixin';
+
 
 if (!('destination' in config)) {
 	config.destination = Cesium.Cartesian3.fromDegrees(config.siteConfig.centerPoint[0], config.siteConfig.centerPoint[1], config.siteConfig.centerPoint[2]);
@@ -96,7 +98,8 @@ class ViewerWrapper{
         //                                             enableDistanceLegend:true
         //                                             });
 
-        //viewer.extend(cesium_navigation.viewerCesiumNavigationMixin);
+        //viewer.extend(CesiumNavigation.viewerCesiumNavigationMixin);
+        //viewer.extend(viewerCesiumNavigationMixin);
 
         try {
             const terrainPath = config.sites[config.defaultSite].elevation;
@@ -203,7 +206,6 @@ class ViewerWrapper{
     };
 
     buildImageryProvider(options){
-        debugger;
         const test = url.parse(options.url);
 		if (test.hostname === null){
 			try {
