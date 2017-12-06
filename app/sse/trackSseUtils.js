@@ -20,14 +20,10 @@ import {beforeSend} from './../util/xgdsUtils';
 const hasSSE = ('xgds' in config);
 
 const moment = require('moment');
-const Cesium = require('cesium');
+const Cesium = require('cesium/Cesium');
 
-// import {Color, ImageMaterialProperty, ColorMaterialProperty, Cartesian2, Cartesian3, CallbackProperty, HeadingPitchRange, ClockRange,
-// 		Clock, SampledPositionProperty, JulianDate, HermitePolynomialApproximation, TimeIntervalCollection, TimeInterval, ClockViewModel,
-// 		CompositePositionProperty, ConstantPositionProperty, ReferenceFrame, SampledProperty, ExtrapolationType} from './../cesium_util/cesium_imports'
-import {DynamicLines, buildCylinder, updatePositionHeading, buildRectangle,
-	    buildPath, buildEllipse } from './../cesium_util/cesiumlib';
-import {SSE} from './sseUtils'
+import {buildPath, buildEllipse } from './../cesium_util/cesiumlib';
+import {SSE} from './sseUtils';
 
 let sse = undefined;
 let fakeHeading = false;

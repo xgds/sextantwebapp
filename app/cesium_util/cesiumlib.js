@@ -1,7 +1,24 @@
+//__BEGIN_LICENSE__
+//Copyright (c) 2015, United States Government, as represented by the
+//Administrator of the National Aeronautics and Space Administration.
+//All rights reserved.
+
+//The xGDS platform is licensed under the Apache License, Version 2.0
+//(the "License"); you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at
+//http://www.apache.org/licenses/LICENSE-2.0.
+
+//Unless required by applicable law or agreed to in writing, software distributed
+//under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+//CONDITIONS OF ANY KIND, either express or implied. See the License for the
+//specific language governing permissions and limitations under the License.
+//__END_LICENSE__
+
 import {config} from './../../config/config_loader';
 
-import 'cesium/Source/Widgets/widgets.css';
-import './style.css';
+require('cesium/Widgets/widgets.css');
+
+import '../css/style.css';
 
 const path = require('path');
 const url = require('url');
@@ -9,19 +26,13 @@ const url = require('url');
 
 //import buildModuleUrl from 'cesium/Source/Core/buildModuleUrl';
 
-const Cesium = require('cesium');
+const Cesium = require('cesium/Cesium');
 
-BingMapsApi.defaultKey = global.config.bing_key;
-Cesium.buildModuleUrl.setBaseUrl('./');
+Cesium.BingMapsApi.defaultKey = global.config.bing_key;
+//Cesium.buildModuleUrl.setBaseUrl('./');
 
-// Load all cesium components required
-// import {Viewer, EllipsoidTerrainProvider, Cartesian3, Cartesian2, PolygonGeometry, PolygonHierarchy, CesiumMath, Cartographic, Ellipsoid, Color,
-// 		sampleTerrain, ScreenSpaceEventHandler, ScreenSpaceEventType, Rectangle, RectangleGeometry, EllipseGeometry, LabelStyle, CzmlDataSource, CustomDataSource,
-// 		CreateTileMapServiceImageryProvider, CesiumTerrainProvider, CallbackProperty, VerticalOrigin, HorizontalOrigin, Matrix4, ConstantProperty,
-// 		SceneMode, SampledPositionProperty, JulianDate, ColorMaterialProperty, ClockRange, ClockViewModel, GroundPrimitive,
-// 		Transforms, HeadingPitchRoll, ColorGeometryInstanceAttribute, GeometryInstance, Primitive, KmlDataSource, Clock} from './cesium_imports'
 
-//const cesium_navigation = require('cesium-navigation');
+//const cesium_navigation = require('cesium-navigation/amd/viewerCesiumNavigationMixin');
 
 //import viewerCesiumNavigationMixin from './cesium-navigation/viewerCesiumNavigationMixin';
 
@@ -63,7 +74,7 @@ class ViewerWrapper{
             terrainExaggeration : terrainExaggeration,
             baseLayerPicker : false,
             terrainProvider : terrainProvider,
-            sceneMode: SceneMode.SCENE3D,
+            sceneMode: Cesium.SceneMode.SCENE3D,
             clockViewModel: new Cesium.ClockViewModel(clock)
         };
 
@@ -146,8 +157,8 @@ class ViewerWrapper{
     
     toLongLatHeight(cartesian) {
     		const cartographic = Cesium.Cartographic.fromCartesian(cartesian);
-        const longitude = Cesium.CesiumMath.toDegrees(cartographic.longitude);
-        const latitude = Cesium.CesiumMath.toDegrees(cartographic.latitude);
+        const longitude = CesiumMath.toDegrees(cartographic.longitude);
+        const latitude = CesiumMath.toDegrees(cartographic.latitude);
         const carto_WGS84 = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian);
         const height = carto_WGS84.height/this.terrainExaggeration;  //TODO need to look up the height from the terrain
         return [longitude, latitude, height];
@@ -200,7 +211,7 @@ class ViewerWrapper{
 				console.log(e);
 			}
 		}
-		return Cesium.CreateTileMapServiceImageryProvider(options);
+		return Cesium.createTileMapServiceImageryProvider(options);
     }
 
     addImagery(options){
@@ -302,8 +313,8 @@ class ViewerWrapper{
                 const heightString = carto_WGS84.height.toFixed(4)/this.terrainExaggeration;
 
                 this.globalpoint = {
-                    'latitude':CesiumMath.toDegrees(cartographic.latitude),
-                    'longitude':CesiumMath.toDegrees(cartographic.longitude),
+                    'latitude':Cesium.CesiumMath.toDegrees(cartographic.latitude),
+                    'longitude':Cesium.CesiumMath.toDegrees(cartographic.longitude),
                     'altitude': heightString
                 };
 

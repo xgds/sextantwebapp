@@ -3,8 +3,9 @@ import * as $ from 'jquery';
 import 'bootstrap-loader';
 import {config} from './../config/config_loader';
 import {ViewerWrapper, zoom, heading, DynamicLines, loadKmls, buildSurfaceCircle} from './cesium_util/cesiumlib';
-//import {Cartesian3, CesiumMath, Color, CallbackProperty} from './cesium_util/cesium_imports'
 
+//require("css!./css/style.css");
+//import './css/style.css';
 
 // Configure the Cesium viewer
 const viewerWrapper = new ViewerWrapper(config.urlPrefix, config.server.cesium_port, config.server.nginx_prefix, 1, 'cesiumContainer');

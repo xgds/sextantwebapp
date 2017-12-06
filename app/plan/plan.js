@@ -15,10 +15,9 @@
 // __END_LICENSE__
 
 const moment = require('moment');
-const Cesium = require('cesium');
+const Cesium = require('cesium/Cesium');
 
-//import {Color, defined, ScreenSpaceEventHandler, ScreenSpaceEventType, ImageMaterialProperty, HeadingPitchRange,Cartesian3, CesiumMath, CallbackProperty, EntityCollection, Clock } from './../cesium_util/cesium_imports'
-import {DynamicLines, buildLineString, buildCylinder, buildSurfaceCircle} from './../cesium_util/cesiumlib';
+import {buildLineString, buildCylinder, buildSurfaceCircle} from './../cesium_util/cesiumlib';
 import {config} from './../../config/config_loader';
 import {beforeSend} from './../util/xgdsUtils';
 

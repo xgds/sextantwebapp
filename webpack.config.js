@@ -1,12 +1,17 @@
 const path = require('path');
 const webpack = require('webpack');
+//const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 // use webpack --watch to watch code to recompile
 // use express in server.js (ie use debug flag)
 
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+
 const nodeModulesPath = path.resolve(__dirname, 'node_modules');
 const buildPath = path.resolve(__dirname, 'public', 'build');
 const mainPath = path.resolve(__dirname, 'app', 'index.js');
+const cesiumSource = path.resolve(__dirname,'node_modules', 'cesium', 'Source');
+const cesiumWorkers = '../Build/Cesium/Workers';
 
 const config = {
     devtool: "source-map",
@@ -14,6 +19,10 @@ const config = {
         errorDetails: true
     },
     resolve: {
+        alias: {
+			// Cesium module name
+			cesium: path.resolve(__dirname, cesiumSource)
+		},
         modules: [
             path.resolve('./node_modules')
         ]
@@ -29,9 +38,24 @@ const config = {
         library: 'sextant', // the name of the library we refer to
         sourcePrefix: '' // required for cesium
     },
+    amd: {
+        // Enable webpack-friendly use of require in Cesium
+        toUrlUndefined: true
+    },
     plugins: [
         new webpack.DefinePlugin({
             'process.env.CONFIG_PATH': JSON.stringify(process.env.CONFIG_PATH || undefined)
+        }),
+        // new HtmlWebpackPlugin({
+	     //    template: 'src/index.html'
+        // }),
+        // Copy Cesium Assets, Widgets, and Workers to a static directory
+        new CopyWebpackPlugin([ { from: path.join(cesiumSource, cesiumWorkers), to: 'Workers' } ]),
+        new CopyWebpackPlugin([ { from: path.join(cesiumSource, 'Assets'), to: 'Assets' } ]),
+        new CopyWebpackPlugin([ { from: path.join(cesiumSource, 'Widgets'), to: 'Widgets' } ]),
+        new webpack.DefinePlugin({
+            // Define relative base path in cesium for loading assets
+            CESIUM_BASE_URL: JSON.stringify('')
         })
     ],
     module: {

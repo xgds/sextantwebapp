@@ -15,13 +15,13 @@
 //__END_LICENSE__
 
 import {config} from './../../config/config_loader';
-import * as moment from 'moment'
+import * as moment from 'moment';
 // import {Color, ImageMaterialProperty, ColorMaterialProperty, Cartesian2, Cartesian3, CallbackProperty,
 //     HeadingPitchRange, SampledPositionProperty, JulianDate, TimeIntervalCollection, TimeInterval, ClockViewModel,
 //     SampledProperty, ExtrapolationType} from './../cesium_util/cesium_imports'
 import {buildPath} from './../cesium_util/cesiumlib';
 
-const Cesium = require('cesium');
+const Cesium = require('cesium/Cesium');
 
 let fakeHeading = false;
 

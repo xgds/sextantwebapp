@@ -14,7 +14,6 @@
 //specific language governing permissions and limitations under the License.
 // __END_LICENSE__
 
-import {config} from './../../config/config_loader';
 import {beforeSend} from './../util/xgdsUtils';
 
 const moment = require('moment');
