@@ -15,6 +15,8 @@
 // __END_LICENSE__
 module.exports = {
 
+    mode: 'STANDALONE',  // valid modes: XGDS, XGDS_SSE, STANDALONE
+
 	// The server that is running this node app 
     server : { port : 3002,
     		   cesium_port: 3002,

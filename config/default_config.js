@@ -18,6 +18,8 @@ let SERVER_NAME = 'localhost';
 
 module.exports = {
 
+	mode: 'XGDS_SSE',  // valid modes: XGDS, XGDS_SSE, STANDALONE
+
 	// The server that is running this node app 
     server : { port : 3001, 
     		   cesium_port: 3001,

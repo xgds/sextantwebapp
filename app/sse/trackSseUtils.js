@@ -17,7 +17,7 @@
 import {config} from './../../config/config_loader';
 import {beforeSend} from './../util/xgdsUtils';
 
-const hasSSE = ('xgds' in config);
+const hasSSE = ('mode' in config && config.mode == 'XGDS_SSE');
 
 const moment = require('moment');
 const Cesium = require('cesium/Cesium');

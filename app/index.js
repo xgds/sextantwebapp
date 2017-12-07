@@ -9,7 +9,8 @@ import {ViewerWrapper, zoom, heading, DynamicLines, loadKmls, buildSurfaceCircle
 const viewerWrapper = new ViewerWrapper(config.urlPrefix, config.server.cesium_port, config.server.nginx_prefix, 1, 'cesiumContainer');
 
 // Set up for SSE or GPS input
-const hasSSE = ('xgds' in config);
+const hasSSE = ('mode' in config && config.mode == 'XGDS_SSE');
+const STANDALONE = ('mode' in config && config.mode == 'STANDALONE');
 import {TrackSSE} from './sse/trackSseUtils'
 import {PlanManager, xgdsPlanManager} from './plan/plan'
 let gps_tracks = undefined;
@@ -27,7 +28,7 @@ viewerWrapper.scene.camera.flyTo({
 if (hasSSE) {
 	tsse = new TrackSSE(viewerWrapper);
 	planManager = new xgdsPlanManager(viewerWrapper);
-} else {
+} else if (STANDALONE) {
 	gps_tracks = new DynamicLines(viewerWrapper);
     planManager = new PlanManager(viewerWrapper);
 }
