@@ -39,6 +39,8 @@ Cesium.BingMapsApi.defaultKey = global.config.bing_key;
 
 //import viewerCesiumNavigationMixin from './viewerCesiumNavigationMixin';
 
+//import CesiumNavigation from 'csNavigation/viewerCesiumNavigationMixin';
+
 
 if (!('destination' in config)) {
 	config.destination = Cesium.Cartesian3.fromDegrees(config.siteConfig.centerPoint[0], config.siteConfig.centerPoint[1], config.siteConfig.centerPoint[2]);

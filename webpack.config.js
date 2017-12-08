@@ -25,7 +25,7 @@ const config = {
         alias: {
 			// Cesium module name
 			cesium: path.resolve(__dirname, cesiumSource),
-            cesiumNavigation: path.resolve(__dirname, cesiumNavigationPath)
+            csNavigation: path.resolve(__dirname, cesiumNavigationPath)
 		},
         modules: [
             path.resolve('./node_modules')

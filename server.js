@@ -17,7 +17,7 @@ const root = path.resolve(__dirname);
 const rerouting = [
 	['/', path.resolve(root, 'public')],
 	['/', path.resolve(root, 'node_modules', 'cesium', 'Build','Cesium')],
-	['/cesiumNavigation', path.resolve(root, 'node_modules', 'cesium-navigation', 'dist','amd')],
+	//['/cesiumNavigation', path.resolve(root, 'node_modules', 'cesium-navigation', 'dist','amd')],
     ['/cesium-assets/imagery', path.resolve(root, 'node_modules', 'cesium', 'Build','Cesium','Assets','Textures')],
     ['/CustomMaps', path.resolve(root, 'public', 'CustomMaps')],
 	[public_extension + '/jquery', path.resolve(root, 'node_modules', 'jquery', 'dist')],
