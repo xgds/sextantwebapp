@@ -20,7 +20,7 @@ require('cesium/Widgets/widgets.css');
 
 import '../css/style.css';
 
-const path = require('path');
+//const path = require('path');
 const url = require('url');
 
 if (config.server.nginx_prefix !== undefined) {

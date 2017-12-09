@@ -21,7 +21,7 @@ const rerouting = [
     ['/cesium-assets/imagery', path.resolve(root, 'node_modules', 'cesium', 'Build','Cesium','Assets','Textures')],
     ['/CustomMaps', path.resolve(root, 'public', 'CustomMaps')],
 	[public_extension + '/jquery', path.resolve(root, 'node_modules', 'jquery', 'dist')],
-	[public_extension + '/jquery-mobile', path.resolve(root, 'node_modules', 'jquery-mobile', 'dist')],
+	[public_extension + '/jquery-mobile-min', path.resolve(root, 'node_modules', 'jquery-mobile-min')],
 	[public_extension + '/font-awesome', path.resolve(root, 'node_modules', 'font-awesome')]
 ];
 

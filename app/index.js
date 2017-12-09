@@ -1,8 +1,24 @@
+// __BEGIN_LICENSE__
+//Copyright (c) 2015, United States Government, as represented by the
+//Administrator of the National Aeronautics and Space Administration.
+//All rights reserved.
+//
+//The xGDS platform is licensed under the Apache License, Version 2.0
+//(the "License"); you may not use this file except in compliance with the License.
+//You may obtain a copy of the License at
+//http://www.apache.org/licenses/LICENSE-2.0.
+//
+//Unless required by applicable law or agreed to in writing, software distributed
+//under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+//CONDITIONS OF ANY KIND, either express or implied. See the License for the
+//specific language governing permissions and limitations under the License.
+// __END_LICENSE__
+
 import * as _ from 'lodash';
 import * as $ from 'jquery';
 import 'bootstrap-loader';
 import {config} from './../config/config_loader';
-import {ViewerWrapper, zoom, heading, DynamicLines, loadKmls, buildSurfaceCircle} from './cesium_util/cesiumlib';
+import {ViewerWrapper, zoom, heading, DynamicLines, loadKmls} from './cesium_util/cesiumlib';
 
 
 // Configure the Cesium viewer
@@ -48,13 +64,13 @@ function addGPSLocation(data){
 	}
 }
 
-window.addEventListener("load",function() { // TODO not needed anymore
-	// Set a timeout...
-	setTimeout(function(){
-		// Hide the address bar!
-		window.scrollTo(0, 1);
-	}, 0);
-});
+// window.addEventListener("load",function() { // TODO not needed anymore
+// 	// Set a timeout...
+// 	setTimeout(function(){
+// 		// Hide the address bar!
+// 		window.scrollTo(0, 1);
+// 	}, 0);
+// });
 
 module.exports = {
 	'camera': viewerWrapper.viewer.scene.camera,
@@ -65,7 +81,7 @@ module.exports = {
     'tsse': tsse,
     'planManager': planManager,
     'gps_tracks': gps_tracks,
-    'connectedDevices' : config.connectedDevices, //Added by Kenneth 9/4/17
+    'connectedDevices' : config.connectedDevices,
     '$':$
 };
 

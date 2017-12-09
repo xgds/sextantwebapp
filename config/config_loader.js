@@ -20,12 +20,20 @@ const initialize = function() {
 		let defaultConfigPath = './standalone_config.js';
 		let configPath = (process.env.CONFIG_PATH || defaultConfigPath);
 		console.log('LOADING CONFIG FROM: ' + configPath);
-		
-		let result = require(configPath);
-						
-		result.urlPrefix = result.server.protocol + '://' + result.server.name;
-		result.siteConfig = result.sites[result.defaultSite];
-		return result;
+
+		let result = require('./moon_xgds_config.js');
+		// (async () => {
+    		// let result = await require(configPath);
+        //
+		// 	result.urlPrefix = result.server.protocol + '://' + result.server.name;
+		// 	result.siteConfig = result.sites[result.defaultSite];
+		// 	return result;
+		// })();
+			result.urlPrefix = result.server.protocol + '://' + result.server.name;
+			result.siteConfig = result.sites[result.defaultSite];
+			return result;
+
+
 	}
 	return global.config;
 }
