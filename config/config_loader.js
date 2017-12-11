@@ -13,26 +13,43 @@
 //CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 //specific language governing permissions and limitations under the License.
 // __END_LICENSE__
-const path = require('path');
+const request = require('then-request');
 
 const initialize = function() {
+	console.log('initializing config');
 	if (global.config === undefined){
-		let defaultConfigPath = './standalone_config.js';
-		let configPath = (process.env.CONFIG_PATH || defaultConfigPath);
-		console.log('LOADING CONFIG FROM: ' + configPath);
+//		let defaultConfigPath = './standalone_config.js';
+		debugger;
+		let result = undefined;
+		if (process.env.CONFIG_PATH !== undefined) {
+			// external file load
+			console.log('LOADING CONFIG FROM: ' + process.env.CONFIG_PATH);
+			let result = require(process.env.CONFIG_PATH);
+			// request('GET', process.env.CONFIG_PATH).done(function(res) {
+  			// 	let result = res.getBody();
+            	// result.urlPrefix = result.server.protocol + '://' + result.server.name;
+            	// result.siteConfig = result.sites[result.defaultSite];
+            	// return result;
+			// });
+		} else {
+            // internal file load
 
-		let result = require('./moon_xgds_config.js');
-		// (async () => {
-    		// let result = await require(configPath);
-        //
-		// 	result.urlPrefix = result.server.protocol + '://' + result.server.name;
-		// 	result.siteConfig = result.sites[result.defaultSite];
-		// 	return result;
-		// })();
-			result.urlPrefix = result.server.protocol + '://' + result.server.name;
-			result.siteConfig = result.sites[result.defaultSite];
-			return result;
+            console.log('LOADING CONFIG FROM DEFAULT: ' + DEFAULT_CONFIG_PATH);
 
+//		let result = require('./moon_xgds_config.js');
+            // (async () => {
+            // let result = await require(configPath);
+            //
+            // 	result.urlPrefix = result.server.protocol + '://' + result.server.name;
+            // 	result.siteConfig = result.sites[result.defaultSite];
+            // 	return result;
+            // })();
+            let result = require(DEFAULT_CONFIG_PATH);
+
+        }
+        result.urlPrefix = result.server.protocol + '://' + result.server.name;
+		result.siteConfig = result.sites[result.defaultSite];
+		return result;
 
 	}
 	return global.config;

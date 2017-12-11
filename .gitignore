@@ -6,3 +6,4 @@ public/sextant_plans
 cesium_tilesets
 public/cesium_tilesets
 public/cesium-assets
+.env

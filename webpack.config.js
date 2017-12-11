@@ -19,117 +19,132 @@ const cesiumWorkers = "../Build/Cesium/Workers";
 
 // Cesium Navigation includes
 //const cesiumNavigationPath = path.resolve(__dirname,"node_modules", "cesium-navigation", "dist", "amd");
+const ENV_DEFAULTS = {'CONFIG_PATH': undefined};
+module.exports = (env = ENV_DEFAULTS) => {
+    return {
+        // see https://blog.flennik.com/the-fine-art-of-the-webpack-2-config-dc4d19d7f172
 
-const config = {
-    //devtool: "source-map",
-    stats: "verbose",
-    resolve: {
-        alias: {
-			// Cesium module name
-			cesium: path.resolve(__dirname, cesiumSource)
-            //csNavigation: path.resolve(__dirname, cesiumNavigationPath)
-		}
-        // modules: [
-        //     path.resolve("./node_modules")
-        // ]
-    },
-    entry: [
-        indexPath
-    ],
-    output: {
-        path: buildPath,
-        publicPath: "/build/",
-        filename: "sextant.bundle.js",
-        //libraryTarget: "var",
-        library: "sextant" // the name of the library we refer to
-        //sourcePrefix: "" // required for cesium
-    },
-    amd: {
-        // Enable webpack-friendly use of require in Cesium
-        toUrlUndefined: true
-    },
-    plugins: [
-        // new webpack.DefinePlugin({
-        //     "process.env.CONFIG_PATH": JSON.stringify(process.env.CONFIG_PATH || undefined)
-        // }),
-        new webpack.EnvironmentPlugin({'CONFIG_PATH': undefined}),
-        new webpack.optimize.UglifyJsPlugin({
-            sourceMap: true,
-            compress: {
-                warnings: true
+        //devtool: "source-map",
+        stats: "verbose",
+        resolve: {
+            alias: {
+                // Cesium module name
+                cesium: path.resolve(__dirname, cesiumSource)
+                //csNavigation: path.resolve(__dirname, cesiumNavigationPath)
             }
-        }),
-        // new webpack.LoaderOptionsPlugin({
-        //     minimize: true
-        // }),
-        // new HtmlWebpackPlugin({
-	     //    template: "src/index.html"
-        // }),
-        // Copy Cesium Assets, Widgets, and Workers to a static directory
-        new CopyWebpackPlugin([ { from: path.join(cesiumSource, cesiumWorkers), to: "Workers" } ]),
-        new CopyWebpackPlugin([ { from: path.join(cesiumSource, "Assets"), to: "Assets" } ]),
-        new CopyWebpackPlugin([ { from: path.join(cesiumSource, "Widgets"), to: "Widgets" } ])
-    ],
-    module: {
-        // noParse: [
-        //     /.pako_inflate.js/ //this module seems to cause some warning apparently
-        // ],
-        //unknownContextCritical: false,
-        rules: [
-            {
-                test: /\.jsx?$/,
-                use: [ {loader: "babel-loader",
+            // modules: [
+            //     path.resolve("./node_modules")
+            // ]
+        },
+        entry: [
+            indexPath
+        ],
+        output: {
+            path: buildPath,
+            publicPath: "/build/",
+            filename: "sextant.bundle.js",
+            //libraryTarget: "var",
+            library: "sextant" // the name of the library we refer to
+            //sourcePrefix: "" // required for cesium
+        },
+        amd: {
+            // Enable webpack-friendly use of require in Cesium
+            toUrlUndefined: true
+        },
+        plugins: [
+            // new webpack.DefinePlugin({
+            //     "process.env.CONFIG_PATH": JSON.stringify(process.env.CONFIG_PATH || undefined)
+            // }),
+            new webpack.DefinePlugin({'DEFAULT_CONFIG_PATH': JSON.stringify('./standalone_config.js')
+//                                      'CONFIG_URL': env.CONFIG_URL
+                                      }),
+            new webpack.EnvironmentPlugin({
+                'CONFIG_PATH': env.CONFIG_PATH
+            }),
+            new webpack.optimize.UglifyJsPlugin({
+                sourceMap: true,
+                compress: {
+                    warnings: true
+                }
+            }),
+            // new webpack.LoaderOptionsPlugin({
+            //     minimize: true
+            // }),
+            // new HtmlWebpackPlugin({
+            //    template: "src/index.html"
+            // }),
+            // Copy Cesium Assets, Widgets, and Workers to a static directory
+            new CopyWebpackPlugin([{from: path.join(cesiumSource, cesiumWorkers), to: "Workers"}]),
+            new CopyWebpackPlugin([{from: path.join(cesiumSource, "Assets"), to: "Assets"}]),
+            new CopyWebpackPlugin([{from: path.join(cesiumSource, "Widgets"), to: "Widgets"}])
+        ],
+        module: {
+            // noParse: [
+            //     /.pako_inflate.js/ //this module seems to cause some warning apparently
+            // ],
+            //unknownContextCritical: false,
+            rules: [
+                {
+                    test: /\.jsx?$/,
+                    use: [{
+                        loader: "babel-loader",
                         options: {
                             plugins: ["transform-runtime"]
                             //presets: ["@babel/preset-env", { "modules": false }]
                             //presets: ["env", "react", "stage-0"]
                         }
-                        }
-                ],
-                exclude: [nodeModulesPath]
-                // query: {
-                //     plugins: ["transform-runtime"], //Don"t know why needed, but recommended
-                //     presets: ["es2015", "stage-0", "react"]
-                // },
+                    }
+                    ],
+                    exclude: [nodeModulesPath]
+                    // query: {
+                    //     plugins: ["transform-runtime"], //Don"t know why needed, but recommended
+                    //     presets: ["es2015", "stage-0", "react"]
+                    // },
 
-            },
-            {test: /\.js$/,
-                exclude: [nodeModulesPath],
-                use: [{loader: "babel-loader",
-                       options: {
+                },
+                {
+                    test: /\.js$/,
+                    exclude: [nodeModulesPath],
+                    use: [{
+                        loader: "babel-loader",
+                        options: {
                             plugins: ["transform-runtime"]
                             //presets: ["@babel/preset-env", { "modules": false }]
                             //presets: ["env", "react", "stage-0"]
                         }
-                       //options: {presets: ["env", "react", "stage-0"] //, { "modules": false }
+                        //options: {presets: ["env", "react", "stage-0"] //, { "modules": false }
                         //}
-                        }]
-            },
-            {
-                // Remove pragmas
-                test: /\.js$/,
-                enforce: 'pre',
-                include: path.resolve(__dirname, cesiumSource),
-                use: [{
-                    loader: 'strip-pragma-loader',
-                    options: {
-                        pragmas: {
-                            debug: false
-                        }
-                    }
-                }]
-            },
-            {test: /\.css$/, use: ["style-loader", "css-loader"]},
-            {test: /\.(png|gif|jpg|jpeg|glsl)$/, use: ["file-loader"]},
-            {test: /\.(woff|woff2|eot|ttf|svg)$/, use: [ { loader: "url-loader",
-                                                           options: {limit:8192}}]},
-            {test: /node_modules/, use: ["ify-loader"]}
-        ]
-    },
-    node: {
-        __dirname: true,
-        fs: "empty" //bug fix for cannot resolve module fs error
+                    }]
+                },
+                // {
+                //     // Remove pragmas
+                //     test: /\.js$/,
+                //     enforce: 'pre',
+                //     include: path.resolve(__dirname, cesiumSource),
+                //     use: [{
+                //         loader: 'strip-pragma-loader',
+                //         options: {
+                //             pragmas: {
+                //                 debug: false
+                //             }
+                //         }
+                //     }]
+                // },
+                {test: /\.css$/, use: ["style-loader", "css-loader"]},
+                {test: /\.(png|gif|jpg|jpeg|glsl)$/, use: ["file-loader"]},
+                {
+                    test: /\.(woff|woff2|eot|ttf|svg)$/, use: [{
+                        loader: "url-loader",
+                        options: {limit: 8192}
+                    }]
+                },
+                {test: /node_modules/, use: ["ify-loader"]}
+            ]
+        },
+        node: {
+            __dirname: true,
+            fs: "empty" //bug fix for cannot resolve module fs error
+        }
     }
 };
 
-module.exports = config;
