@@ -55,7 +55,7 @@ for (let route of rerouting){
 //Host terrain tiles
 if (process.env.TERRAIN_PATH !== undefined) {
     try {
-        const terrainPath = process.env.TERRAIN_PATH; // same as config.sites[config.defaultSite].elevation;
+        const terrainPath = process.env.TERRAIN_PATH; // add it to .env file, same as config.sites[config.defaultSite].elevation;
         if (terrainPath !== undefined) {
             console.log('building terrain server for ' + terrainPath);
             app = terrainServer(app, terrainPath);
