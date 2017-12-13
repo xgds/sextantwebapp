@@ -35,8 +35,7 @@ Cesium.BingMapsApi.defaultKey = global.config.bing_key;
 
 
 // later when we have this provided from node module do this
-//const CesiumNavigation = require('cesiumNavigation/viewerCesiumNavigationMixin');
-//const CesiumNavigation = require('./cesium-navigation/viewerCesiumNavigationMixin');
+//import viewerCesiumNavigationMixin from 'cesiumNvigation/viewerCesiumNavigationMixin';
 
 
 if (!('destination' in config)) {
@@ -103,7 +102,7 @@ class ViewerWrapper{
         //                                             enableDistanceLegend:true
         //                                             });
 
-        //viewer.extend(CesiumNavigation.viewerCesiumNavigationMixin);
+        //viewer.extend(viewerCesiumNavigationMixin);
 
         try {
             const terrainPath = config.sites[config.defaultSite].elevation;

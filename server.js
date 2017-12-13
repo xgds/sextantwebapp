@@ -28,13 +28,9 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const terrainServer = require('./terrainserver');
+import {config} from './config/config_loader';
 
 let app = express();
-
-
-// Serve static files from the public folder
-// let public_extension = config.server.public_prefix;
-// public_extension = (public_extension  === undefined) ? '' : public_extension ;
 
 const root = path.resolve(__dirname);
 const rerouting = [
@@ -51,21 +47,18 @@ for (let route of rerouting){
     app.use(route[0], express.static(route[1]));
 }
 
-//Host terrain tiles
-if (process.env.TERRAIN_PATH !== undefined) {
-    try {
-        const terrainPath = process.env.TERRAIN_PATH; // add it to .env file, same as config.sites[config.defaultSite].elevation;
-        if (terrainPath !== undefined) {
-            console.log('building terrain server for ' + terrainPath);
-            app = terrainServer(app, terrainPath);
-        }
-    } catch (e) {
-        console.log(e);
-    }
+// Host terrain tiles
+try {
+	const terrainPath = config.sites[config.defaultSite].elevation;
+	if (terrainPath !== undefined){
+		console.log('building terrain server for ' + terrainPath);
+		app = terrainServer(app, terrainPath);
+	}
+} catch (e) {
+	console.log(e);
 }
 
-
-if (process.env.SERVER_CORS === true) {
+if (config.cors !== undefined) {
     app.use(function (req, res, next) {
         console.log('shoving headers in');
         res.header("Access-Control-Allow-Origin", "*");
@@ -74,8 +67,7 @@ if (process.env.SERVER_CORS === true) {
     });
 }
 
-const port = process.env.SERVER_PORT;
-
+const port = config.server.port;
 app.listen(port, function () {
   console.log('Example app listening on port ' + port);
 });
