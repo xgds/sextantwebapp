@@ -17,8 +17,12 @@ const indexPath = path.resolve(__dirname, "app", "index.js");
 const cesiumSource = path.resolve(__dirname,"node_modules", "cesium", "Source");
 const cesiumWorkers = "../Build/Cesium/Workers";
 
-// Cesium Navigation includes
-//const cesiumNavigationPath = path.resolve(__dirname,"node_modules", "cesium-navigation", "dist", "amd");
+// Cesium Navigation includes, this does not work the way cesium-navigation is packaged.
+// For now we have the files copied into our cesium_util directory.
+//const cesiumNavigationPath = path.resolve(__dirname,"node_modules", "cesium-navigation", "Source");
+//    "cesium-navigation": "git+https://github.com/xgds/cesium-navigation.git",
+
+
 const ENV_DEFAULTS = {'CONFIG_PATH': undefined};
 module.exports = (env = ENV_DEFAULTS) => {
     return {
@@ -30,7 +34,7 @@ module.exports = (env = ENV_DEFAULTS) => {
             alias: {
                 // Cesium module name
                 cesium: path.resolve(__dirname, cesiumSource)
-                //csNavigation: path.resolve(__dirname, cesiumNavigationPath)
+                //cesiumNavigation: path.resolve(__dirname, cesiumNavigationPath)
             }
             // modules: [
             //     path.resolve("./node_modules")
