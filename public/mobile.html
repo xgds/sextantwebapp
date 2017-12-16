@@ -43,6 +43,25 @@
         
 </div>
 
+<div id="layersPopup" style="display:none;">
+    <div id="layertreeContainer">
+        <div class="btn-toolbar mb-1" role="toolbar">
+           <button id="refreshTreeLink" class="fa fa-refresh btn btn-primary btn-sm mr-2" onclick="javascript: app.vent.trigger('refreshTree');"></button>
+          <div class="input-group mr-5">
+                <input name="searchTree" placeholder="Filter..." autocomplete="off" class="form-control col-6">
+                <span class="input-group-addon " id="btnResetSearch"><i class="fa fa-close"></i></span>
+            </div>
+        </div>
+        <!--
+        <div class="mb-2" role="group">
+            <button id="btnTransparencyEditors" class="btn btn-primary" onclick="toggleTransparencySliders();app.vent.trigger('toggleTransparency');">Transparency</button>
+            <span id="matches"></span>
+        </div>
+        -->
+        <div id="layertree" data-source="ajax" class="sampletree"></div>
+    </div>
+</div>
+
 
 <!-- Symbol that shows whether we're connected to container in top right of screen -->
 <div id="containerConnected_div">   
@@ -51,6 +70,12 @@
         </span>
     </span>
 </div>
+
+
+<div id ="layersButtonDiv" >
+    <span class="btn" id="layers_btn" onclick="toggleLayerTree();">Layers</span>
+</div>
+
 
 <div id ="connectedDevices" style="display:none">
     <ul id ="deviceList" style="list-style-type:none; margin:5px; padding:0;">

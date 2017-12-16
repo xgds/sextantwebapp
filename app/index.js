@@ -27,11 +27,15 @@ const viewerWrapper = new ViewerWrapper(config.urlPrefix, config.server.cesium_p
 // Set up for SSE or GPS input
 const hasSSE = ('mode' in config && config.mode == 'XGDS_SSE');
 const STANDALONE = ('mode' in config && config.mode == 'STANDALONE');
-import {TrackSSE} from './sse/trackSseUtils'
-import {PlanManager, xgdsPlanManager} from './plan/plan'
+
+import {TrackSSE} from './sse/trackSseUtils';
+import {PlanManager, xgdsPlanManager} from './plan/plan';
+import {LayerTree} from './tree/layerTree';
+
 let gps_tracks = undefined;
 let tsse = undefined;
 let planManager = undefined;
+let layerTree = undefined;
 
 viewerWrapper.scene.camera.flyTo({
     destination: config.destination,
@@ -47,6 +51,10 @@ if (hasSSE) {
 } else if (STANDALONE) {
 	gps_tracks = new DynamicLines(viewerWrapper);
     planManager = new PlanManager(viewerWrapper);
+}
+
+if (config.layer_tree_url !== undefined){
+    layerTree = new LayerTree(viewerWrapper, 'layersPopup');
 }
 
 // Load the kml configured if any
@@ -82,6 +90,7 @@ module.exports = {
     'planManager': planManager,
     'gps_tracks': gps_tracks,
     'connectedDevices' : config.connectedDevices,
+    'layerTree': layerTree,
     '$':$
 };
 

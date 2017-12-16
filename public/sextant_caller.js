@@ -155,4 +155,10 @@
 		return sextant.planManager.savePlan(newName,newVersion,newNotes);
 	}
 
+	function toggleLayerTree() {
+		if (sextant.layerTree !== undefined){
+			sextant.layerTree.toggle();
+		}
+	}
+
     

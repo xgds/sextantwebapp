@@ -64,12 +64,12 @@ module.exports = (env = ENV_DEFAULTS) => {
             new webpack.EnvironmentPlugin({
                 'CONFIG_PATH': env.CONFIG_PATH
             }),
-            new webpack.optimize.UglifyJsPlugin({
-                sourceMap: true,
-                compress: {
-                    warnings: true
-                }
-            }),
+            // new webpack.optimize.UglifyJsPlugin({
+            //     sourceMap: true,
+            //     compress: {
+            //         warnings: true
+            //     }
+            // }),
             // new webpack.LoaderOptionsPlugin({
             //     minimize: true
             // }),
@@ -134,6 +134,7 @@ module.exports = (env = ENV_DEFAULTS) => {
                 //     }]
                 // },
                 {test: /\.css$/, use: ["style-loader", "css-loader"]},
+                {test: /\.less$/, use: ["style-loader", "css-loader", "less-loader"]},
                 {test: /\.(png|gif|jpg|jpeg|glsl)$/, use: ["file-loader"]},
                 {
                     test: /\.(woff|woff2|eot|ttf|svg)$/, use: [{

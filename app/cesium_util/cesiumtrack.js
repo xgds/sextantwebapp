@@ -502,4 +502,4 @@ class Tracker {
     };
 }
 
-export {TrackSSE}
+export {Tracker}

@@ -64,10 +64,11 @@ module.exports = {
 	// list of kml links to load
     kml_urls : [],
     
-    
-    // whether or not this is a development server
-    debug : true,
-    
+
+	// url for fancytree json data for layers
+	layer_tree_url: 'https://'  + SERVER_NAME + '/xgds_map_server/rest/treejson/',
+	layer_tree_icon_url: 'https://' + SERVER_NAME + '/static/rest/xgds_map_server/icons/',
+
     // whether or not to show lat long elevation hovering over mouse move
     showCoordinates : false,
     
