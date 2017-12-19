@@ -16,22 +16,26 @@
 
 import {beforeSend} from './../util/xgdsUtils';
 
-const Cookies = require( 'js-cookie' );
+const Cookies = require( 'js.cookie' );
 
 import {config} from './../../config/config_loader';
 
-import 'jquery.fancytree/dist/skin-lion/ui.fancytree.less';
+import 'jquery.fancytree/dist/skin-lion/ui.fancytree.css';
 
 const $ = require('jquery');
 
+
 const fancytree = require('jquery.fancytree');
 require('jquery.fancytree/dist/modules/jquery.fancytree.filter');
-require('jquery.fancytree/dist/modules/jquery.fancytree.persist');
+require('jquery.fancytree/dist/modules/jquery.fancytree.select');
+require('jquery.fancytree/dist/modules/jquery.fancytree.ui-deps');
 
+//require('jquery.fancytree/dist/modules/jquery.fancytree.persist');
 
 class LayerTree {
-    constructor(viewerWrapper,  popupDivId) {
+    constructor(viewerWrapper,  popupDivId, kmlManager) {
         this.viewerWrapper = viewerWrapper;
+        this.kmlManager = kmlManager;
         this.popupDiv = $('#' + popupDivId);
         this.visible = false;
         this.layersInitialized = false;
@@ -63,6 +67,24 @@ class LayerTree {
 	            return config.layer_tree_icon_url + 'dataTif.png';
 	    }
     	return null;
+    };
+
+    getKmlUrl(data) {
+        switch(data.node.data.type) {
+            case 'MapLayer':
+                // TODO add prefix url
+                return config.urlPrefix + '/xgds_map_server/rest/maplayer/kml/' + data.node.key + '.kml';
+            case 'KmlMap':
+                let kmlFilePath = data.node.data.kmlFile;
+                let splits = kmlFilePath.split('/');
+                let result = config.urlPrefix + '/' + splits[1] + '/rest';
+                for (let i=2; i<splits.length; i++){
+                    result += '/' + splits[i];
+                }
+                return result;
+            default:
+                return undefined;
+        }
     };
 
     /*
@@ -111,8 +133,10 @@ class LayerTree {
             	return;
             }
             let context = this;
+
             let mytree =  layertreeNode.fancytree({
-                extensions: ['persist', 'filter'], //, 'transparency_slider'],
+                //extensions: ['persist', 'filter'], //, 'transparency_slider'],
+                extensions: ['filter'],
                 source: this.treeData,
                 filter: {
                     autoApply: true,  // Re-apply last filter if lazy data is loaded
@@ -125,12 +149,12 @@ class LayerTree {
                   },
                 checkbox: true,
                 icon: function(event, data) {
-                	  if( !data.node.isFolder() ) { 
-                		  return context.getTreeIcon(data.node.data.type); 
+                	  if( !data.node.isFolder() ) {
+                		  return context.getTreeIcon(data.node.data.type);
                 	  }
                 	},
                 expand: function(event, data){
-                	app.vent.trigger('tree:expanded', data.node);
+                	//app.vent.trigger('tree:expanded', data.node);
                 },
                 lazyLoad: function(event, data){
                     data.result = $.ajax({
@@ -159,13 +183,13 @@ class LayerTree {
                     });
                 },
                 select: function(event, data) {
-                    console.log('SELECTED');
-                    console.log(data);
-                    // new simpler way
-                    if (_.isUndefined(data.node.mapView)){
-                        //app.vent.trigger('mapNode:create', data.node);
-                    } else {
-                        data.node.mapView.onRender(data.node.selected);
+                    let kmlUrl = context.getKmlUrl(data);
+                    if (kmlUrl !== undefined) {
+                        if (data.node.selected) {
+                            context.kmlManager.showKml(kmlUrl);
+                        } else {
+                            context.kmlManager.hideKml(kmlUrl);
+                        }
                     }
                   },
                   persist: {
@@ -184,7 +208,7 @@ class LayerTree {
                       types: 'active expanded focus selected'  // which status types to store
                     }
             });
-            this.tree = layertreeNode.fancytree('getTree');  //TODO see if this differs from mytree
+            this.tree = fancytree.getTree(layertreeNode);  //TODO see if this differs from mytree
             //this.setupContextMenu(layertreeNode); //TODO see about integrating context menu, need to make it flexible.
         }
     };
@@ -220,7 +244,7 @@ class LayerTree {
     	        return;
     	      }
     	      // Pass a string to perform case insensitive matching
-    	      n = app.tree.filterNodes(match, opts);
+    	      n = this.tree.filterNodes(match, opts);
     	      $('button#btnResetSearch').attr('disabled', false);
     	      $('span#matches').text('(' + n + ' matches)');
     	    }).focus();

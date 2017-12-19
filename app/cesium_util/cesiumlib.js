@@ -35,7 +35,7 @@ Cesium.BingMapsApi.defaultKey = global.config.bing_key;
 
 
 // later when we have this provided from node module do this
-//import viewerCesiumNavigationMixin from 'cesiumNvigation/viewerCesiumNavigationMixin';
+//import viewerCesiumNavigationMixin from 'cesiumNavigation/viewerCesiumNavigationMixin';
 
 
 if (!('destination' in config)) {
@@ -679,28 +679,7 @@ const buildPath = function(spp, label, labelColor, ellipseColor, id, headingCall
 
 
 
-const loadKml = function(kmlUrl, viewerWrapper, callback) {
-	viewerWrapper.viewer.dataSources.add(Cesium.KmlDataSource.load(kmlUrl, {
-				name: kmlUrl,
-		        camera: viewerWrapper.viewer.camera,
-		        canvas: viewerWrapper.viewer.canvas
-		    })
-		).then( function (dataSource) {
-			if (callback !== undefined) {
-				callback(dataSource);
-			}
-		});
-}
 
-const loadKmls = function(kmlUrls, viewerWrapper, callback){
-	if (!_.isEmpty(kmlUrls)) {
-		console.log('Loading kml:');
-		for (let i=0; i<kmlUrls.length; i++){
-			console.log(kmlUrls[i]);
-			loadKml(kmlUrls[i], viewerWrapper, callback);
-		}
-	}
-}
 
 export {ViewerWrapper, DynamicLines, zoom, heading, buildLineString, buildCylinder, buildRectangle, buildSurfaceCircle, 
-		loadKml, loadKmls, buildPath, buildEllipse}
+		buildPath, buildEllipse}

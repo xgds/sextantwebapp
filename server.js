@@ -40,7 +40,8 @@ const rerouting = [
     ['/CustomMaps', path.resolve(root, 'public', 'CustomMaps')],
 	['/jquery', path.resolve(root, 'node_modules', 'jquery', 'dist')],
 	['/jquery-mobile-min', path.resolve(root, 'node_modules', 'jquery-mobile-min')],
-	['/font-awesome', path.resolve(root, 'node_modules', 'font-awesome')]
+	['/font-awesome', path.resolve(root, 'node_modules', 'font-awesome')],
+	['/jquery-fancytree', path.resolve(root, 'node_modules', 'jquery.fancytree')]
 ];
 
 for (let route of rerouting){

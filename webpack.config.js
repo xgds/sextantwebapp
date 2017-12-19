@@ -10,6 +10,8 @@ const webpack = require("webpack");
 // use express in server.js (ie use debug flag)
 
 const CopyWebpackPlugin = require("copy-webpack-plugin");
+const ExtractTextPlugin = require("extract-text-webpack-plugin");
+const ManifestRevisionPlugin = require("manifest-revision-webpack-plugin");
 
 const nodeModulesPath = path.resolve(__dirname, "node_modules");
 const buildPath = path.resolve(__dirname, "public", "build");
@@ -19,8 +21,7 @@ const cesiumWorkers = "../Build/Cesium/Workers";
 
 // Cesium Navigation includes, this does not work the way cesium-navigation is packaged.
 // For now we have the files copied into our cesium_util directory.
-const cesiumNavigationPath = path.resolve(__dirname,"node_modules", "cesium-navigation", "Source");
-
+//const cesiumNavigationPath = path.resolve(__dirname,"node_modules", "cesium-navigation", "dist", "amd");
 
 const ENV_DEFAULTS = {'CONFIG_PATH': undefined};
 module.exports = (env = ENV_DEFAULTS) => {
@@ -32,8 +33,9 @@ module.exports = (env = ENV_DEFAULTS) => {
         resolve: {
             alias: {
                 // Cesium module name
-                cesium: path.resolve(__dirname, cesiumSource),
-                cesiumNavigation: path.resolve(__dirname, cesiumNavigationPath)
+                'cesium': path.resolve(__dirname, cesiumSource),
+                'jquery': require.resolve('jquery')
+                //cesiumNavigation: path.resolve(__dirname, cesiumNavigationPath)
             }
             // modules: [
             //     path.resolve("./node_modules")
@@ -79,7 +81,15 @@ module.exports = (env = ENV_DEFAULTS) => {
             // Copy Cesium Assets, Widgets, and Workers to a static directory
             new CopyWebpackPlugin([{from: path.join(cesiumSource, cesiumWorkers), to: "Workers"}]),
             new CopyWebpackPlugin([{from: path.join(cesiumSource, "Assets"), to: "Assets"}]),
-            new CopyWebpackPlugin([{from: path.join(cesiumSource, "Widgets"), to: "Widgets"}])
+            new CopyWebpackPlugin([{from: path.join(cesiumSource, "Widgets"), to: "Widgets"}]),
+            new webpack.ProvidePlugin({
+              // Make jQuery / $ available in every module:
+              $: 'jquery',
+              jQuery: 'jquery',
+              // NOTE: Required to load jQuery Plugins into the *global* jQuery instance:
+              jquery: 'jquery'
+            }),
+            new ExtractTextPlugin("styles.css")
         ],
         module: {
             // noParse: [
@@ -133,16 +143,24 @@ module.exports = (env = ENV_DEFAULTS) => {
                 //         }
                 //     }]
                 // },
-                {test: /\.css$/, use: ["style-loader", "css-loader"]},
-                {test: /\.less$/, use: ["style-loader", "css-loader", "less-loader"]},
-                {test: /\.(png|gif|jpg|jpeg|glsl)$/, use: ["file-loader"]},
                 {
-                    test: /\.(woff|woff2|eot|ttf|svg)$/, use: [{
-                        loader: "url-loader",
-                        options: {limit: 8192}
-                    }]
+                    test: /\.css$/,
+                    use: ExtractTextPlugin.extract({
+                        fallback: "style-loader",
+                        use: "css-loader"
+                    })
                 },
-                {test: /node_modules/, use: ["ify-loader"]}
+                //{test: /\.css$/, use: ["style-loader", "css-loader"]},
+                {test: /\.less$/, use: ["style-loader", "css-loader", "less-loader"]},
+                //{test: /\.(png|gif|jpg|jpeg|glsl)$/, use: ["file-loader"]},
+                //{test: /\.(glsl)$/, use: ["file-loader"]},
+                {
+                    test: /\.(?:png|jpe?g|woff|woff2|eot|ttf|svg|gif|glsl)$/, use: [{
+                        loader: "url-loader",
+                        options: {limit: 10000}
+                    }]
+                }
+                //{test: /node_modules/, use: ["ify-loader"]}
             ]
         },
         node: {

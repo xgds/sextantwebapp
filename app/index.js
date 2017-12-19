@@ -14,11 +14,10 @@
 //specific language governing permissions and limitations under the License.
 // __END_LICENSE__
 
-import * as _ from 'lodash';
 import * as $ from 'jquery';
 import 'bootstrap-loader';
 import {config} from './../config/config_loader';
-import {ViewerWrapper, zoom, heading, DynamicLines, loadKmls} from './cesium_util/cesiumlib';
+import {ViewerWrapper, zoom, heading, DynamicLines} from './cesium_util/cesiumlib';
 
 
 // Configure the Cesium viewer
@@ -31,10 +30,12 @@ const STANDALONE = ('mode' in config && config.mode == 'STANDALONE');
 import {TrackSSE} from './sse/trackSseUtils';
 import {PlanManager, xgdsPlanManager} from './plan/plan';
 import {LayerTree} from './tree/layerTree';
+import {KmlManager} from './cesium_util/kml';
 
 let gps_tracks = undefined;
 let tsse = undefined;
 let planManager = undefined;
+let kmlManager = undefined;
 let layerTree = undefined;
 
 viewerWrapper.scene.camera.flyTo({
@@ -53,12 +54,13 @@ if (hasSSE) {
     planManager = new PlanManager(viewerWrapper);
 }
 
+// Load the kml configured if any
+kmlManager = new KmlManager(viewerWrapper);
+
 if (config.layer_tree_url !== undefined){
-    layerTree = new LayerTree(viewerWrapper, 'layersPopup');
+    layerTree = new LayerTree(viewerWrapper, 'layersPopup', kmlManager);
 }
 
-// Load the kml configured if any
-loadKmls(config.kml_urls, viewerWrapper);
 
 
 function addGPSLocation(data){
