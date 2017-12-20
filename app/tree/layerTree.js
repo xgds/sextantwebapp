@@ -75,13 +75,7 @@ class LayerTree {
             case 'MapLayer':
                 return config.urlPrefix + '/xgds_map_server/rest/maplayer/kml/' + data.node.key + '.kml';
             case 'KmlMap':
-                let kmlFilePath = data.node.data.kmlFile;
-                let splits = kmlFilePath.split('/');
-                let result = config.urlPrefix + '/' + splits[1] + '/rest';
-                for (let i=2; i<splits.length; i++){
-                    result += '/' + splits[i];
-                }
-                return result;
+                return this.getRestUrl(data.node.data.kmlFile);
             default:
                 return undefined;
         }
@@ -91,13 +85,7 @@ class LayerTree {
         switch(data.node.data.type) {
             case 'MapTile':
             case 'MapDataTile':
-                let tilePath = data.node.data.tilePath;
-                let splits = tilePath.split('/');
-                let result = config.urlPrefix + '/' + splits[1] + '/rest';
-                for (let i=2; i<splits.length; i++){
-                    result += '/' + splits[i];
-                }
-                return result;
+                return this.getRestUrl(data.node.data.tilePath);
             default:
                 return undefined;
         }
@@ -141,6 +129,20 @@ class LayerTree {
     	    });
     };
     */
+
+    /**
+     * @function getRestUrl
+     * @param originalUrl
+     * @returns {string} the fully qualified url with rest injected between the first and second element in the original url
+     */
+    getRestUrl(originalUrl) {
+        let splits = originalUrl.split('/');
+        let result = config.urlPrefix + '/' + splits[1] + '/rest';
+        for (let i=2; i<splits.length; i++){
+            result += '/' + splits[i];
+        }
+        return result;
+    };
     
     createTree() {
         if (_.isUndefined(this.tree) && !_.isNull(this.treeData)){
@@ -176,7 +178,7 @@ class LayerTree {
                     data.result = $.ajax({
                         xhrFields: {withCredentials: true},
                         beforeSend: beforeSend,
-                        url: data.node.data.childNodesUrl,
+                        url: context.getRestUrl(data.node.data.childNodesUrl),
                         dataType: 'json',
                         success: $.proxy(function (data) {
                             if (!_.isUndefined(data) && data.length > 0) {
