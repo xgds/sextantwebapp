@@ -32,7 +32,40 @@ require('jquery.fancytree/dist/modules/jquery.fancytree.ui-deps');
 
 //require('jquery.fancytree/dist/modules/jquery.fancytree.persist');
 
+/**
+ * @file layerTree.js
+ * Use a provider of fancytree json data to drive a fancytree
+ * When the nodes in the fancy tree are turned on/off they show or hide the layers in the Cesium view
+ * For right now this controls the following:
+ * -KML layers
+ * -Map layers
+ * -Map tiles
+ * -Map data tiles
+ * ** in progress
+ * -Plans
+ *
+ * @todo refactor so that this is not so xGDS specific
+ * @todo persist & use cookies
+ * @todo test filtering
+ * @todo customize tree styling
+ *
+ */
+
+/**
+ * @name LayerTree
+ * Singleton to bridge between the viewer and fancytree
+ *
+ */
 class LayerTree {
+
+    /**
+     * @function constructor
+     * @param viewerWrapper the Viewerwrapper from cesiumlib
+     * @param popupDivId the ID of the div that is the popup for fancytree
+     * @param kmlManager
+     * @param imageLayerManager
+     *
+     */
     constructor(viewerWrapper,  popupDivId, kmlManager, imageLayerManager) {
         this.viewerWrapper = viewerWrapper;
         this.kmlManager = kmlManager;
@@ -43,6 +76,10 @@ class LayerTree {
         this.initializeMapData();
     };
 
+    /**
+     * @function toggle show or hide the popup for the layer manager
+     * @todo turn this in to a dialog
+     */
     toggle() {
         this.visible = !this.visible;
         if (this.visible){
@@ -54,6 +91,12 @@ class LayerTree {
     };
 
 
+    /**
+     * @function getTreeIcon get the url for the icon to render in the tree node.
+     * @param key
+     * @returns {*}  the path to the png to render in the tree
+     * @todo this is pretty brittle, defining all the icons right here.  Make it model driven.
+     */
     getTreeIcon(key) {
     	switch (key) {
 	        case 'MapLink':
@@ -70,6 +113,12 @@ class LayerTree {
     	return null;
     };
 
+    /**
+     * @function getKmlUrl
+     * @param data the data from the selected node
+     * @returns {*} the rest friendly url to get the data for a map layer or kml map
+     *
+     */
     getKmlUrl(data) {
         switch(data.node.data.type) {
             case 'MapLayer':
@@ -81,6 +130,12 @@ class LayerTree {
         }
     };
 
+    /**
+     * @function getImageLayerUrl
+     * @param data
+     * @returns {*} the rest url for getting the image layer
+     *
+     */
     getImageLayerUrl(data) {
         switch(data.node.data.type) {
             case 'MapTile':
@@ -134,6 +189,7 @@ class LayerTree {
      * @function getRestUrl
      * @param originalUrl
      * @returns {string} the fully qualified url with rest injected between the first and second element in the original url
+     *
      */
     getRestUrl(originalUrl) {
         let splits = originalUrl.split('/');
@@ -143,7 +199,12 @@ class LayerTree {
         }
         return result;
     };
-    
+
+    /**
+     * @function createTree
+     * Actually construct the fancytree
+     *
+     */
     createTree() {
         if (_.isUndefined(this.tree) && !_.isNull(this.treeData)){
             let layertreeNode = this.popupDiv.find('#layertree');
@@ -243,6 +304,11 @@ class LayerTree {
         }
     };
 
+    /**
+     * @function refreshTree
+     * Refresh the fancy tree with data from its url
+     *
+     */
     refreshTree() {
         if (!_.isUndefined(this.tree)){
             this.tree.reload({
@@ -254,6 +320,11 @@ class LayerTree {
         }
     };
 
+    /**
+     * @function connectFilter
+     * Connect the filter input and button to the fancy tree
+     *
+     */
     connectFilter() {
     	$('#btnResetSearch').click(function(e){
     	      $('input[name=searchTree]').val('');
@@ -280,7 +351,12 @@ class LayerTree {
     	    }).focus();
     };
 
-    // load map tree ahead of time to load layers into map
+    /**
+     * @function initializeMapData
+     * load map tree ahead of time to load layers into map, using cookies from persistence and original forced-on layers from server
+     * @todo does this need refactoring?
+     *
+     */
     initializeMapData() {
         if (!this.layersInitialized){
             $.ajax({
@@ -324,6 +400,10 @@ class LayerTree {
         }
     };
 
+    /**
+     * @function selectNodes Preselect (check) nodes in the fancytree that are cookied as selected
+     * @param nodes
+     */
     selectNodes(nodes){
         // select specific nodes that were set in cookies
         for (let i=0; i<nodes.length; i++){
