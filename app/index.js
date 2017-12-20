@@ -31,11 +31,13 @@ import {TrackSSE} from './sse/trackSseUtils';
 import {PlanManager, xgdsPlanManager} from './plan/plan';
 import {LayerTree} from './tree/layerTree';
 import {KmlManager} from './cesium_util/kml';
+import {ImageLayerManager} from './cesium_util/imageLayer';
 
 let gps_tracks = undefined;
 let tsse = undefined;
 let planManager = undefined;
 let kmlManager = undefined;
+let imageLayerManager = undefined;
 let layerTree = undefined;
 
 viewerWrapper.scene.camera.flyTo({
@@ -57,8 +59,11 @@ if (hasSSE) {
 // Load the kml configured if any
 kmlManager = new KmlManager(viewerWrapper);
 
+// Load the image layers configured if any
+imageLayerManager = new ImageLayerManager(viewerWrapper);
+
 if (config.layer_tree_url !== undefined){
-    layerTree = new LayerTree(viewerWrapper, 'layersPopup', kmlManager);
+    layerTree = new LayerTree(viewerWrapper, 'layersPopup', kmlManager, imageLayerManager);
 }
 
 

@@ -20,9 +20,6 @@ require('cesium/Widgets/widgets.css');
 
 import '../css/style.css';
 
-//const path = require('path');
-const url = require('url');
-
 if (config.server.nginx_prefix !== undefined) {
     window.CESIUM_BASE_URL = '/' + config.server.nginx_prefix + '/';
 } else {
@@ -48,7 +45,6 @@ class ViewerWrapper{
         this.host = host;
         this.port = port;
         this.urlPrefix = url_prefix;
-        this.layerList = {};
         this.terrainList = {};
         this.terrainExaggeration = terrainExaggeration;
         this.globalpoint = null;
@@ -80,10 +76,6 @@ class ViewerWrapper{
             clockViewModel: new Cesium.ClockViewModel(clock)
         };
 
-        if ('baseImagery' in config){
-            viewerOptions["imageryProvider"] = this.buildImageryProvider(config.baseImagery);
-        }
-
         if ('ellipsoid' in config){
             if (config.ellipsoid == 'MOON') {
                 viewerOptions['globe'] = new Cesium.Globe(Cesium.Ellipsoid.MOON);
@@ -94,7 +86,6 @@ class ViewerWrapper{
         this.viewer = viewer;
         this.scene = viewer.scene;
         this.camera = viewer.scene.camera;
-        this.layers = viewer.scene.imageryLayers;
         this.globalrange = undefined;
 
         // viewer.extend(viewerCesiumNavigationMixin, {enableCompass:true,
@@ -112,13 +103,7 @@ class ViewerWrapper{
         } catch (e) {
             console.log(e);
         }
-        try {
-            if ('imagery' in config.sites[config.defaultSite]) {
-                this.addImagery(config.sites[config.defaultSite].imagery);
-            }
-        } catch (e) {
-            //ulp
-        }
+
         
         viewer.infoBox.frame.sandbox = 
         	'allow-same-origin allow-top-navigation allow-pointer-lock allow-popups allow-forms allow-scripts';
@@ -208,26 +193,8 @@ class ViewerWrapper{
         }.bind(this), Cesium.ScreenSpaceEventType.MOUSE_MOVE);
     };
 
-    buildImageryProvider(options){
-        if ('url' in options) {
-            const test = url.parse(options.url);
-            if (test.hostname === null) {
-                try {
-                    options.url = this.serveraddress() + options.url;
-                    console.log('Loading imagery from: ' + options.url);
-                } catch (e) {
-                    console.log(e);
-                }
-            }
-            return Cesium.createTileMapServiceImageryProvider(options);
-        } else if ('wms' in options){
-            return new Cesium.WebMapServiceImageryProvider(options.wms);
-        }
-    }
 
-    addImagery(options){
-    		this.layerList[options.url] = this.layers.addImageryProvider(this.buildImageryProvider(options));
-    };
+
 
 
     addTerrain(folder_location, image_address) {

@@ -149,31 +149,33 @@ module.exports = (env = ENV_DEFAULTS) => {
                     use: ExtractTextPlugin.extract({
                         fallback: "style-loader",
                         use: [{
-                                    loader: 'css-loader',
+                                    loader: 'css-loader'
+                            /*
                                     options: {
                                         // If you are having trouble with urls not resolving add this setting.
                                         // See https://github.com/webpack-contrib/css-loader#url
                                         url: false,
                                         minimize: true,
                                         sourceMap: true
-                                       /* alias: { "./Viewer": path.join(cesiumSource, "Widgets", "Viewer"),
-                                                 "./Animation": path.join(cesiumSource, "Widgets", "Animation"),
-                                                 "./BaseLayerPicker": path.join(cesiumSource, "Widgets", "BaseLayerPicker"),
-                                                 "./Cesium3DTilesInspector": path.join(cesiumSource, "Widgets", "Cesium3DTilesInspector"),
-                                                 "./CesiumWidget": path.join(cesiumSource, "Widgets", "CesiumWidget"),
-                                                 "./FullscreenButton": path.join(cesiumSource, "Widgets", "FullscreenButton"),
-                                                 "./Geocoder": path.join(cesiumSource, "Widgets", "Geocoder"),
-                                                 "./HomeButton": path.join(cesiumSource, "Widgets", "HomeButton"),
-                                                 "./Images": path.join(cesiumSource, "Widgets", "Images"),
-                                                 "./InfoBox": path.join(cesiumSource, "Widgets", "InfoBox"),
-                                                 "./NavigationHelpButton": path.join(cesiumSource, "Widgets", "NavigationHelpButton"),
-                                                 "./PerformanceWatchdog": path.join(cesiumSource, "Widgets", "PerformanceWatchdog"),
-                                                 "./SceneModePicker": path.join(cesiumSource, "Widgets", "SceneModePicker"),
-                                                 "./SelectionIndicator": path.join(cesiumSource, "Widgets", "SelectionIndicator"),
-                                                 "./Timeline": path.join(cesiumSource, "Widgets", "Timeline"),
-                                                 "./VRButton": path.join(cesiumSource, "Widgets", "VRButton")
-                                        } */
+                                        // alias: { "./Viewer": path.join(cesiumSource, "Widgets", "Viewer"),
+                                        //          "./Animation": path.join(cesiumSource, "Widgets", "Animation"),
+                                        //          "./BaseLayerPicker": path.join(cesiumSource, "Widgets", "BaseLayerPicker"),
+                                        //          "./Cesium3DTilesInspector": path.join(cesiumSource, "Widgets", "Cesium3DTilesInspector"),
+                                        //          "./CesiumWidget": path.join(cesiumSource, "Widgets", "CesiumWidget"),
+                                        //          "./FullscreenButton": path.join(cesiumSource, "Widgets", "FullscreenButton"),
+                                        //          "./Geocoder": path.join(cesiumSource, "Widgets", "Geocoder"),
+                                        //          "./HomeButton": path.join(cesiumSource, "Widgets", "HomeButton"),
+                                        //          "./Images": path.join(cesiumSource, "Widgets", "Images"),
+                                        //          "./InfoBox": path.join(cesiumSource, "Widgets", "InfoBox"),
+                                        //          "./NavigationHelpButton": path.join(cesiumSource, "Widgets", "NavigationHelpButton"),
+                                        //          "./PerformanceWatchdog": path.join(cesiumSource, "Widgets", "PerformanceWatchdog"),
+                                        //          "./SceneModePicker": path.join(cesiumSource, "Widgets", "SceneModePicker"),
+                                        //          "./SelectionIndicator": path.join(cesiumSource, "Widgets", "SelectionIndicator"),
+                                        //          "./Timeline": path.join(cesiumSource, "Widgets", "Timeline"),
+                                        //          "./VRButton": path.join(cesiumSource, "Widgets", "VRButton")
+                                        // }
                                     }
+                                    */
                                 },
                                 {
                                     loader: 'sass-loader',

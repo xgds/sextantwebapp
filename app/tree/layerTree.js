@@ -33,9 +33,10 @@ require('jquery.fancytree/dist/modules/jquery.fancytree.ui-deps');
 //require('jquery.fancytree/dist/modules/jquery.fancytree.persist');
 
 class LayerTree {
-    constructor(viewerWrapper,  popupDivId, kmlManager) {
+    constructor(viewerWrapper,  popupDivId, kmlManager, imageLayerManager) {
         this.viewerWrapper = viewerWrapper;
         this.kmlManager = kmlManager;
+        this.imageLayerManager = imageLayerManager;
         this.popupDiv = $('#' + popupDivId);
         this.visible = false;
         this.layersInitialized = false;
@@ -72,11 +73,26 @@ class LayerTree {
     getKmlUrl(data) {
         switch(data.node.data.type) {
             case 'MapLayer':
-                // TODO add prefix url
                 return config.urlPrefix + '/xgds_map_server/rest/maplayer/kml/' + data.node.key + '.kml';
             case 'KmlMap':
                 let kmlFilePath = data.node.data.kmlFile;
                 let splits = kmlFilePath.split('/');
+                let result = config.urlPrefix + '/' + splits[1] + '/rest';
+                for (let i=2; i<splits.length; i++){
+                    result += '/' + splits[i];
+                }
+                return result;
+            default:
+                return undefined;
+        }
+    };
+
+    getImageLayerUrl(data) {
+        switch(data.node.data.type) {
+            case 'MapTile':
+            case 'MapDataTile':
+                let tilePath = data.node.data.tilePath;
+                let splits = tilePath.split('/');
                 let result = config.urlPrefix + '/' + splits[1] + '/rest';
                 for (let i=2; i<splits.length; i++){
                     result += '/' + splits[i];
@@ -189,6 +205,18 @@ class LayerTree {
                             context.kmlManager.showKml(kmlUrl);
                         } else {
                             context.kmlManager.hideKml(kmlUrl);
+                        }
+                    } else  {
+                        // see if it is an image layer
+                        let imageLayerUrl = context.getImageLayerUrl(data);
+                        if (imageLayerUrl !== undefined){
+                            if (data.node.selected) {
+                                let options = {url:imageLayerUrl,
+                                               flipXY: true}; // we know that we want this set for layers we made
+                                context.imageLayerManager.showImageLayer(options);
+                            } else {
+                                context.imageLayerManager.hideImageLayer(imageLayerUrl);
+                            }
                         }
                     }
                   },

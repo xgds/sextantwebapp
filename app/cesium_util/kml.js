@@ -20,85 +20,85 @@ const Cesium = require('cesium/Cesium');
 
 
 /**
- * @file
+ * @file kml.js
  * Utilities for managing KML in Cesium
  *
  */
 
+/**
+ * @name KmlManager
+ * Singleton to bridge between the viewer and kml functionality.
+ *
+ */
 class KmlManager {
+
     /**
-     * @name KmlManager
-     * Singleton to bridge between the viewer and kml functionality.
-     * Uses CesiumJS events.
+     * @function constructor
+     * @param viewerWrapper
+     * Construct and initialize
      *
      */
     constructor(viewerWrapper) {
-        /**
-         * @function constructor
-         * @property viewerWrapper
-         * Construct and initialize
-         *
-         */
         this.viewerWrapper = viewerWrapper;
         this.kmlMap = {};
         this.initialize();
     };
 
+     /**
+      * @function initialize
+      * Initialize with kmls set up in config
+      * @todo support cookies
+      *
+      */
     initialize(){
-        /**
-         * @function initialize
-         * Initialize with kmls set up in config
-         * @todo support cookies
-         *
-         */
         this.loadKmls(config.kml_urls);
     };
 
+    /**
+     * @function hideKml
+     * @param kmlUrl
+     * Remove a kml from the viewer's data sources (if it was loaded)
+     *
+     */
     hideKml(kmlUrl){
-         /**
-          * @function hideKml
-          * @property kmlUrl
-          * Remove a kml from the viewer's data sources (if it was loaded)
-          *
-          */
         if (kmlUrl in this.kmlMap){
-            this.viewerWrapper.viewer.dataSources.remove(this.kmlMap(kmlUrl));
+            this.viewerWrapper.viewer.dataSources.remove(this.kmlMap[kmlUrl]);
         }
     };
 
+     /**
+      * @function showKml
+      * @param kmlUrl
+      * Add a kml to the viewer's data sources (if it was loaded)
+      * Otherwise, load it
+      *
+      */
     showKml(kmlUrl){
-        /**
-         * @function showKml
-         * @property kmlUrl
-         * Add a kml to the viewer's data sources (if it was loaded)
-         * Otherwise, load it
-         *
-         */
-
         if (kmlUrl in this.kmlMap){
-            this.viewerWrapper.viewer.dataSources.add(this.kmlMap(kmlUrl));
+            this.viewerWrapper.viewer.dataSources.add(this.kmlMap[kmlUrl]);
         } else {
             this.loadKml(kmlUrl);
         }
     }
 
+    /**
+     * @function loadKml
+     * @param kmlUrl
+     * @param callback
+     * Load a kml from url and add it to the viewer's data sources and the map to toggle later
+     *
+     */
     loadKml(kmlUrl, callback) {
-        /**
-         * @function loadKml
-         * @property kmlUrl
-         * @property callback
-         * Load a kml from url and add it to the viewer's data sources and the map to toggle later
-         *
-         */
         if (!(kmlUrl in this.kmlMap)) {
             try {
+                let context = this;
                 this.viewerWrapper.viewer.dataSources.add(Cesium.KmlDataSource.load(kmlUrl, {
                         name: kmlUrl,
-                        camera: this.viewerWrapper.viewer.camera,
-                        canvas: this.viewerWrapper.viewer.canvas
+                        camera: context.viewerWrapper.viewer.camera,
+                        canvas: context.viewerWrapper.viewer.canvas
                     })
                 ).then(function (dataSource) {
-                    this.kmlMap[kmlUrl] = dataSource;
+                    context.kmlMap[kmlUrl] = dataSource;
                     if (callback !== undefined) {
                         callback(dataSource);
                     }
@@ -112,14 +112,14 @@ class KmlManager {
         }
     };
 
+    /**
+     * @function loadKmls
+     * @param kmlUrls array of kml urls
+     * @param callback
+     * Load a many kmls from an array of urls
+     *
+     */
     loadKmls(kmlUrls, callback) {
-        /**
-         * @function loadKmls
-         * @property kmlUrls array of kml urls
-         * @property callback
-         * Load a many kmls from an array of urls
-         *
-         */
         if (!_.isEmpty(kmlUrls)) {
             console.log('Loading kml:');
             for (let i = 0; i < kmlUrls.length; i++) {
