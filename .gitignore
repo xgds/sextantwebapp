@@ -7,3 +7,4 @@ cesium_tilesets
 public/cesium_tilesets
 public/cesium-assets
 .env
+.DS_Store

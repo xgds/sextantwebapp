@@ -2,8 +2,8 @@
  * Created by johan on 5/24/2017.
  */
 import * as messenger from './socket.js';
-import { viewerWrapper, addGPSLocation } from './../index.js';
-import buildLineString from './../cesium_util/cesiumlib.js';
+import { viewerWrapper, addGPSLocation } from 'index.js';
+import buildLineString from 'cesium_util/cesiumlib.js';
 
 gpsmesh = messenger.addChannel({
     name: 'gpsmesh',

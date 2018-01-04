@@ -14,10 +14,19 @@
 //specific language governing permissions and limitations under the License.
 //__END_LICENSE__
 
-import {config} from './../../config/config_loader';
+import {config} from 'config_loader';
 
-function beforeSend(xhr) {
-       xhr.setRequestHeader ("Authorization", "Basic " + btoa(config.xgds.username + ":" + config.xgds.password));
+/**
+ * @function xgdsAuth
+ * adds basic authentication headers to a map to be used by ajax calls
+ * only if there are username/password in the config
+ *
+ */
+const xgdsAuth = function(settings) {
+       if (!_.isEmpty(config.xgds) && !_.isEmpty(config.xgds.username)){
+              settings['headers'] = {"authorization": "Basic " + btoa(config.xgds.username + ":" + config.xgds.password)};
+       }
+       return settings;
 }
 
-export {beforeSend}
+export {xgdsAuth}

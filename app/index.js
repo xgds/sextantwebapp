@@ -16,8 +16,8 @@
 
 import * as $ from 'jquery';
 import 'bootstrap-loader';
-import {config} from './../config/config_loader';
-import {ViewerWrapper, zoom, heading, DynamicLines} from './cesium_util/cesiumlib';
+import {config} from 'config_loader';
+import {ViewerWrapper, zoom, heading, DynamicLines} from 'cesium_util/cesiumlib';
 
 
 // Configure the Cesium viewer
@@ -27,11 +27,11 @@ const viewerWrapper = new ViewerWrapper(config.urlPrefix, config.server.cesium_p
 const hasSSE = ('mode' in config && config.mode == 'XGDS_SSE');
 const STANDALONE = ('mode' in config && config.mode == 'STANDALONE');
 
-import {TrackSSE} from './sse/trackSseUtils';
-import {PlanManager, xgdsPlanManager} from './plan/plan';
-import {LayerTree} from './tree/layerTree';
-import {KmlManager} from './cesium_util/kml';
-import {ImageLayerManager} from './cesium_util/imageLayer';
+import {TrackSSE} from 'sse/trackSseUtils';
+import {PlanManager, xgdsPlanManager} from 'plan/plan';
+import {LayerTree} from 'tree/layerTree';
+import {KmlManager} from 'cesium_util/kmlManager';
+import {ImageLayerManager} from 'cesium_util/imageLayerManager';
 
 let gps_tracks = undefined;
 let tsse = undefined;

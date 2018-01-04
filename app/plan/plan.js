@@ -17,9 +17,10 @@
 const moment = require('moment');
 const Cesium = require('cesium/Cesium');
 
-import {buildLineString, buildCylinder, buildSurfaceCircle} from './../cesium_util/cesiumlib';
-import {config} from './../../config/config_loader';
-import {beforeSend} from './../util/xgdsUtils';
+import {buildLineString, buildCylinder, buildSurfaceCircle} from 'cesium_util/cesiumlib';
+import {config} from 'config_loader';
+import {xgdsAuth} from 'util/xgdsUtils';
+
 
 const hostname = "xgds" in config ? config.xgds.protocol + '://' + config.xgds.name :
 	config.server.protocol + '://' + config.server.name + ':' + config.server.port;
@@ -466,37 +467,35 @@ class PlanManager {
 			}
 			
 			this.setSaveMessage('Saving Plan.');
-			
-			$.ajax({
-	            url: savePlanUrl,
-	            method: method,
-	            dataType: 'json',
-	            xhrFields: {withCredentials: true},
-	            beforeSend: beforeSend,
-	            data: JSON.stringify(this.plan),
-	            success: $.proxy(function(data) {
-		            	if (data != null){
-		            		let oldPlanPK = this.plan.serverId;
-		            		
-		            		// load the new plan
-		            		this.clearPlan(true);
-		            		this.plan = data;
-	            			this.renderPlan();
-	            			this.hideSaveAsPopup();
-	            			this.updateSaveAsPopup(false);
-	            			
-		            		// then schedule the plan
-	            			if (this.plan.serverId !== oldPlanPK){
-	            				this.schedulePlan();
-	            			}
-		            	}
-	            }, this),
-	            error: $.proxy(function(data) {
-	            		this.setSaveMessage('Saving Plan Error');
-	            		console.log('Could not save the plan.');
-	            		console.log(data);
-	            }, this)
-	          });
+			let settings = {
+                url: savePlanUrl,
+                method: method,
+                dataType: 'json',
+                data: JSON.stringify(this.plan),
+                success: $.proxy(function(data) {
+                    if (data != null){
+                        let oldPlanPK = this.plan.serverId;
+
+                        // load the new plan
+                        this.clearPlan(true);
+                        this.plan = data;
+                        this.renderPlan();
+                        this.hideSaveAsPopup();
+                        this.updateSaveAsPopup(false);
+
+                        // then schedule the plan
+                        if (this.plan.serverId !== oldPlanPK){
+                            this.schedulePlan();
+                        }
+                    }
+                }, this),
+                error: $.proxy(function(data) {
+                    this.setSaveMessage('Saving Plan Error');
+                    console.log('Could not save the plan.');
+                    console.log(data);
+                }, this)
+            };
+			$.ajax(xgdsAuth(settings));
 		
 	};
 	
@@ -505,22 +504,21 @@ class PlanManager {
 		// this makes it the 'active' plan 
 		
 		let schedulePlanUrl = this.hostname + '/xgds_planner2/rest/schedulePlanActive/' + config.xgds.follow_channel + '/' + this.plan.serverId;
-		$.ajax({
+		let settings = {
             url: schedulePlanUrl,
             method: 'POST',
             dataType: 'json',
-            xhrFields: {withCredentials: true},
-            beforeSend: beforeSend,
             success: $.proxy(function(data) {
-	            	if (data != null){
-	            		console.log('plan scheduled.')
-	            	}
+                if (data != null){
+                    console.log('plan scheduled.')
+                }
             }, this),
             error: $.proxy(function(data) {
-            		alert('Scheduling Plan Error');
-            		console.log(data);
+                alert('Scheduling Plan Error');
+                console.log(data);
             }, this)
-          });
+        };
+		$.ajax(xgdsAuth(settings));
 	}
 
 }
@@ -572,13 +570,10 @@ class xgdsPlanManager extends PlanManager {
         }
 
         this.setSaveMessage('Saving Plan.');
-
-        $.ajax({
+		let settings = {
             url: savePlanUrl,
             method: method,
             dataType: 'json',
-            xhrFields: {withCredentials: true},
-            beforeSend: beforeSend,
             data: JSON.stringify(this.plan),
             success: $.proxy(function(data) {
                 if (data != null){
@@ -602,17 +597,16 @@ class xgdsPlanManager extends PlanManager {
                 console.log('Could not save the plan.');
                 console.log(data);
             }, this)
-        });
+        };
+        $.ajax(xgdsAuth(settings));
 
     };
 
     _fetchPlan() {
         let currentPlanUrl = this.hostname + '/xgds_planner2/rest/plans/today/json';
-        $.ajax({
+        let settings = {
             url: currentPlanUrl,
             dataType: 'json',
-            xhrFields: {withCredentials: true},
-            beforeSend: beforeSend,
             success: $.proxy(function(data){
                 if (data !== null){
                     let planDict = data;
@@ -624,16 +618,17 @@ class xgdsPlanManager extends PlanManager {
                         let firstPlan = (this.plan === undefined);
                         this.planFromJSON(thePlan);
                         if (firstPlan){
-                        		this.zoomTo();
+                            this.zoomTo();
                         }
                     }
                 }
-			}, this),
+            }, this),
             error: $.proxy(function(data) {
                 console.log('Could not get plan for today');
                 console.log(data);
             }, this)
-        });
+        };
+        $.ajax(xgdsAuth(settings));
     };
 
     schedulePlan(){
@@ -641,12 +636,10 @@ class xgdsPlanManager extends PlanManager {
         // this makes it the 'active' plan
 
         let schedulePlanUrl = this.hostname + '/xgds_planner2/rest/schedulePlanActive/' + config.xgds.follow_channel + '/' + this.plan.serverId;
-        $.ajax({
+        let settings = {
             url: schedulePlanUrl,
             method: 'POST',
             dataType: 'json',
-            xhrFields: {withCredentials: true},
-            beforeSend: beforeSend,
             success: $.proxy(function(data) {
                 if (data != null){
                     console.log('plan scheduled.')
@@ -656,7 +649,8 @@ class xgdsPlanManager extends PlanManager {
                 alert('Scheduling Plan Error');
                 console.log(data);
             }, this)
-        });
+        };
+        $.ajax(xgdsAuth(settings));
     }
 }
 

@@ -14,11 +14,11 @@
 //specific language governing permissions and limitations under the License.
 // __END_LICENSE__
 
-import {beforeSend} from './../util/xgdsUtils';
 
 const Cookies = require( 'js.cookie' );
 
-import {config} from './../../config/config_loader';
+import {config} from 'config_loader';
+import {xgdsAuth} from 'util/xgdsUtils';
 
 import 'jquery.fancytree/dist/skin-lion/ui.fancytree.css';
 
@@ -236,9 +236,7 @@ class LayerTree {
                 	//app.vent.trigger('tree:expanded', data.node);
                 },
                 lazyLoad: function(event, data){
-                    data.result = $.ajax({
-                        xhrFields: {withCredentials: true},
-                        beforeSend: beforeSend,
+                    let settings = {
                         url: context.getRestUrl(data.node.data.childNodesUrl),
                         dataType: 'json',
                         success: $.proxy(function (data) {
@@ -259,15 +257,16 @@ class LayerTree {
                         error: $.proxy(function(xhr, textStatus, errorThrown) {
                             console.log(textStatus);
                         })
-                    });
+                    };
+                    data.result = $.ajax(xgdsAuth(settings));
                 },
                 select: function(event, data) {
                     let kmlUrl = context.getKmlUrl(data);
                     if (kmlUrl !== undefined) {
                         if (data.node.selected) {
-                            context.kmlManager.showKml(kmlUrl);
+                            context.kmlManager.show(kmlUrl);
                         } else {
-                            context.kmlManager.hideKml(kmlUrl);
+                            context.kmlManager.hide(kmlUrl);
                         }
                     } else  {
                         // see if it is an image layer
@@ -276,9 +275,9 @@ class LayerTree {
                             if (data.node.selected) {
                                 let options = {url:imageLayerUrl,
                                                flipXY: true}; // we know that we want this set for layers we made
-                                context.imageLayerManager.showImageLayer(options);
+                                context.imageLayerManager.show(options);
                             } else {
-                                context.imageLayerManager.hideImageLayer(imageLayerUrl);
+                                context.imageLayerManager.hide(imageLayerUrl);
                             }
                         }
                     }
@@ -305,11 +304,11 @@ class LayerTree {
     };
 
     /**
-     * @function refreshTree
+     * @function refresh
      * Refresh the fancy tree with data from its url
      *
      */
-    refreshTree() {
+    refresh() {
         if (!_.isUndefined(this.tree)){
             this.tree.reload({
                 url: config.layer_tree_url
@@ -359,11 +358,9 @@ class LayerTree {
      */
     initializeMapData() {
         if (!this.layersInitialized){
-            $.ajax({
+            let settings = {
                 url: config.layer_tree_url,
                 dataType: 'json',
-                xhrFields: {withCredentials: true},
-                beforeSend: beforeSend,
                 success: $.proxy(function (data) {
                     console.log('loaded tree data');
                     if (data != null) {
@@ -376,16 +373,15 @@ class LayerTree {
                 error: $.proxy(function(xhr, textStatus, errorThrown) {
                     console.log(textStatus);
                 })
-              });
+            };
+            $.ajax(xgdsAuth(settings));
             // turn on layers that were turned on in the cookies
             let selected_uuids = Cookies.get('fancytree-1-selected');
             if (selected_uuids != undefined && selected_uuids.length > 0){
-                $.ajax({
+                let settings2 = {
                     url: '/xgds_map_server/uuidsjson/',
                     dataType: 'json',
                     type: 'POST',
-                    xhrFields: {withCredentials: true},
-                    beforeSend: beforeSend,
                     data: {'uuids':selected_uuids},
                     success: $.proxy(function(data) {
                         if (data != null){
@@ -395,7 +391,8 @@ class LayerTree {
                     error: $.proxy(function(xhr, textStatus, errorThrown) {
                         console.log(textStatus);
                     })
-                });
+                };
+                $.ajax(xgdsAuth(settings2));
             }
         }
     };

@@ -161,4 +161,8 @@
 		}
 	}
 
-    
+	function refreshLayerTree() {
+        if (sextant.layerTree !== undefined){
+            sextant.layerTree.refresh();
+        }
+	}

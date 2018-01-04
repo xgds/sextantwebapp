@@ -45,33 +45,32 @@ function loadDevices(){
 function checkConnectedDevices(){
     const hostname = config.xgds.protocol + '://' + config.xgds.name;
 	let url= hostname + '/xgds_status_board/rest/multiSubsystemStatusJson/';
-	
-	$.ajax({
-		type: "POST",
-		url: url,
-		dataType: 'json',
-		xhrFields: {withCredentials: true},
-		beforeSend: function(xhr) {
-			xhr.setRequestHeader ("Authorization", "Basic " + btoa(config.xgds.username + ":" + config.xgds.password));
-		},
-		data: {names:deviceNames},
-		success: $.proxy(function(data, status) {
-			$.each(sextant.connectedDevices, function( key, value ) {
-				for(let i=0;i<data.length;i++){
-					if ('statusColor' in data[i]){
-						let statusColor = data[i].statusColor;
-						if (!_.isEmpty(statusColor)){
-							$("#"+data[i].name).css('background-color', statusColor);
-						}
-					}
-				}
-			});
-		}, this),
-		error: $.proxy(function(data) {
-			console.log('Could not get active channels');
-			console.log(data);
-		}, this)
-	});
+	let settings = {
+        type: "POST",
+        url: url,
+        dataType: 'json',
+        data: {names:deviceNames},
+        success: $.proxy(function(data, status) {
+            $.each(sextant.connectedDevices, function( key, value ) {
+                for(let i=0;i<data.length;i++){
+                    if ('statusColor' in data[i]){
+                        let statusColor = data[i].statusColor;
+                        if (!_.isEmpty(statusColor)){
+                            $("#"+data[i].name).css('background-color', statusColor);
+                        }
+                    }
+                }
+            });
+        }, this),
+        error: $.proxy(function(data) {
+            console.log('Could not get active channels');
+            console.log(data);
+        }, this)
+    };
+    if (!_.isEmpty(config.xgds) && !_.isEmpty(config.xgds.username)){
+        settings['headers'] =  "Basic " + btoa(config.xgds.username + ":" + config.xgds.password);
+    }
+	$.ajax(settings);
 	
 };
 

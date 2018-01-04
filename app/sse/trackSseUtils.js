@@ -14,8 +14,8 @@
 //specific language governing permissions and limitations under the License.
 //__END_LICENSE__
 
-import {config} from './../../config/config_loader';
-import {beforeSend} from './../util/xgdsUtils';
+import {config} from 'config_loader';
+import {xgdsAuth} from 'util/xgdsUtils';
 
 const hasSSE = ('mode' in config && config.mode == 'XGDS_SSE');
 
@@ -479,28 +479,27 @@ class TrackSSE {
 	}; 
 
 	getCurrentPositions() {
-		let trackPKUrl = hostname + '/track/rest/position/active/json'
-		$.ajax({
-			url: trackPKUrl,
-			dataType: 'json',
-			xhrFields: {withCredentials: true},
-			beforeSend: beforeSend,
-			success: $.proxy(function(data) {
-				if (data != null){
-					// should return dictionary of channel: position
-					for (let track_name in data){
-						let channel = this.convertTrackNameToChannel(track_name);
-						if (!(channel in this.positions) && (channel in config.xgds.ev_channels)){
-							this.updatePosition(channel, data[track_name], true);
-						}
-					}
-				}
-			}, this),
-			error: $.proxy(function(data) {
-				console.log('could not get active track position');
-				console.log(data);
-			})
-		});
+		let trackPKUrl = hostname + '/track/rest/position/active/json';
+		let settings = {
+            url: trackPKUrl,
+            dataType: 'json',
+            success: $.proxy(function(data) {
+                if (data != null){
+                    // should return dictionary of channel: position
+                    for (let track_name in data){
+                        let channel = this.convertTrackNameToChannel(track_name);
+                        if (!(channel in this.positions) && (channel in config.xgds.ev_channels)){
+                            this.updatePosition(channel, data[track_name], true);
+                        }
+                    }
+                }
+            }, this),
+            error: $.proxy(function(data) {
+                console.log('could not get active track position');
+                console.log(data);
+            })
+        };
+		$.ajax(xgdsAuth(settings));
 	};
 
 	getTrack(channel, data) {
@@ -514,22 +513,21 @@ class TrackSSE {
 		}
 
 		let trackUrl =  hostname + '/xgds_map_server/rest/mapJson/basaltApp.BasaltTrack/pk:' + data.track_pk
-		$.ajax({
-			url: trackUrl,
-			dataType: 'json',
-			xhrFields: {withCredentials: true},
-			beforeSend: beforeSend,
-			success: $.proxy(function(data) {
-				if (data != null && data.length == 1){
-					this.tracks[channel] = data[0];
-					this.renderTrack(channel, data[0]);
-				}
-			}, this),
-			error: $.proxy(function(response) {
-				console.log('could not get track contents for ' + data.track_pk);
-				console.log(response);
-			})
-		});
+		let settings = {
+            url: trackUrl,
+            dataType: 'json',
+            success: $.proxy(function(data) {
+                if (data != null && data.length == 1){
+                    this.tracks[channel] = data[0];
+                    this.renderTrack(channel, data[0]);
+                }
+            }, this),
+            error: $.proxy(function(response) {
+                console.log('could not get track contents for ' + data.track_pk);
+                console.log(response);
+            })
+        };
+		$.ajax(xgdsAuth(settings));
 
 	};
 }

@@ -14,7 +14,7 @@
 //specific language governing permissions and limitations under the License.
 // __END_LICENSE__
 
-import {beforeSend} from './../util/xgdsUtils';
+import {xgdsAuth} from 'util/xgdsUtils';
 
 const moment = require('moment');
 
@@ -91,21 +91,19 @@ class SSE{
     getChannels() {
         // get the active channels over AJAX
         if (this.activeChannels === undefined){
-        	
-            $.ajax({
-            		url: this.host + '/xgds_core/rest/sseActiveChannels/',
-            		dataType: 'json',
-            		xhrFields: {withCredentials: true},
-            		beforeSend: beforeSend,
-            		async: false,
-            		success: $.proxy(function(data) {
+        	let settings = {
+                url: this.host + '/xgds_core/rest/sseActiveChannels/',
+                dataType: 'json',
+                async: false,
+                success: $.proxy(function(data) {
                     this.activeChannels = data;
-            		}, this),
-            		error: $.proxy(function(data) {
+                }, this),
+                error: $.proxy(function(data) {
                     console.log('Could not get active channels');
                     console.log(data);
-            		}, this)
-            });
+                }, this)
+            };
+            $.ajax(xgdsAuth(settings));
         }
         return this.activeChannels;
     };

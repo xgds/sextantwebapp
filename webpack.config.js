@@ -36,10 +36,12 @@ module.exports = (env = ENV_DEFAULTS) => {
                 'cesium': path.resolve(__dirname, cesiumSource),
                 'jquery': require.resolve('jquery')
                 //cesiumNavigation: path.resolve(__dirname, cesiumNavigationPath)
-            }
-            // modules: [
-            //     path.resolve("./node_modules")
-            // ]
+            },
+            modules: [
+                path.resolve("./app"),
+                path.resolve("./config"),
+                path.resolve("./node_modules")
+            ]
         },
         entry: [
             indexPath

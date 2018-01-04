@@ -14,9 +14,10 @@
 //specific language governing permissions and limitations under the License.
 //__END_LICENSE__
 
-import {config} from './../../config/config_loader';
+import {config} from 'config_loader';
 import * as moment from 'moment';
-import {buildPath} from './../cesium_util/cesiumlib';
+import {buildPath} from 'cesium_util/cesiumlib';
+import {xgdsAuth} from 'util/xgdsUtils';
 
 const Cesium = require('cesium/Cesium');
 
@@ -482,11 +483,9 @@ class Tracker {
         }
 
         let trackUrl =  hostname + '/xgds_map_server/rest/mapJson/basaltApp.BasaltTrack/pk:' + data.track_pk
-        $.ajax({
+        let settings = {
             url: trackUrl,
             dataType: 'json',
-            xhrFields: {withCredentials: true},
-            beforeSend: beforeSend,
             success: $.proxy(function(data) {
                 if (data != null && data.length == 1){
                     this.tracks[channel] = data[0];
@@ -497,7 +496,8 @@ class Tracker {
                 console.log('could not get track contents for ' + data.track_pk);
                 console.log(response);
             })
-        });
+        };
+        $.ajax(xgdsAuth(settings));
 
     };
 }

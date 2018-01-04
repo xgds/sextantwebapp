@@ -14,12 +14,14 @@
 //specific language governing permissions and limitations under the License.
 //__END_LICENSE__
 
-import {config} from './../../config/config_loader';
+import {config} from 'config_loader';
 const Cesium = require('cesium/Cesium');
 const url = require('url');
+import {ElementManager} from "cesium_util/elementManager";
+
 
 /**
- * @file imageLayer.js
+ * @file imageLayerManager.js
  * Utilities for managing Image Layers in Cesium
  * These are tiled image sets.
  *
@@ -30,38 +32,29 @@ const url = require('url');
  * Singleton to bridge between the viewer and image layer functionality.
  *
  */
-class ImageLayerManager {
+class ImageLayerManager extends ElementManager{
 
     /**
-     * @function constructor
-     * @param viewerWrapper
-     * Construct and initialize
+     * @function getInitialElementList
+     * @returns Array returns the list of initial map elements to be loaded, by identifier metadata (ie url or options)
+     * Initialize with kmls set up in config
+     * @todo support cookies
      *
      */
-    constructor(viewerWrapper) {
-        this.viewerWrapper = viewerWrapper;
-        this.layerMap = {};
-        this.initialize();
-    };
-
-    /**
-      * @function initialize
-      * Initialize with image layers set up in config
-      * @todo support cookies
-      *
-      */
-    initialize(){
+    getInitialElementList(){
+        let result = [];
         if ('baseImagery' in config){
-            this.viewerWrapper.viewer.imageryProvider = this.loadImageLayer(config.baseImagery, 0);
+            result.push(config.baseImagery);
         }
         try {
             if ('imagery' in config.sites[config.defaultSite]) {
-                this.loadImageLayer(config.sites[config.defaultSite].imagery);
+                result.push(config.sites[config.defaultSite].imagery);
             }
         } catch (e) {
             //ulp
         }
-    };
+        return result;
+    }
 
     /**
       * @function loadImageLayer
@@ -70,7 +63,7 @@ class ImageLayerManager {
       * Build an imagery provider based on the url
       *
       */
-    loadImageLayer(options, index){
+    load(options, callback){
         let newImageryLayer = undefined;
         let newImagery = undefined;
         let theUrl = undefined;
@@ -91,20 +84,23 @@ class ImageLayerManager {
             theUrl = options.wms;
         }
         if (newImagery !== undefined){
-            newImageryLayer = this.viewerWrapper.viewer.imageryLayers.addImageryProvider(newImagery, index);
-            this.layerMap[theUrl] = newImageryLayer;
+            newImageryLayer = this.viewerWrapper.viewer.imageryLayers.addImageryProvider(newImagery);
+            this.elementMap[theUrl] = newImageryLayer;
+            if (callback !== undefined) {
+                callback(newImageryLayer);
+            }
         }
         return newImageryLayer;
 
     };
 
     /**
-     * @function showImageLayer
+     * @function show
      * @param options
      * Show the image layer identified by options, or loads it if it was not yet loaded
      *
      */
-    showImageLayer(options) {
+    show(options) {
         let theUrl = undefined;
         if ('url' in options) {
             theUrl = options.url;
@@ -112,10 +108,10 @@ class ImageLayerManager {
             theUrl = options.wms;
         }
         if (theUrl !== undefined) {
-            if (theUrl in this.layerMap){
-                this.layerMap[theUrl].show = true;
+            if (theUrl in this.elementMap){
+                this.elementMap[theUrl].show = true;
             } else {
-                this.loadImageLayer(options);
+                this.load(options);
             }
         } else {
             console.log('Invalid layer options.');
@@ -124,15 +120,13 @@ class ImageLayerManager {
     };
 
     /**
-     * @function hideImageLayer
-     * @param imageLayerUrl
+     * @function doHide
+     * @param element
      * Hide the image layer
      *
      */
-    hideImageLayer(imageLayerUrl){
-        if (imageLayerUrl in this.layerMap){
-            this.layerMap[imageLayerUrl].show = false;
-        }
+    doHide(element){
+        element.show = false;
     };
 
 }

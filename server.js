@@ -61,7 +61,7 @@ try {
 
 if (config.cors !== undefined) {
     app.use(function (req, res, next) {
-        console.log('shoving headers in');
+        console.log('CORS headers enabled server side.');
         res.header("Access-Control-Allow-Origin", "*");
         res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
         next();

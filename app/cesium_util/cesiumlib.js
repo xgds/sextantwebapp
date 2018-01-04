@@ -14,11 +14,11 @@
 //specific language governing permissions and limitations under the License.
 //__END_LICENSE__
 
-import {config} from './../../config/config_loader';
+import {config} from 'config_loader';
 
 require('cesium/Widgets/widgets.css');
 
-import '../css/style.css';
+import 'css/style.css';
 
 if (config.server.nginx_prefix !== undefined) {
     window.CESIUM_BASE_URL = '/' + config.server.nginx_prefix + '/';
@@ -334,12 +334,12 @@ class ViewerWrapper{
     getRaisedPositionsFromArray(latLongCoords) {
     		const cartographicArray = [];
         latLongCoords.forEach(function(p) {
-            let cartographicPoint = Cesium.Cartographic.fromDegrees(p[0], p[1]);
+            let cartographicPoint = Cesium.Cartographic.fromDegrees(p[0], p[1]);zz
             cartographicArray.push(cartographicPoint);
         });
         return this.getHeights(cartographicArray);
     };
-    
+
     getHeights(cartographicArray) {
     		return new Promise(function(resolve, reject) {
 	        const ellipsoid = this.viewer.scene.globe.ellipsoid;
@@ -351,7 +351,7 @@ class ViewerWrapper{
 	                    raisedPositionsCartograhpic[i].height *= terrainExaggeration;
 	                });
 	                let inter = ellipsoid.cartographicArrayToCartesianArray(raisedPositionsCartograhpic);
-	                resolve(inter);
+	                resolve(inter);z
 	            });
 	    }.bind(this));
     };
