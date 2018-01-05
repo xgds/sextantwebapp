@@ -77,6 +77,9 @@ class ImageLayerManager extends ElementManager{
                     console.log(e);
                 }
             }
+            if (!options.url.includes(config.server.name)){
+                options.proxy = new Cesium.DefaultProxy('/proxy/');
+            }
             newImagery = Cesium.createTileMapServiceImageryProvider(options);
             theUrl = options.url;
         } else if ('wms' in options){

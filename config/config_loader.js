@@ -16,10 +16,18 @@
 
 //const request = require('then-request');
 //const request = require('request');
+import * as _ from 'lodash';
 const configPath = (process.env.CONFIG_PATH || DEFAULT_CONFIG_PATH);
 
 function populateConfig(result) {
 	result.urlPrefix = result.server.protocol + '://' + result.server.name;
+    if (!_.isUndefined(result.xgds)) {
+        result.urlPrefix = result.xgds.protocol + '://';
+        if (!_.isUndefined(result.xgds.username)) {
+            result.urlPrefix += result.xgds.username + ':' + result.xgds.password + '@';
+        }
+        result.urlPrefix += result.xgds.name;
+    }
 	result.siteConfig = result.sites[result.defaultSite];
 	return result;
 };

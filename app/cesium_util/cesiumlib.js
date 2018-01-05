@@ -52,6 +52,18 @@ class ViewerWrapper{
         this.mesh_entities = [];
         this.mesh_rowcol = [];
 
+        // set up the trusted server
+        if (!_.isEmpty(config.xgds)) {
+            Cesium.TrustedServers.add(config.xgds.name,  config.xgds.port);
+        }
+
+        if (!_.isUndefined(config.trustedServers)){
+            for (let ts of config.trustedServers) {
+                Cesium.TrustedServers.add(ts.name,  ts.port);
+            }
+
+        }
+
         // Set simple geometry for the full planet
         const terrainProvider = new Cesium.EllipsoidTerrainProvider();
         this.terrainList['default'] = terrainProvider;
