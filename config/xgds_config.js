@@ -14,9 +14,10 @@
 //specific language governing permissions and limitations under the License.
 // __END_LICENSE__
 
-let USERNAME = 'TODO:USERNAME';
-let PASSWORD = 'TODO:PASSWORD';
-let SERVER_NAME = 'localhost';
+const USERNAME = 'TODO:USERNAME';
+const PASSWORD = 'TODO:PASSWORD';
+const SERVER_NAME = 'localhost';
+const LOCAL_SERVER_NAME = 'localhost';
 
 module.exports = {
 
@@ -25,7 +26,7 @@ module.exports = {
 	// The server that is running this node app 
     server : { port : 3001,
     		   cesium_port: undefined,
-    		   name : SERVER_NAME, 
+    		   name : LOCAL_SERVER_NAME,
     		   protocol: 'https',
     		   nginx_prefix: 'wristApp'},
     		   
@@ -103,7 +104,13 @@ module.exports = {
     //connectedDevices : {  redCamera1 : 'CAM1', 
     //                      boat2 : 'IV'
     //                    }
-    connectedDevices : { 
-      }
+    connectedDevices : {}
+
+    // if you want express to add cors headers because pages from this server will be included in other websites
+    //cors: true,
+
+    // if you have other external websites that require authorization add them here
+    //trustedServers: [{'name':'myhostname.com', 'port':80}]
+
 
 }

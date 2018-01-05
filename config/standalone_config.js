@@ -74,7 +74,14 @@ module.exports = {
     showCoordinates : false,
     
     // TODO override with your key.
-    bing_key : 'Ak71PK14Ypz2_IuQ2-TGbV-OVYLKeg_KEXFFYiNmEny6aFJVYxUg_pUxZfhaQ2vy'
+    bing_key : '#TODO PUT IN YOUR BING KEY'
+
+    // if you want express to add cors headers because pages from this server will be included in other websites
+    //cors: true,
+
+    // if you have other external websites that require authorization add them here
+    //trustedServers: [{'name':'myhostname.com', 'port':80}]
+
 
 
 }

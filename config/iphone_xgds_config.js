@@ -14,9 +14,10 @@
 //specific language governing permissions and limitations under the License.
 // __END_LICENSE__
 
-let USERNAME = 'TODO:username';
-let PASSWORD = 'TODO:authotoken';
-let SERVER_NAME = 'TODO:YOUR IP ADDRESS';
+const USERNAME = 'TODO:username';
+const PASSWORD = 'TODO:authotoken';
+const SERVER_NAME = 'TODO:YOUR IP ADDRESS FOR XGDS SERVER';
+const LOCAL_SERVER_NAME = 'TODO:YOUR IP ADDRESS';
 
 module.exports = {
 
@@ -25,7 +26,7 @@ module.exports = {
 	// The server that is running this node app 
     server : { port : 3001,
     		   cesium_port: undefined,
-    		   name : SERVER_NAME,
+    		   name : LOCAL_SERVER_NAME,
     		   protocol: 'https',
     		   nginx_prefix: 'wristApp'},
     		   
@@ -34,9 +35,9 @@ module.exports = {
     		name : SERVER_NAME,
     	    protocol : 'https',
     	    ev_channels: ['EV1', 'EV2'],
-       	follow_channel: 'EV1',
-       	username: USERNAME,
-       	password: PASSWORD
+       		follow_channel: 'EV1',
+       		username: USERNAME,
+       		password: PASSWORD
     },
     
     // If we are using web sockets this should only exist in the default side
@@ -93,7 +94,7 @@ module.exports = {
     showCoordinates : false,
 
     // TODO override with your key if using bing.
-    bing_key : 'Ak71PK14Ypz2_IuQ2-TGbV-OVYLKeg_KEXFFYiNmEny6aFJVYxUg_pUxZfhaQ2vy',
+    bing_key : '#TODO PUT IN YOUR BING KEY',
 
     connectedDevices : {pXRF : 'pXRF', 
           			   LIBS : 'LIBS', 
@@ -101,4 +102,11 @@ module.exports = {
           			   FTIR : 'FTIR', 
           			   redCamera2 : 'CAM2', 
           			   boat : 'IV'}
+
+    // if you want express to add cors headers because pages from this server will be included in other websites
+    //cors: true,
+
+    // if you have other external websites that require authorization add them here
+    //trustedServers: [{'name':'myhostname.com', 'port':80}]
+
 }
