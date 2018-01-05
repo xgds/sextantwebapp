@@ -78,7 +78,13 @@ class ImageLayerManager extends ElementManager{
                 }
             }
             if (!options.url.includes(config.server.name)){
-                options.proxy = new Cesium.DefaultProxy('/proxy/');
+                if (!_.isUndefined(config.xgds)) {
+                    if (!options.url.includes(config.xgds.name)) {
+                        options.proxy = new Cesium.DefaultProxy('/proxy/');
+                    }
+                }  else {
+                    options.proxy = new Cesium.DefaultProxy('/proxy/');
+                }
             }
             newImagery = Cesium.createTileMapServiceImageryProvider(options);
             theUrl = options.url;
