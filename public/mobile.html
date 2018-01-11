@@ -20,9 +20,9 @@
 
 
 <!-- Same html from xgds server -->
-<div id="savePopup">a
+<div id="savePopup">
         <p>Enter a new name and/or version to save as.  (Version already changed.)</p>
-        <table>aa
+        <table>
         <tr>
             <td><label for="saveAsName">Name</label></td>
             <td><input type="text" id="saveAsName"></td>
@@ -47,14 +47,17 @@
         
 </div>
 
-<div id="layersPopup" style="display:none;">
+<div id="layersPopup">
     <div id="layertreeContainer">
-        <div class="btn-toolbar mb-1" role="toolbar">
-           <button id="refreshTreeLink" class="fa fa-refresh btn btn-primary btn-sm mr-2" onclick="javascript: refreshLayerTree();"></button>
-          <div class="input-group mr-5">
+        <div data-role="controlgroup" data-type="horizontal" >
+           <button id="refreshTreeLink" class="fa fa-refresh ui-btn btn-sm" onclick="refreshLayerTree();"></button>
+            <button id="closeLayers" class="fa fa-close ui-btn btn-sm" onclick="toggleLayerTree();"></button>
+<!--
+            <div data-role="controlgroup" data-type="horizontal">
                 <input name="searchTree" placeholder="Filter..." autocomplete="off" class="form-control col-6">
                 <span class="input-group-addon " id="btnResetSearch"><i class="fa fa-close"></i></span>
             </div>
+            -->
         </div>
         <!--
         <div class="mb-2" role="group">

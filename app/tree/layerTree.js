@@ -275,6 +275,21 @@ class LayerTree {
                             if (data.node.selected) {
                                 let options = {url:imageLayerUrl,
                                                flipXY: true}; // we know that we want this set for layers we made
+                                if (data.node.data.projectionName !== undefined){
+                                    options.projectionName = data.node.data.projectionName;
+                                    if (data.node.data.minx !== undefined) {
+                                        //build bounding rectangle
+                                        options.bounds = {minx: data.node.data.minx,
+                                                          miny: data.node.data.miny,
+                                                          maxx: data.node.data.maxx,
+                                                          maxy: data.node.data.maxy
+                                        }
+                                        // console.log(options.url);
+                                        // options.url = options.url + '/{z}/{x}/{y}.png';
+                                        // console.log(options.url);
+                                    }
+                                    options.flipXY = false;
+                                }
                                 context.imageLayerManager.show(options);
                             } else {
                                 context.imageLayerManager.hide(imageLayerUrl);

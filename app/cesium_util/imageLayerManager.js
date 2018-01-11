@@ -18,6 +18,7 @@ import {config} from 'config_loader';
 const Cesium = require('cesium/Cesium');
 const url = require('url');
 import {ElementManager} from "cesium_util/elementManager";
+import {projectionManager} from "cesium_util/projectionManager";
 
 
 /**
@@ -86,8 +87,17 @@ class ImageLayerManager extends ElementManager{
                     options.proxy = new Cesium.DefaultProxy('/proxy/');
                 }
             }
+            if (options.projectionName !== undefined) {
+                let tilingScheme = projectionManager.getTilingScheme(options.projectionName, options.bounds);
+                if (tilingScheme !== undefined) {
+                    options.tilingScheme = tilingScheme;
+                    options.rectangle = tilingScheme.rectangle;
+                }
+
+            }
             newImagery = Cesium.createTileMapServiceImageryProvider(options);
             theUrl = options.url;
+
         } else if ('wms' in options){
             newImagery = new Cesium.WebMapServiceImageryProvider(options.wms);
             theUrl = options.wms;
