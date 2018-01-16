@@ -109,6 +109,8 @@ class LayerTree {
 	            return config.layer_tree_icon_url + 'tif.png';
 	        case 'MapDataTile':
 	            return config.layer_tree_icon_url + 'dataTif.png';
+            case 'PlanLink':
+                return config.layer_tree_icon_url + 'plan.png';
 	    }
     	return null;
     };
@@ -120,14 +122,19 @@ class LayerTree {
      *
      */
     getKmlUrl(data) {
-        switch(data.node.data.type) {
-            case 'MapLayer':
-                return config.urlPrefix + '/xgds_map_server/rest/maplayer/kml/' + data.node.key + '.kml';
-            case 'KmlMap':
-                return this.getRestUrl(data.node.data.kmlFile);
-            default:
-                return undefined;
+        if ('kmlFile' in data.node.data){
+            return this.getRestUrl(data.node.data.kmlFile);
         }
+        return undefined;
+        // switch(data.node.data.type) {
+        //     if
+        //     case 'MapLayer':
+        //         return config.urlPrefix + '/xgds_map_server/rest/maplayer/kml/' + data.node.key + '.kml';
+        //     case 'KmlMap':
+        //         return this.getRestUrl(data.node.data.kmlFile);
+        //     default:
+        //         return undefined;
+        // }
     };
 
     /**
