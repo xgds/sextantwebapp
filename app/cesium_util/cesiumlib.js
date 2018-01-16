@@ -30,6 +30,8 @@ const Cesium = require('cesium/Cesium');
 
 Cesium.BingMapsApi.defaultKey = global.config.bing_key;
 
+//import {projectionManager} from "cesium_util/projectionManager";
+
 
 // later when we have this provided from node module do this
 //import viewerCesiumNavigationMixin from 'cesiumNavigation/viewerCesiumNavigationMixin';
@@ -65,6 +67,19 @@ class ViewerWrapper{
         }
 
         // Set simple geometry for the full planet
+
+        const theRealOne = {topLeft: [24.070617695061806,87.90173269295278],
+            topRight: [49.598705282838125,87.04553528415659],
+            bottomRight:[34.373553362965566,86.015550572534],
+            bottomLeft: [14.570663006937881,86.60174704052636]};
+
+        const rectangle = new Cesium.Rectangle(Cesium.Math.toRadians(theRealOne.bottomLeft[0]),
+             Cesium.Math.toRadians(theRealOne.bottomLeft[1]),
+             Cesium.Math.toRadians(theRealOne.topRight[0]),
+             Cesium.Math.toRadians(theRealOne.topRight[1]));
+
+        // may need to create geometry that matches the projection
+        //const terrainProvider = new Cesium.EllipsoidTerrainProvider({tilingScheme:projectionManager.getTilingScheme('NP_STEREO', rectangle)});
         const terrainProvider = new Cesium.EllipsoidTerrainProvider();
         this.terrainList['default'] = terrainProvider;
 
@@ -72,6 +87,16 @@ class ViewerWrapper{
         let clock = new Cesium.Clock({
 			clockRange: Cesium.ClockRange.UNBOUNDED
 		});
+
+        let sceneMode = Cesium.SceneMode.SCENE3D;
+        if (!_.isUndefined(config.sceneMode)){
+            if (config.sceneMode == 'SCENE2D'){
+                sceneMode = Cesium.SceneMode.SCENE2D;
+            } else if (config.sceneMode == 'COLUMBUS_VIEW'){
+                sceneMode = Cesium.SceneMode.COLUMBUS_VIEW;
+            }
+        }
+        console.log('scene mode is ' + sceneMode);
 
         const viewerOptions = {
             timeline : false,
@@ -84,14 +109,17 @@ class ViewerWrapper{
             terrainExaggeration : terrainExaggeration,
             baseLayerPicker : false,
             terrainProvider : terrainProvider,
-            sceneMode: Cesium.SceneMode.SCENE3D,
+            sceneMode: sceneMode,
             clockViewModel: new Cesium.ClockViewModel(clock)
         };
 
         if ('ellipsoid' in config){
             if (config.ellipsoid == 'MOON') {
-                viewerOptions['globe'] = new Cesium.Globe(Cesium.Ellipsoid.MOON);
+                this.ellipsoid = Cesium.Ellipsoid.MOON;
+                viewerOptions['globe'] = new Cesium.Globe(this.ellipsoid);
             }
+        } else {
+            this.ellipsoid = Cesium.Ellipsoid.WGS84;
         }
 
         const viewer = new Cesium.Viewer(this.container, viewerOptions);

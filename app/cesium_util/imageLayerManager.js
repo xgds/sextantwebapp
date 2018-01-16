@@ -19,6 +19,7 @@ const Cesium = require('cesium/Cesium');
 const url = require('url');
 import {ElementManager} from "cesium_util/elementManager";
 import {projectionManager} from "cesium_util/projectionManager";
+import * as _ from "lodash";
 
 
 /**
@@ -34,6 +35,20 @@ import {projectionManager} from "cesium_util/projectionManager";
  *
  */
 class ImageLayerManager extends ElementManager{
+
+    /**
+     * @function initialize
+     * Initialize with elements set up in config
+     * @todo support cookies
+     *
+     */
+    initialize(){
+        super.initialize();
+        let initialElements = this.getInitialElementList();
+        if (initialElements !== undefined && !_.isEmpty(initialElements)) {
+            this.loadElements(initialElements);
+        }
+    };
 
     /**
      * @function getInitialElementList
@@ -68,6 +83,7 @@ class ImageLayerManager extends ElementManager{
         let newImageryLayer = undefined;
         let newImagery = undefined;
         let theUrl = undefined;
+        options.ellipsoid = this.viewerWrapper.ellipsoid;
         if ('url' in options) {
             const test = url.parse(options.url);
             if (test.hostname === null) {
@@ -92,10 +108,13 @@ class ImageLayerManager extends ElementManager{
                 if (tilingScheme !== undefined) {
                     options.tilingScheme = tilingScheme;
                     options.rectangle = tilingScheme.rectangle;
+                    options.url = options.url + '/{z}/{x}/{y}.png';
                 }
+                newImagery = new Cesium.UrlTemplateImageryProvider(options);
 
+            } else {
+                newImagery = Cesium.createTileMapServiceImageryProvider(options);
             }
-            newImagery = Cesium.createTileMapServiceImageryProvider(options);
             theUrl = options.url;
 
         } else if ('wms' in options){
