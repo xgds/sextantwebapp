@@ -18,7 +18,7 @@
 const Cookies = require( 'js.cookie' );
 
 import {config} from 'config_loader';
-import {xgdsAuth} from 'util/xgdsUtils';
+import {xgdsAuth, getRestUrl} from 'util/xgdsUtils';
 
 import 'jquery.fancytree/dist/skin-lion/ui.fancytree.css';
 
@@ -66,10 +66,11 @@ class LayerTree {
      * @param imageLayerManager
      *
      */
-    constructor(viewerWrapper,  popupDivId, kmlManager, imageLayerManager) {
+    constructor(viewerWrapper,  popupDivId, kmlManager, imageLayerManager, groundOverlayTimeManager) {
         this.viewerWrapper = viewerWrapper;
         this.kmlManager = kmlManager;
         this.imageLayerManager = imageLayerManager;
+        this.groundOverlayTimeManager = groundOverlayTimeManager;
         this.popupDiv = $('#' + popupDivId);
         this.visible = false;
         this.layersInitialized = false;
@@ -111,6 +112,8 @@ class LayerTree {
 	            return config.layer_tree_icon_url + 'dataTif.png';
             case 'PlanLink':
                 return config.layer_tree_icon_url + 'plan.png';
+            case 'GroundOverlayTime':
+                return config.layer_tree_icon_url + 'overlayTime.svg';
 	    }
     	return null;
     };
@@ -123,18 +126,9 @@ class LayerTree {
      */
     getKmlUrl(data) {
         if ('kmlFile' in data.node.data){
-            return this.getRestUrl(data.node.data.kmlFile);
+            return getRestUrl(data.node.data.kmlFile);
         }
         return undefined;
-        // switch(data.node.data.type) {
-        //     if
-        //     case 'MapLayer':
-        //         return config.urlPrefix + '/xgds_map_server/rest/maplayer/kml/' + data.node.key + '.kml';
-        //     case 'KmlMap':
-        //         return this.getRestUrl(data.node.data.kmlFile);
-        //     default:
-        //         return undefined;
-        // }
     };
 
     /**
@@ -147,7 +141,7 @@ class LayerTree {
         switch(data.node.data.type) {
             case 'MapTile':
             case 'MapDataTile':
-                return this.getRestUrl(data.node.data.tilePath);
+                return getRestUrl(data.node.data.tilePath);
             default:
                 return undefined;
         }
@@ -193,21 +187,6 @@ class LayerTree {
     */
 
     /**
-     * @function getRestUrl
-     * @param originalUrl
-     * @returns {string} the fully qualified url with rest injected between the first and second element in the original url
-     *
-     */
-    getRestUrl(originalUrl) {
-        let splits = originalUrl.split('/');
-        let result = config.urlPrefix + '/' + splits[1] + '/rest';
-        for (let i=2; i<splits.length; i++){
-            result += '/' + splits[i];
-        }
-        return result;
-    };
-
-    /**
      * @function createTree
      * Actually construct the fancytree
      *
@@ -244,7 +223,7 @@ class LayerTree {
                 },
                 lazyLoad: function(event, data){
                     let settings = {
-                        url: context.getRestUrl(data.node.data.childNodesUrl),
+                        url: getRestUrl(data.node.data.childNodesUrl),
                         dataType: 'json',
                         success: $.proxy(function (data) {
                             if (!_.isUndefined(data) && data.length > 0) {
@@ -300,6 +279,17 @@ class LayerTree {
                                 context.imageLayerManager.show(options);
                             } else {
                                 context.imageLayerManager.hide(imageLayerUrl);
+                            }
+                        } else {
+                            // see if it is a ground overlay time layer
+                            if (data.node.data.type == "GroundOverlayTime") {
+                                if (data.node.selected) {
+                                    data.node.data.id = data.node.key;
+                                    data.node.data.name = data.node.title;
+                                    context.groundOverlayTimeManager.show(data.node.data);
+                                } else {
+                                    context.groundOverlayTimeManager.hide(data.node.key);
+                                }
                             }
                         }
                     }

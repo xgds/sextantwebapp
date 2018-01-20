@@ -82,7 +82,7 @@ class ImageLayerManager extends ElementManager{
     load(options, callback){
         let newImageryLayer = undefined;
         let newImagery = undefined;
-        let theUrl = undefined;
+        let theUrl = String(options.url);
         options.ellipsoid = this.viewerWrapper.ellipsoid;
         if ('url' in options) {
             const test = url.parse(options.url);
@@ -115,11 +115,11 @@ class ImageLayerManager extends ElementManager{
             } else {
                 newImagery = Cesium.createTileMapServiceImageryProvider(options);
             }
-            theUrl = options.url;
+
 
         } else if ('wms' in options){
             newImagery = new Cesium.WebMapServiceImageryProvider(options.wms);
-            theUrl = options.wms;
+            theUrl = String(options.wms);
         }
         if (newImagery !== undefined){
             newImageryLayer = this.viewerWrapper.viewer.imageryLayers.addImageryProvider(newImagery);
@@ -147,7 +147,11 @@ class ImageLayerManager extends ElementManager{
         }
         if (theUrl !== undefined) {
             if (theUrl in this.elementMap){
-                this.elementMap[theUrl].show = true;
+                if (this.elementMap[theUrl].isDestroyed()) {
+                    this.load(options);
+                } else {
+                    this.viewerWrapper.viewer.imageryLayers.add(this.elementMap[theUrl]);
+                }
             } else {
                 this.load(options);
             }
@@ -164,7 +168,12 @@ class ImageLayerManager extends ElementManager{
      *
      */
     doHide(element){
-        element.show = false;
+
+        //TODO neither of these actually work.  We have to destroy the layer.  Stupid.
+        //this.viewerWrapper.viewer.imageryLayers.remove(element, false);
+        //element.show = false;
+
+        this.viewerWrapper.viewer.imageryLayers.remove(element);
     };
 
 }

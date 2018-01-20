@@ -99,8 +99,8 @@ class ProjectionManager {
            rectangleSouthwestInMeters = new Cesium.Cartesian2(boundsUTM.minx, boundsUTM.miny);
            rectangleNortheastInMeters = new Cesium.Cartesian2(boundsUTM.maxx, boundsUTM.maxy);
 
-            let theMin = projection.unproject(rectangleSouthwestInMeters);
-            let theMax = projection.unproject(rectangleNortheastInMeters);
+            //let theMin = projection.unproject(rectangleSouthwestInMeters);
+            //let theMax = projection.unproject(rectangleNortheastInMeters);
             // console.log('min');
             // console.log(theMin);
             // console.log('max');

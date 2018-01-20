@@ -19,14 +19,13 @@ import * as _ from 'lodash';
 
 
 /**
- * A tiling scheme for geometry referenced to a {@link WebMercatorProjection}, EPSG:3857.  This is
- * the tiling scheme used by Google Maps, Microsoft Bing Maps, and most of ESRI ArcGIS Online.
+ * A tiling scheme for geometry referenced to a {@link MapProjection}.
  *
- * @alias WebMercatorTilingScheme
+ * @alias ProjectionTilingScheme
  * @constructor
  *
  * @param {Object} [options] Object with the following properties:
- * @param {MapProjection} [options.projection=WebMercatorProjection] The map projection that will be used for this
+ * @param {MapProjection} The map projection that will be used for this
  * tiling scheme.  Defaults to a WebMercatorProjection.
  * @param {Ellipsoid} [options.ellipsoid=Ellipsoid.WGS84] The ellipsoid whose surface is being tiled. Defaults to
  * the WGS84 ellipsoid.
@@ -267,45 +266,3 @@ class ProjectionTilingScheme {
 }
 
 export {ProjectionTilingScheme}
-
-/**
- * A tiling scheme for geometry referenced to a custom projection where
- * longitude and latitude are directly mapped to X and Y.
- *
- */
-// class ProjectionTilingScheme  {
-//
-//     /**
-//      * @constructor
-//      *
-//      * @param {Object} [options] Object with the following properties:
-//      * @param {Ellipsoid} [options.ellipsoid=Ellipsoid.WGS84] The ellipsoid whose surface is being tiled. Defaults to
-//      * the WGS84 ellipsoid.
-//      * @param {Projection} The MapProjection to be used by the tiling scheme
-//      * @param {Rectangle} [options.rectangle=Rectangle.MAX_VALUE] The rectangle, in radians, covered by the tiling scheme.
-//      * @param {Number} [options.numberOfLevelZeroTilesX=2] The number of tiles in the X direction at level zero of
-//      * the tile tree.
-//      * @param {Number} [options.numberOfLevelZeroTilesY=1] The number of tiles in the Y direction at level zero of
-//      * the tile tree.
-//      */
-//     constructor(options){
-//         super(options);
-//         this._projection = options.projection;
-//
-//         // the base class used the web mercator projection to figure out the rectangle.  Redo that work.
-//         let southwest = this._projection.unproject(options.rectangleSouthwestInMeters);
-//         let northeast = this._projection.unproject(options.rectangleNortheastInMeters);
-//         this._rectangle = new Cesium.Rectangle(southwest.longitude, southwest.latitude,
-//             northeast.longitude, northeast.latitude);
-//         console.log('projection rectangle in radians');
-//         console.log(this._rectangle);
-//
-//
-//
-//     }
-//
-//
-//
-//
-//
-// }

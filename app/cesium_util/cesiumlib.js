@@ -374,7 +374,7 @@ class ViewerWrapper{
     getRaisedPositionsFromArray(latLongCoords) {
     		const cartographicArray = [];
         latLongCoords.forEach(function(p) {
-            let cartographicPoint = Cesium.Cartographic.fromDegrees(p[0], p[1]);zz
+            let cartographicPoint = Cesium.Cartographic.fromDegrees(p[0], p[1]);
             cartographicArray.push(cartographicPoint);
         });
         return this.getHeights(cartographicArray);
@@ -385,13 +385,13 @@ class ViewerWrapper{
 	        const ellipsoid = this.viewer.scene.globe.ellipsoid;
 	        const terrainExaggeration = this.terrainExaggeration;
 	        // 18 is the level of detail
-	        sampleTerrain(this.viewer.terrainProvider, 18, cartographicArray)
+	        Cesium.sampleTerrain(this.viewer.terrainProvider, 18, cartographicArray)
 	            .then(function (raisedPositionsCartograhpic) {
 	                raisedPositionsCartograhpic.forEach(function (coord, i) {
 	                    raisedPositionsCartograhpic[i].height *= terrainExaggeration;
 	                });
 	                let inter = ellipsoid.cartographicArrayToCartesianArray(raisedPositionsCartograhpic);
-	                resolve(inter);z
+	                resolve(inter);
 	            });
 	    }.bind(this));
     };
@@ -600,28 +600,74 @@ const buildSurfaceCircle = function(position, radius, styleOptions, id, viewerWr
 
 
 //this was a debugging function, if you ever need to build a rectangle have to use the parameters
-const buildRectangle = function(position, width, height, label, color, id, viewerWrapper, callback) {
-	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
-		const rectangleInstance = new Cesium.GeometryInstance({
-			  geometry : new Cesium.RectangleGeometry({
-			    rectangle : Cesium.Rectangle.fromDegrees(-140.0, 30.0, -100.0, 40.0)
-			  }),
-			  id : id,
-			  attributes : {
-			    color : new Cesium.ColorGeometryInstanceAttribute(0.0, 1.0, 1.0, 0.5)
-			  }
-			});
-		
-		const primitive = viewerWrapper.viewer.scene.primitives.add(new Cesium.Primitive({
-			  geometryInstances : [rectangleInstance],
-			  debugShowBoundingVolume: true
-			}));
-		
-		if (callback !== undefined){
-	    	callback(primitive);
-	    }
-	});
-}
+// const buildRectangle = function(position, width, height, label, color, id, viewerWrapper, callback) {
+// 	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
+// 		const rectangleInstance = new Cesium.GeometryInstance({
+// 			  geometry : new Cesium.RectangleGeometry({
+// 			    rectangle : Cesium.Rectangle.fromDegrees(-140.0, 30.0, -100.0, 40.0)
+// 			  }),
+// 			  id : id,
+// 			  attributes : {
+// 			    color : new Cesium.ColorGeometryInstanceAttribute(0.0, 1.0, 1.0, 0.5)
+// 			  }
+// 			});
+//
+// 		const primitive = viewerWrapper.viewer.scene.primitives.add(new Cesium.Primitive({
+// 			  geometryInstances : [rectangleInstance],
+// 			  debugShowBoundingVolume: true
+// 			}));
+//
+// 		if (callback !== undefined){
+// 	    	callback(primitive);
+// 	    }
+// 	});
+// }
+
+//Build a rectangle entity with the given material
+const buildRectangle = function(positions, material, id, name, viewerWrapper, callback) {
+    // if (material === undefined){
+    //     material = Cesium.Color.WHITE;
+    // }
+    viewerWrapper.getRaisedPositions(positions).then(function(raisedPositions)
+    {
+        let entityRectangle = viewerWrapper.viewer.entities.add({
+            id: id,
+            name: name,
+            rectangle: {
+                coordinates: Cesium.Rectangle.fromCartesianArray(raisedPositions, viewerWrapper.ellipsoid),
+                height: 1,
+                extrudedHeight: 0,
+                material: material
+            }
+        });
+
+        if (callback !== undefined) {
+            callback(entityRectangle);
+        }
+    });
+};
+
+//Build a rectangle entity with the given material
+const buildRectangleFromRadians = function(west, south, east, north, material, id, name, viewerWrapper, callback) {
+    // if (material === undefined){
+    //     material = Cesium.Color.WHITE;
+    // }
+    let entityRectangle = viewerWrapper.viewer.entities.add({
+        id: id,
+        name: name,
+        rectangle: {
+            coordinates: Cesium.Rectangle.fromRadians(west, south, east, north),
+            height: 1,
+            extrudedHeight: 0,
+            material: material
+        }
+    });
+
+    if (callback !== undefined) {
+        callback(entityRectangle);
+    }
+};
+
 
 //build a simple ellipse.  We will be using this as a trailing ellipse to have a smooth camera when following
 const buildEllipse = function(spp, color, viewerWrapper, callback) {
@@ -640,7 +686,7 @@ const buildEllipse = function(spp, color, viewerWrapper, callback) {
 	if (callback !== undefined){
 		callback(entityEllipse);
 	}
-}
+};
 
 // this is the main function we are using to render a path and an ellipse with the current position.
 const buildPath = function(spp, label, labelColor, ellipseColor, id, headingCallback, viewerWrapper, callback){
@@ -689,4 +735,4 @@ const buildPath = function(spp, label, labelColor, ellipseColor, id, headingCall
 
 
 export {ViewerWrapper, DynamicLines, zoom, heading, buildLineString, buildCylinder, buildRectangle, buildSurfaceCircle, 
-		buildPath, buildEllipse}
+		buildPath, buildEllipse, buildRectangleFromRadians}

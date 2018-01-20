@@ -126,9 +126,7 @@ class ElementManager {
      */
     loadElements(elementUrls, callback) {
         if (!_.isEmpty(elementUrls)) {
-            console.log('Loading element:');
             for (let i = 0; i < elementUrls.length; i++) {
-                console.log('Element Loading: ' + elementUrls[i]);
                 this.load(elementUrls[i], callback);
             }
         }

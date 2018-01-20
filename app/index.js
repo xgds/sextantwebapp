@@ -32,12 +32,14 @@ import {PlanManager, xgdsPlanManager} from 'plan/plan';
 import {LayerTree} from 'tree/layerTree';
 import {KmlManager} from 'cesium_util/kmlManager';
 import {ImageLayerManager} from 'cesium_util/imageLayerManager';
+import {GroundOverlayTimeManager} from 'cesium_util/groundOverlayTimeManager';
 
 let gps_tracks = undefined;
 let tsse = undefined;
 let planManager = undefined;
 let kmlManager = undefined;
 let imageLayerManager = undefined;
+let groundOverlayTimeManager = undefined;
 let layerTree = undefined;
 
 viewerWrapper.scene.camera.flyTo({
@@ -62,8 +64,11 @@ kmlManager = new KmlManager(viewerWrapper);
 // Load the image layers configured if any
 imageLayerManager = new ImageLayerManager(viewerWrapper);
 
+// Set up the ground overlay time manager
+groundOverlayTimeManager = new GroundOverlayTimeManager(viewerWrapper);
+
 if (config.layer_tree_url !== undefined){
-    layerTree = new LayerTree(viewerWrapper, 'layersPopup', kmlManager, imageLayerManager);
+    layerTree = new LayerTree(viewerWrapper, 'layersPopup', kmlManager, imageLayerManager, groundOverlayTimeManager);
 }
 
 

@@ -23,11 +23,26 @@ import {config} from 'config_loader';
  *
  */
 const xgdsAuth = function(settings) {
-       if (!_.isEmpty(config.xgds) && !_.isEmpty(config.xgds.username)){
-              settings['headers'] = {'authorization': 'Basic ' + btoa(config.xgds.username + ':' + config.xgds.password)};
-              settings['xhrFields'] = {withCredentials: true};
-       }
-       return settings;
+    if (!_.isEmpty(config.xgds) && !_.isEmpty(config.xgds.username)){
+        settings['headers'] = {'authorization': 'Basic ' + btoa(config.xgds.username + ':' + config.xgds.password)};
+        settings['xhrFields'] = {withCredentials: true};
+    }
+    return settings;
 }
 
-export {xgdsAuth}
+/**
+ * @function getRestUrl
+ * @param originalUrl
+ * @returns {string} the fully qualified url with rest injected between the first and second element in the original url
+ *
+ */
+const getRestUrl = function(originalUrl) {
+    let splits = originalUrl.split('/');
+    let result = config.urlPrefix + '/' + splits[1] + '/rest';
+    for (let i=2; i<splits.length; i++){
+        result += '/' + splits[i];
+    }
+    return result;
+};
+
+export {xgdsAuth, getRestUrl}
