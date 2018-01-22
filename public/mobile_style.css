@@ -103,3 +103,9 @@ left:5px;
 ::-webkit-scrollbar-thumb:window-inactive {
     background: #41617D !important;
 }
+
+.fancytree-container {
+	outline:none !important;
+    overflow: scroll;
+    max-height: 400px;
+}

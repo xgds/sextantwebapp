@@ -157,7 +157,11 @@
 
 	function toggleLayerTree() {
 		if (sextant.layerTree !== undefined){
-			sextant.layerTree.toggle();
+			if (!sextant.layerTree.layersInitialized) {
+				alert('Layers not yet loaded.');
+			} else {
+                sextant.layerTree.toggle();
+            }
 		}
 	}
 
