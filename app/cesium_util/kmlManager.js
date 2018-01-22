@@ -17,6 +17,8 @@
 import {config} from 'config_loader';
 const Cesium = require('cesium/Cesium');
 import {ElementManager} from "cesium_util/elementManager";
+import {xgdsAuth} from "util/xgdsUtils";
+import * as _ from "lodash";
 
 
 /**
@@ -72,29 +74,56 @@ class KmlManager extends ElementManager {
      * Load an element from url and add it to the viewer and the elementmap to toggle later
      *
      */
-    load(elementUrl, callback) {
-        if (!(elementUrl in this.elementMap)) {
-            try {
-                let context = this;
-                this.viewerWrapper.viewer.dataSources.add(Cesium.KmlDataSource.load(elementUrl, {
-                        name: elementUrl,
-                        camera: context.viewerWrapper.viewer.camera,
-                        canvas: context.viewerWrapper.viewer.canvas
-                    })
-                ).then(function (dataSource) {
-                    context.elementMap[elementUrl] = dataSource;
-                    if (callback !== undefined) {
-                        callback(dataSource);
-                    }
-                });
-            } catch(err) {
-                console.log('Problem loading kml: ' + elementUrl);
-                console.log(err);
-            }
-        } else {
-            console.log('kml attempted to be loaded more than once: ' + kmlUrl);
-        }
-    };
+     load(elementUrl, callback) {
+         if (!(elementUrl in this.elementMap)) {
+             try {
+                 let context = this;
+                 let options = {
+                     name: elementUrl,
+                     camera: context.viewerWrapper.viewer.camera,
+                     canvas: context.viewerWrapper.viewer.canvas
+                 };
+
+                 // load text from a URL, setting a custom header
+                 let settings = {};
+                 if (!elementUrl.includes(config.server.name)){
+                     if (!_.isUndefined(config.xgds)) {
+                         if (elementUrl.includes(config.xgds.name)) {
+                             settings = xgdsAuth(settings);
+                         }
+                     }
+                 }
+                 if ('headers' in settings) {
+                     Cesium.loadBlob(elementUrl, settings.headers).then(function (blob) {
+                            context.viewerWrapper.viewer.dataSources.add(Cesium.KmlDataSource.load(blob, options)
+                         ).then(function (dataSource) {
+                             context.elementMap[elementUrl] = dataSource;
+                             if (callback !== undefined) {
+                                 callback(dataSource);
+                             }
+                         })
+                     }).otherwise(function (error) {
+                         console.log(error);
+                         alert('Problem loading kml: ' + elementUrl);
+                     });
+                 } else {
+
+                     this.viewerWrapper.viewer.dataSources.add(Cesium.KmlDataSource.load(elementUrl, options)
+                     ).then(function (dataSource) {
+                         context.elementMap[elementUrl] = dataSource;
+                         if (callback !== undefined) {
+                             callback(dataSource);
+                         }
+                     });
+                 }
+             } catch(err) {
+                 console.log('Problem loading kml: ' + elementUrl);
+                 console.log(err);
+             }
+         } else {
+             console.log('kml attempted to be loaded more than once: ' + kmlUrl);
+         }
+     };
 
 
 }
