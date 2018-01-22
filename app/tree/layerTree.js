@@ -15,7 +15,7 @@
 // __END_LICENSE__
 
 
-const Cookies = require( 'js.cookie' );
+const Cookies = require( 'js-cookie/src/js.cookie' );
 
 import {config} from 'config_loader';
 import {xgdsAuth, getRestUrl} from 'util/xgdsUtils';
@@ -374,11 +374,9 @@ class LayerTree {
                 url: config.layer_tree_url,
                 dataType: 'json',
                 success: $.proxy(function (data) {
-                    console.log('loaded tree data');
                     if (data != null) {
                         this.treeData = data;
                         this.layersInitialized = true;
-                        //app.vent.trigger('treeData:loaded');
                         //this.initializeMapLayers(app.treeData[0]);
                     }
                 }, this),
@@ -389,7 +387,7 @@ class LayerTree {
             $.ajax(xgdsAuth(settings));
             // turn on layers that were turned on in the cookies
             let selected_uuids = Cookies.get('fancytree-1-selected');
-            if (selected_uuids != undefined && selected_uuids.length > 0){
+            if (!_.isEmpty(selected_uuids)){
                 let settings2 = {
                     url: '/xgds_map_server/uuidsjson/',
                     dataType: 'json',

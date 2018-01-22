@@ -18,6 +18,7 @@ const USERNAME = 'TODO:username';
 const PASSWORD = 'TODO:authotoken';
 const SERVER_NAME = 'TODO:YOUR IP ADDRESS FOR XGDS SERVER';
 const LOCAL_SERVER_NAME = 'TODO:YOUR IP ADDRESS';
+const NGINX_PREFIX = 'wristApp';
 
 module.exports = {
 
@@ -28,7 +29,7 @@ module.exports = {
     		   cesium_port: undefined,
     		   name : LOCAL_SERVER_NAME,
     		   protocol: 'https',
-    		   nginx_prefix: 'wristApp'},
+    		   nginx_prefix: NGINX_PREFIX},
     		   
     // This should only exist in xGDS side
     xgds : { port : 443, 
@@ -89,6 +90,8 @@ module.exports = {
 	// url for fancytree json data for layers
 	layer_tree_url: 'https://'  + SERVER_NAME + '/xgds_map_server/rest/treejson/',
 	layer_tree_icon_url: 'https://' + SERVER_NAME + '/static/rest/xgds_map_server/icons/',
+	layer_tree_icon_url:  'https://' + LOCAL_SERVER_NAME + '/' + NGINX_PREFIX + '/icons/',
+
     
     // whether or not to show lat long elevation hovering over mouse move
     showCoordinates : false,

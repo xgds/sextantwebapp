@@ -15,6 +15,8 @@
 // __END_LICENSE__
 
 const SERVER_NAME = 'localhost';
+const NGINX_PREFIX = 'wristApp';
+
 
 module.exports = {
 
@@ -27,7 +29,7 @@ module.exports = {
     		   cesium_port: 3001,
     		   name : SERVER_NAME,
     		   protocol: 'http',
-    		   nginx_prefix: 'wristApp'},
+    		   nginx_prefix: NGINX_PREFIX},
     		   
     // If we are using web sockets this should only exist in the default side
     socket : { protocol : 'http',
@@ -69,7 +71,8 @@ module.exports = {
 
 	// url for fancytree json data for layers
 	layer_tree_url: 'https://'  + SERVER_NAME + '/xgds_map_server/rest/treejson/',
-	layer_tree_icon_url: 'https://' + SERVER_NAME + '/static/rest/xgds_map_server/icons/',
+	layer_tree_icon_url:  'https://localhost/wristApp/icons/',
+
 
     // whether or not to show lat long elevation hovering over mouse move
     showCoordinates : false,
