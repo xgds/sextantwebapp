@@ -311,8 +311,30 @@ class LayerTree {
                     }
             });
             this.tree = fancytree.getTree(layertreeNode);  //TODO see if this differs from mytree
+            this.connectFilter(this);
             //this.setupContextMenu(layertreeNode); //TODO see about integrating context menu, need to make it flexible.
         }
+    };
+
+    loadTreeData(afterLoad) {
+        let settings = {
+                url: config.layer_tree_url,
+                dataType: 'json',
+                success: $.proxy(function (data) {
+                    if (data != null) {
+                        this.treeData = data;
+                        this.layersInitialized = true;
+                        if (!_.isUndefined(afterLoad)){
+                            afterLoad(data);
+                        }
+                        //this.initializeMapLayers(app.treeData[0]);
+                    }
+                }, this),
+                error: $.proxy(function(xhr, textStatus, errorThrown) {
+                    console.log(textStatus);
+                })
+            };
+            $.ajax(xgdsAuth(settings));
     };
 
     /**
@@ -322,12 +344,16 @@ class LayerTree {
      */
     refresh() {
         if (!_.isUndefined(this.tree)){
-            this.tree.reload({
-                url: config.layer_tree_url
-            }).done(function(){
-                console.log('RELOADED');
-                //app.vent.trigger('layerView:reloadLayers');
-            });
+            let context = this;
+
+            this.loadTreeData(function(data) { context.tree.reload(data)});
+            //this.tree.reload(this.treeData);
+            // this.tree.reload({
+            //     url: config.layer_tree_url
+            // }).done(function(){
+            //     console.log('RELOADED');
+            //     //app.vent.trigger('layerView:reloadLayers');
+            // });
         }
     };
 
@@ -336,11 +362,11 @@ class LayerTree {
      * Connect the filter input and button to the fancy tree
      *
      */
-    connectFilter() {
+    connectFilter(context) {
     	$('#btnResetSearch').click(function(e){
     	      $('input[name=searchTree]').val('');
     	      $('span#matches').text('');
-    	      this.tree.clearFilter();
+    	      context.tree.clearFilter();
     	    }).attr('disabled', true);
 
     	$('input[name=searchTree]').keyup(function(e){
@@ -356,7 +382,7 @@ class LayerTree {
     	        return;
     	      }
     	      // Pass a string to perform case insensitive matching
-    	      n = this.tree.filterNodes(match, opts);
+    	      n = context.tree.filterNodes(match, opts);
     	      $('button#btnResetSearch').attr('disabled', false);
     	      $('span#matches').text('(' + n + ' matches)');
     	    }).focus();
@@ -370,21 +396,7 @@ class LayerTree {
      */
     initializeMapData() {
         if (!this.layersInitialized){
-            let settings = {
-                url: config.layer_tree_url,
-                dataType: 'json',
-                success: $.proxy(function (data) {
-                    if (data != null) {
-                        this.treeData = data;
-                        this.layersInitialized = true;
-                        //this.initializeMapLayers(app.treeData[0]);
-                    }
-                }, this),
-                error: $.proxy(function(xhr, textStatus, errorThrown) {
-                    console.log(textStatus);
-                })
-            };
-            $.ajax(xgdsAuth(settings));
+            this.loadTreeData();
             // turn on layers that were turned on in the cookies
             let selected_uuids = Cookies.get('fancytree-1-selected');
             if (!_.isEmpty(selected_uuids)){

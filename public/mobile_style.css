@@ -109,3 +109,9 @@ left:5px;
     overflow: scroll;
     max-height: 400px;
 }
+
+.row {
+    display:inline;
+    margin-left: 5px;
+    margin-right: 5px;
+}
