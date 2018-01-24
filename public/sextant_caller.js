@@ -170,3 +170,13 @@
             sextant.layerTree.refresh();
         }
 	}
+
+	function toggleTransparencySliders() {
+		if (sextant.layerTree !== undefined){
+			if (!sextant.layerTree.layersInitialized) {
+				alert('Layers not yet loaded.');
+			} else {
+                sextant.layerTree.toggleTransparencySliders();
+            }
+		}
+	}

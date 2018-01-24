@@ -15,7 +15,7 @@
 // __END_LICENSE__
 
 
-const Cookies = require( 'js-cookie/src/js.cookie' );
+window.Cookies = require('js-cookie');  // normal imports did not work so hardcoded here.
 
 import {config} from 'config_loader';
 import {xgdsAuth, getRestUrl} from 'util/xgdsUtils';
@@ -30,7 +30,10 @@ require('jquery.fancytree/dist/modules/jquery.fancytree.filter');
 require('jquery.fancytree/dist/modules/jquery.fancytree.select');
 require('jquery.fancytree/dist/modules/jquery.fancytree.ui-deps');
 
-//require('jquery.fancytree/dist/modules/jquery.fancytree.persist');
+require('jquery.fancytree/dist/modules/jquery.fancytree.persist');
+//require('jquery.slider');
+require('tree/fancyTreeSlider');
+
 
 /**
  * @file layerTree.js
@@ -74,12 +77,12 @@ class LayerTree {
         this.popupDiv = $('#' + popupDivId);
         this.visible = false;
         this.layersInitialized = false;
+        this.transparencySlidersVisible = false;
         this.initializeMapData();
     };
 
     /**
      * @function toggle show or hide the popup for the layer manager
-     * @todo turn this in to a dialog
      */
     toggle() {
         this.visible = !this.visible;
@@ -99,23 +102,23 @@ class LayerTree {
      * @todo this is pretty brittle, defining all the icons right here.  Make it model driven.
      */
     getTreeIcon(key) {
-    	switch (key) {
-	        case 'MapLink':
-	            return config.layer_tree_icon_url + 'link-16.png';
-	        case 'KmlMap':
-	            return config.layer_tree_icon_url + 'gearth.png';
-	        case 'MapLayer':
-	            return config.layer_tree_icon_url + 'maplayer.png';
-	        case 'MapTile':
-	            return config.layer_tree_icon_url + 'tif.png';
-	        case 'MapDataTile':
-	            return config.layer_tree_icon_url + 'dataTif.png';
+        switch (key) {
+            case 'MapLink':
+                return config.layer_tree_icon_url + 'link-16.png';
+            case 'KmlMap':
+                return config.layer_tree_icon_url + 'gearth.png';
+            case 'MapLayer':
+                return config.layer_tree_icon_url + 'maplayer.png';
+            case 'MapTile':
+                return config.layer_tree_icon_url + 'tif.png';
+            case 'MapDataTile':
+                return config.layer_tree_icon_url + 'dataTif.png';
             case 'PlanLink':
                 return config.layer_tree_icon_url + 'plan.png';
             case 'GroundOverlayTime':
                 return config.layer_tree_icon_url + 'overlayTime.svg';
-	    }
-    	return null;
+        }
+        return null;
     };
 
     /**
@@ -147,45 +150,6 @@ class LayerTree {
         }
     };
 
-    /*
-    setupContextMenu(layertreeNode) {
-    	layertreeNode.contextmenu({
-    	      delegate: 'span.fancytree-title',
-    	      menu: [
-    	          {title: 'Download KML', cmd: 'download', uiIcon: 'ui-icon-arrowthickstop-1-s', disabled: false }
-    	          ],
-    	      beforeOpen: function(event, ui) {
-    	        let node = $.ui.fancytree.getNode(ui.target);
-    	        if (node !== null){
-    	        		layertreeNode.contextmenu('enableEntry','download', _.contains(['MapLayer', 'KmlMap'], node.data.type))
-    	        		node.setActive();
-    	        }
-    	      },
-    	      select: function(event, ui) {
-    	        let node = $.ui.fancytree.getNode(ui.target);
-    	        if (node !== null){
-    	        		if (ui.cmd == 'download') {
-    	        			let url = '';
-    	        			if (node.data.type == 'MapLayer'){
-	    	        			url = '/xgds_map_server/maplayer/kml/';
-	    	        			url += node.key + '.kml';
-    	        			} else if (node.data.type == 'KmlMap'){
-	    	        			url = node.data.kmlFile;
-    	        			}
-    	        			$.fileDownload(url, {
-    	            		 	httpMethod: 'GET',
-    	                     failCallback: function (htmlResponse, url) {
-    	                    	 	console.log(htmlResponse);
-    	                    	 	alert('Could not download kml.');
-    	                     }
-    	                 });
-    	        		}
-    	        }
-    	      }
-    	    });
-    };
-    */
-
     /**
      * @function createTree
      * Actually construct the fancytree
@@ -195,13 +159,12 @@ class LayerTree {
         if (_.isUndefined(this.tree) && !_.isNull(this.treeData)){
             let layertreeNode = this.popupDiv.find('#layertree');
             if (layertreeNode.length == 0){
-            	return;
+                return;
             }
             let context = this;
 
             let mytree =  layertreeNode.fancytree({
-                //extensions: ['persist', 'filter'], //, 'transparency_slider'],
-                extensions: ['filter'],
+                extensions: ['filter', 'transparency_slider', 'persist'],
                 source: this.treeData,
                 filter: {
                     autoApply: true,  // Re-apply last filter if lazy data is loaded
@@ -211,15 +174,15 @@ class LayerTree {
                     highlight: true,  // Highlight matches by wrapping inside <mark> tags
                     mode: 'hide',  // Hide unmatched nodes (pass 'dimm' to gray out unmatched nodes)
                     autoExpand: true
-                  },
+                },
                 checkbox: true,
                 icon: function(event, data) {
-                	  if( !data.node.isFolder() ) {
-                		  return context.getTreeIcon(data.node.data.type);
-                	  }
-                	},
+                    if( !data.node.isFolder() ) {
+                        return context.getTreeIcon(data.node.data.type);
+                    }
+                },
                 expand: function(event, data){
-                	//app.vent.trigger('tree:expanded', data.node);
+                    //app.vent.trigger('tree:expanded', data.node);
                 },
                 lazyLoad: function(event, data){
                     let settings = {
@@ -247,68 +210,23 @@ class LayerTree {
                     data.result = $.ajax(xgdsAuth(settings));
                 },
                 select: function(event, data) {
-                    let kmlUrl = context.getKmlUrl(data);
-                    if (kmlUrl !== undefined) {
-                        if (data.node.selected) {
-                            context.kmlManager.show(kmlUrl);
-                        } else {
-                            context.kmlManager.hide(kmlUrl);
-                        }
-                    } else  {
-                        // see if it is an image layer
-                        let imageLayerUrl = context.getImageLayerUrl(data);
-                        if (imageLayerUrl !== undefined){
-                            if (data.node.selected) {
-                                let options = {url:imageLayerUrl,
-                                               flipXY: true}; // we know that we want this set for layers we made
-                                if (data.node.data.projectionName !== undefined){
-                                    options.projectionName = data.node.data.projectionName;
-                                    if (data.node.data.minx !== undefined) {
-                                        //build bounding rectangle
-                                        options.bounds = {minx: data.node.data.minx,
-                                                          miny: data.node.data.miny,
-                                                          maxx: data.node.data.maxx,
-                                                          maxy: data.node.data.maxy
-                                        }
-                                        // console.log(options.url);
-                                        // options.url = options.url + '/{z}/{x}/{y}.png';
-                                        // console.log(options.url);
-                                    }
-                                    options.flipXY = false;
-                                }
-                                context.imageLayerManager.show(options);
-                            } else {
-                                context.imageLayerManager.hide(imageLayerUrl);
-                            }
-                        } else {
-                            // see if it is a ground overlay time layer
-                            if (data.node.data.type == "GroundOverlayTime") {
-                                if (data.node.selected) {
-                                    data.node.data.id = data.node.key;
-                                    data.node.data.name = data.node.title;
-                                    context.groundOverlayTimeManager.show(data.node.data);
-                                } else {
-                                    context.groundOverlayTimeManager.hide(data.node.key);
-                                }
-                            }
-                        }
-                    }
-                  },
-                  persist: {
-                      cookieDelimiter: '~',    // character used to join key strings
-                      cookiePrefix: undefined, // 'fancytree-<treeId>-' by default
-                      cookie: { // settings passed to js.cookie plugin
+                    context.doSelect(data, context);
+                },
+                persist: {
+                    cookieDelimiter: '~',    // character used to join key strings
+                    cookiePrefix: undefined, // 'fancytree-<treeId>-' by default
+                    cookie: { // settings passed to js.cookie plugin
                         raw: false,
                         expires: '',
                         path: '',
                         domain: '',
                         secure: false
-                      },
-                      expandLazy: false, // true: recursively expand and load lazy nodes
-                      overrideSource: true,  // true: cookie takes precedence over `source` data attributes.
-                      store: 'cookie',     // 'cookie': use cookie, 'local': use localStore, 'session': use sessionStore
-                      types: 'active expanded focus selected'  // which status types to store
-                    }
+                    },
+                    expandLazy: false, // true: recursively expand and load lazy nodes
+                    overrideSource: true,  // true: cookie takes precedence over `source` data attributes.
+                    store: 'cookie',     // 'cookie': use cookie, 'local': use localStore, 'session': use sessionStore
+                    types: 'active expanded focus selected'  // which status types to store
+                }
             });
             this.tree = fancytree.getTree(layertreeNode);  //TODO see if this differs from mytree
             this.connectFilter(this);
@@ -316,25 +234,75 @@ class LayerTree {
         }
     };
 
+    doSelect(data, context) {
+        let kmlUrl = context.getKmlUrl(data);
+        if (kmlUrl !== undefined) {
+            if (data.node.selected) {
+                context.kmlManager.show(kmlUrl);
+            } else {
+                context.kmlManager.hide(kmlUrl);
+            }
+        } else  {
+            // see if it is an image layer
+            let imageLayerUrl = context.getImageLayerUrl(data);
+            if (imageLayerUrl !== undefined){
+                if (data.node.selected) {
+                    let options = {url:imageLayerUrl,
+                        flipXY: true}; // we know that we want this set for layers we made
+                    if (data.node.data.projectionName !== undefined){
+                        options.projectionName = data.node.data.projectionName;
+                        if (data.node.data.minx !== undefined) {
+                            //build bounding rectangle
+                            options.bounds = {minx: data.node.data.minx,
+                                miny: data.node.data.miny,
+                                maxx: data.node.data.maxx,
+                                maxy: data.node.data.maxy
+                            }
+                            // console.log(options.url);
+                            // options.url = options.url + '/{z}/{x}/{y}.png';
+                            // console.log(options.url);
+                        }
+                        options.flipXY = false;
+                    }
+                    context.imageLayerManager.show(options);
+                } else {
+                    context.imageLayerManager.hide(imageLayerUrl);
+                }
+            } else {
+                // see if it is a ground overlay time layer
+                if (data.node.data.type == "GroundOverlayTime") {
+                    if (data.node.selected) {
+                        data.node.data.id = data.node.key;
+                        data.node.data.name = data.node.title;
+                        context.groundOverlayTimeManager.show(data.node.data);
+                    } else {
+                        context.groundOverlayTimeManager.hide(data.node.key);
+                    }
+                }
+            }
+        }
+    };
+
     loadTreeData(afterLoad) {
         let settings = {
-                url: config.layer_tree_url,
-                dataType: 'json',
-                success: $.proxy(function (data) {
-                    if (data != null) {
-                        this.treeData = data;
-                        this.layersInitialized = true;
-                        if (!_.isUndefined(afterLoad)){
-                            afterLoad(data);
-                        }
-                        //this.initializeMapLayers(app.treeData[0]);
+            url: config.layer_tree_url,
+            dataType: 'json',
+            success: $.proxy(function (data) {
+                if (data != null) {
+                    this.treeData = data;
+                    this.layersInitialized = true;
+                    if (!_.isUndefined(afterLoad)){
+                        afterLoad(data);
                     }
-                }, this),
-                error: $.proxy(function(xhr, textStatus, errorThrown) {
-                    console.log(textStatus);
-                })
-            };
-            $.ajax(xgdsAuth(settings));
+                    //this.initializeMapLayers(app.treeData[0]);
+                }
+            }, this),
+            error: $.proxy(function(xhr, textStatus, errorThrown) {
+                console.log(textStatus);
+                alert("Problem loading layers.");
+            })
+        };
+        $.ajax(xgdsAuth(settings));
     };
 
     /**
@@ -363,29 +331,29 @@ class LayerTree {
      *
      */
     connectFilter(context) {
-    	$('#btnResetSearch').click(function(e){
-    	      $('input[name=searchTree]').val('');
-    	      $('span#matches').text('');
-    	      context.tree.clearFilter();
-    	    }).attr('disabled', true);
+        $('#btnResetSearch').click(function(e){
+            $('input[name=searchTree]').val('');
+            $('span#matches').text('');
+            context.tree.clearFilter();
+        }).attr('disabled', true);
 
-    	$('input[name=searchTree]').keyup(function(e){
-    	      let n,
-    	        opts = {
-    	          autoExpand: true,
-    	          leavesOnly: false
-    	        },
-    	        match = $(this).val();
+        $('input[name=searchTree]').keyup(function(e){
+            let n,
+                opts = {
+                    autoExpand: true,
+                    leavesOnly: false
+                },
+                match = $(this).val();
 
-    	      if(e && e.which === $.ui.keyCode.ESCAPE || $.trim(match) === ''){
-    	        $('button#btnResetSearch').click();
-    	        return;
-    	      }
-    	      // Pass a string to perform case insensitive matching
-    	      n = context.tree.filterNodes(match, opts);
-    	      $('button#btnResetSearch').attr('disabled', false);
-    	      $('span#matches').text('(' + n + ' matches)');
-    	    }).focus();
+            if(e && e.which === $.ui.keyCode.ESCAPE || $.trim(match) === ''){
+                $('button#btnResetSearch').click();
+                return;
+            }
+            // Pass a string to perform case insensitive matching
+            n = context.tree.filterNodes(match, opts);
+            $('button#btnResetSearch').attr('disabled', false);
+            $('span#matches').text('(' + n + ' matches)');
+        }).focus();
     };
 
     /**
@@ -401,7 +369,7 @@ class LayerTree {
             let selected_uuids = Cookies.get('fancytree-1-selected');
             if (!_.isEmpty(selected_uuids)){
                 let settings2 = {
-                    url: '/xgds_map_server/uuidsjson/',
+                    url: config.layer_tree_get_node_data_url,
                     dataType: 'json',
                     type: 'POST',
                     data: {'uuids':selected_uuids},
@@ -428,9 +396,65 @@ class LayerTree {
         for (let i=0; i<nodes.length; i++){
             let node = nodes[i];
             node.selected = true;
-            //this.createNode(nodes[i]);
+            this.doSelect({node:node}, this);
         }
     };
-}
+
+    handleTransparencySliderChange(event, ui) {
+        let newValue = ui.value;
+        let node_id = ui.handle.parentElement.id.substring(0, ui.handle.parentElement.id.length - 7);
+        let node = app.tree.getNodeByKey(node_id);
+        if (node.mapView != undefined) {
+            node.mapView.setTransparency(newValue);
+        }
+        // set the printed value
+        let transparencyValueID = '#' + node_id + '_transparencyValue';
+        let transparencyValueSpan = $(ui.handle.parentElement.parentElement).find(transparencyValueID);
+        $(transparencyValueSpan).html(newValue);
+
+        Cookies.set(node_id, {transparency: newValue});
+    };
+
+    toggleTransparencySliders(rootNode) {
+        this.transparencySlidersVisible = !this.transparencySlidersVisible;
+        if (this.transparencySlidersVisible){
+            if (rootNode == undefined){
+                rootNode = this.tree.getRootNode();
+            }
+            this.showTransparencySliders(rootNode);
+        } else {
+            $(".transparency_value").hide();
+            $(".transparency_slider").hide(); //.slider("destroy");
+        }
+    };
+
+
+    showTransparencySliders(node){
+        let context = this;
+        node.visit(function(node) {
+            if (node.data.transparency != undefined){
+                let el = $(node.li)
+                let value_span = el.find(".transparency_value");
+
+                if (value_span.length == 0){
+                    let slider_div = el.find(".transparency_slider");
+                    let theSlider = slider_div.slider({value:node.data.transparency,
+                        slide: context.handleTransparencySliderChange});
+
+                    // add the value
+                    let transparencyValueID = node.key + '_transparencyValue';
+                    let transparencyHtml = '<span style="float:right;" class="transparency_value" id=' + transparencyValueID + '>' + node.data.transparency + '</span>';
+                    $(slider_div).parent().append($(transparencyHtml));
+                } else {
+                    let slider_div = $(value_span).prev();
+                    slider_div.toggle();
+                    value_span.toggle();
+                }
+            }
+            return true;
+        });
+    };
+};
+
 
 export {LayerTree}
