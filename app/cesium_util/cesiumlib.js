@@ -41,6 +41,8 @@ if (!('destination' in config)) {
 	config.destination = Cesium.Cartesian3.fromDegrees(config.siteConfig.centerPoint[0], config.siteConfig.centerPoint[1], config.siteConfig.centerPoint[2]);
 }
 
+
+
 class ViewerWrapper{
     constructor(host, port, url_prefix, terrainExaggeration, container) {
         this.container = container;

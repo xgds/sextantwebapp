@@ -19,6 +19,8 @@ const Cesium = require('cesium/Cesium');
 const url = require('url');
 import {ElementManager} from "cesium_util/elementManager";
 import {projectionManager} from "cesium_util/projectionManager";
+import {UrlXHRTemplateImageryProvider} from 'cesium_util/UrlXHRTemplateImageryProvider';
+import {xgdsAuth} from 'util/xgdsUtils';
 import * as _ from "lodash";
 
 
@@ -97,7 +99,10 @@ class ImageLayerManager extends ElementManager{
             if (!options.url.includes(config.server.name)){
                 if (!_.isUndefined(config.xgds)) {
                     if (!options.url.includes(config.xgds.name)) {
+                        //TODO probably don't need the proxy as xgds does support CORS
                         options.proxy = new Cesium.DefaultProxy('/proxy/');
+                    } else {
+                        options.xhr = xgdsAuth({});
                     }
                 }  else {
                     options.proxy = new Cesium.DefaultProxy('/proxy/');
@@ -110,10 +115,16 @@ class ImageLayerManager extends ElementManager{
                     options.rectangle = tilingScheme.rectangle;
                     options.url = options.url + '/{z}/{x}/{y}.png';
                 }
-                newImagery = new Cesium.UrlTemplateImageryProvider(options);
+
+                newImagery = new UrlXHRTemplateImageryProvider(options);
 
             } else {
-                newImagery = Cesium.createTileMapServiceImageryProvider(options);
+                //TODO have this return one that supports xhr options
+                let tempImagery = Cesium.createTileMapServiceImageryProvider(options);
+                options.url = tempImagery.url;
+                options.rectangle = tempImagery.rectangle;
+                options.tilingScheme = tempImagery.tilingScheme;
+                newImagery = new UrlXHRTemplateImageryProvider(options);
             }
 
 
