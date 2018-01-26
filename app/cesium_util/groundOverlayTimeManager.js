@@ -20,6 +20,11 @@ const url = require('url');
 import {ElementManager} from "cesium_util/elementManager";
 import {buildRectangle, buildRectangleFromRadians} from "cesium_util/cesiumlib";
 import {getRestUrl} from 'util/xgdsUtils';
+import {projectionManager} from "cesium_util/projectionManager";
+import {SingleTileTimeImageryProvider} from "cesium_util/SingleTileTimeImageryProvider";
+import {buildTimeIntervalCollection} from "cesium_util/TimeUtils";
+import {patchOptionsForRemote, prefixUrl} from 'util/xgdsUtils';
+
 
 import * as _ from "lodash";
 
@@ -39,16 +44,15 @@ import * as _ from "lodash";
 class GroundOverlayTimeManager extends ElementManager{
 
     /**
-      * @function load
-      * @param options the ground overlay time options
+     * @function load
+     * @param options the ground overlay time options
      * "options": {
                                     "maxLon": 48.273283,
                                     "end": "2020-10-01T14:00:00Z",
                                     "minLon": 12.197847,
                                     "minLat": 86.565344,
-                                    "timeUrl": "/xgds_map_server/overlayTime/ereachability/",
-                                    "
-                                    ": "/xgds_map_server/overlayTimeImage/ereachability/",
+                                    "timeUrl": "/xgds_map_server/overlayTime/ereachability/{Time}",
+                                    ": "/xgds_map_server/overlayTimeImage/ereachability/{Time}",
                                     "interval": 7200.0,
                                     "start": "2020-09-22T14:00:00Z",
                                     "maxLat": 87.108042,
@@ -56,50 +60,46 @@ class GroundOverlayTimeManager extends ElementManager{
                                     "id": "ereachability",
                                     "name": "Reachability"
                                 }
-      *
-      */
+     *
+     */
     load(options, callback){
-        let newRectangle = undefined;
-        let newMaterial = undefined;
+        let newImageryLayer = undefined;
+        let newImagery = undefined;
+        options.ellipsoid = this.viewerWrapper.ellipsoid;
+        options.clock = this.viewerWrapper.clock;
+        if (!_.isUndefined(options.start) && !_.isUndefined((options.end))) {
+            //TODO this will call the server for every single tick.
+            // instead support intervals, do we really need to iterate through each?
+            // options.times = new Cesium.TimeInterval({
+            //     start: Cesium.JulianDate.fromIso8601(options.start),
+            //     stop: Cesium.JulianDate.fromIso8601(options.end)
+            // });
+            options.times = buildTimeIntervalCollection(options.start, options.end, options.interval);
+        }
         if (options.minLon !== undefined){
             let context = this;
 
             let rectangle = new Cesium.Rectangle(Cesium.Math.toRadians(options.minLon),
-                           Cesium.Math.toRadians(options.minLat),
-                           Cesium.Math.toRadians(options.maxLon),
-                           Cesium.Math.toRadians(options.maxLat));
-            let singleTileImageryProvider = new Cesium.SingleTileImageryProvider({
-                                                   url: getRestUrl(options.imageUrl),
-                                                   rectangle: rectangle,
-                                                ellipsoid: this.viewerWrapper.ellipsoid
-                //proxy: new Cesium.DefaultProxy('/proxy/')
-            });
+                Cesium.Math.toRadians(options.minLat),
+                Cesium.Math.toRadians(options.maxLon),
+                Cesium.Math.toRadians(options.maxLat));
 
-             let resultDict = {'rect': singleTileImageryProvider,
-                                  'material': newMaterial};
+            options.url = prefixUrl(options.url);
+            options = patchOptionsForRemote(options);
+            if (options.projectionName !== undefined) {
+                options.tilingScheme = projectionManager.getTilingScheme(options.projectionName, options.bounds);
+            }
 
-             context.elementMap[options.id] = resultDict;
 
-            // build the material
-            //TODO use CompositeMaterial property to get the value of the material at the time
-            // let theImage = Cesium.loadImage(getRestUrl(options.imageUrl));
-            // newMaterial = new Cesium.ImageMaterialProperty({image: theImage});
-            //
-            //
-            // buildRectangleFromRadians(Cesium.Math.toRadians(options.minLon),
-            //                Cesium.Math.toRadians(options.minLat),
-            //                Cesium.Math.toRadians(options.maxLon),
-            //                Cesium.Math.toRadians(options.maxLat),
-            //                newMaterial, options.id, options.name, this.viewerWrapper, function(entityRectangle){
-            //     newRectangle = entityRectangle;
-            //     let resultDict = {'rect': newRectangle,
-            //                       'material': newMaterial}
-            //     context.elementMap[options.id] = resultDict;
-            //     if (callback !== undefined) {
-            //         callback(resultDict);
-            //     }
-            // });
-
+            newImagery = new SingleTileTimeImageryProvider(options);
+            if (newImagery !== undefined){
+                newImageryLayer = this.viewerWrapper.viewer.imageryLayers.addImageryProvider(newImagery);
+                this.elementMap[options.id] = newImageryLayer;
+                if (callback !== undefined) {
+                    callback(newImageryLayer);
+                }
+            }
+            return newImageryLayer;
         }
     };
 
@@ -114,15 +114,16 @@ class GroundOverlayTimeManager extends ElementManager{
 
         if (id !== undefined) {
             if (id in this.elementMap){
-                let rect = this.elementMap[id].rect;
-                if (rect !== undefined){
-                    rect.show = true;
+                if (this.elementMap[id].isDestroyed()) {
+                    this.load(options);
+                } else {
+                    this.viewerWrapper.viewer.imageryLayers.add(this.elementMap[id]);
                 }
             } else {
                 this.load(options);
             }
         } else {
-            console.log('Invalid ground overlay options.');
+            console.log('Invalid ground overlay options; id required.');
             console.log(options);
         }
     };
@@ -134,10 +135,7 @@ class GroundOverlayTimeManager extends ElementManager{
      *
      */
     doHide(element){
-        let rect = element.rect;
-        if (rect !== undefined){
-            rect.show = false;
-        }
+        this.viewerWrapper.viewer.imageryLayers.remove(element);
     };
 
 }

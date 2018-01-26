@@ -85,10 +85,12 @@ class ViewerWrapper{
         const terrainProvider = new Cesium.EllipsoidTerrainProvider();
         this.terrainList['default'] = terrainProvider;
 
+        let clockOptions = {clockRange: Cesium.ClockRange.UNBOUNDED};
+        if ('startTime' in config){
+            clockOptions.startTime = Cesium.JulianDate.fromIso8601(config.startTime);
+        }
 
-        let clock = new Cesium.Clock({
-			clockRange: Cesium.ClockRange.UNBOUNDED
-		});
+        this.clock = new Cesium.Clock(clockOptions);
 
         let sceneMode = Cesium.SceneMode.SCENE3D;
         if (!_.isUndefined(config.sceneMode)){
@@ -112,8 +114,12 @@ class ViewerWrapper{
             baseLayerPicker : false,
             terrainProvider : terrainProvider,
             sceneMode: sceneMode,
-            clockViewModel: new Cesium.ClockViewModel(clock)
+            clockViewModel: new Cesium.ClockViewModel(this.clock)
         };
+
+        if ('showTimeline' in config) {
+            viewerOptions.showTimeline = config.showTimeline;
+        }
 
         if ('ellipsoid' in config){
             if (config.ellipsoid == 'MOON') {

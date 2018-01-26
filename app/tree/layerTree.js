@@ -18,7 +18,7 @@
 window.Cookies = require('js-cookie');  // normal imports did not work so hardcoded here.
 
 import {config} from 'config_loader';
-import {xgdsAuth, getRestUrl} from 'util/xgdsUtils';
+import {xgdsAuth, getRestUrl, patchOptionsForRemote} from 'util/xgdsUtils';
 
 import 'jquery.fancytree/dist/skin-lion/ui.fancytree.css';
 
@@ -256,9 +256,8 @@ class LayerTree {
                 // see if it is a ground overlay time layer
                 if (data.node.data.type == "GroundOverlayTime") {
                     if (data.node.selected) {
-                        data.node.data.id = data.node.key;
-                        data.node.data.name = data.node.title;
-                        context.groundOverlayTimeManager.show(data.node.data);
+                        let options = this.buildGroundOverlayTimeOptions(data);
+                        context.groundOverlayTimeManager.show(options);
                     } else {
                         context.groundOverlayTimeManager.hide(data.node.key);
                     }
@@ -267,24 +266,41 @@ class LayerTree {
         }
     };
 
+    buildProjectionBounds(data, options, minx, miny, maxx, maxy) {
+        if (data.node.data.projectionName !== undefined) {
+            options.projectionName = data.node.data.projectionName;
+        }
+        if (minx !== undefined) {
+            //build bounding rectangle
+            options.bounds = {minx: minx,
+                miny: miny,
+                maxx: maxx,
+                maxy: maxy
+            }
+        }
+    };
+
     buildImageLayerOptions(data, imageLayerUrl) {
         let options = {url:imageLayerUrl,
-                        flipXY: true}; // we know that we want this set for layers we made
-        if (data.node.data.projectionName !== undefined){
-            options.projectionName = data.node.data.projectionName;
-            if (data.node.data.minx !== undefined) {
-                //build bounding rectangle
-                options.bounds = {minx: data.node.data.minx,
-                    miny: data.node.data.miny,
-                    maxx: data.node.data.maxx,
-                    maxy: data.node.data.maxy
-                }
-                // console.log(options.url);
-                // options.url = options.url + '/{z}/{x}/{y}.png';
-                // console.log(options.url);
-            }
+                       flipXY: true}; // we know that we want this set for layers we made
+        this.buildProjectionBounds(data, options,
+            data.node.data.minx, data.node.data.miny,
+            data.node.data.maxx, data.node.data.maxy);
+        if (!_.isUndefined(data.node.data.projectionName)) {
             options.flipXY = false;
+            // options.url = options.url + '/{z}/{x}/{y}.png';
         }
+        return options;
+    };
+
+    buildGroundOverlayTimeOptions(data) {
+        let options = data.node.data;
+        options.url = data.node.data.imageUrl;
+        options.id = data.node.key;
+
+        this.buildProjectionBounds(data, options,
+            data.node.data.minLon, data.node.data.minLat,
+            data.node.data.maxLon, data.node.data.maxLat);
         return options;
     };
 

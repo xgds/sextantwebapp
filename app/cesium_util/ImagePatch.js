@@ -65,9 +65,6 @@ Cesium.loadImageViaBlob = function(url, request, headers) {
 };
 
 Cesium.ImageryProvider.loadImage = function(imageryProvider, url, request, headers) {
-    if (url.includes('rp.xgds.org')){
-        debugger;
-    }
     if (ktxRegex.test(url)) {
         return Cesium.loadKTX(url, headers, request);
     } else if (crnRegex.test(url)) {

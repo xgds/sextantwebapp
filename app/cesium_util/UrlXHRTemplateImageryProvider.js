@@ -18,12 +18,23 @@ const Cesium = require('cesium/Cesium');
 import * as _ from 'lodash';
 require('cesium_util/ImagePatch');
 
+/**
+ * Provides imagery by requesting tiles using specified
+ * Supports authentication headers, which can be passed in with the xhr value in options
+ * @link UrlTemplateImageryProvider
+ *
+ */
 
 class UrlXHRTemplateImageryProvider extends Cesium.UrlTemplateImageryProvider {
+    /**
+     * @constructor
+     * @param options
+     * @param {String} options.xhr.headers the headers
+     */
     constructor(options){
         super(options);
 
-        this.xhr = Cesium.defaultValue(options.xhr, {});
+        this._xhr = Cesium.defaultValue(options.xhr, {});
         
         // extension of the parent class does not give access to locally defined things.
         this.degreesScratchComputed = false;
@@ -64,7 +75,7 @@ class UrlXHRTemplateImageryProvider extends Cesium.UrlTemplateImageryProvider {
 
             ++formatIndex;
 
-            let xhrOptions = this.xhr;
+            let xhrOptions = this._xhr;
             xhrOptions.url = url;
             if (format.type === 'json') {
                 return Cesium.loadJson(xhrOptions).then(format.callback).otherwise(this.doRequest);
@@ -118,8 +129,8 @@ class UrlXHRTemplateImageryProvider extends Cesium.UrlTemplateImageryProvider {
         //>>includeEnd('debug');
         let url = this.buildImageUrl(this, x, y, level);
         let headers = undefined;
-        if ('headers' in this.xhr) {
-            headers = this.xhr.headers;
+        if ('headers' in this._xhr) {
+            headers = this._xhr.headers;
         }
         return Cesium.ImageryProvider.loadImage(this, url, request, headers);
     };

@@ -15,6 +15,10 @@
 //__END_LICENSE__
 
 import {config} from 'config_loader';
+import * as _ from "lodash";
+const url = require('url');
+
+
 
 /**
  * @function xgdsAuth
@@ -45,4 +49,39 @@ const getRestUrl = function(originalUrl) {
     return result;
 };
 
-export {xgdsAuth, getRestUrl}
+/**
+ * Update the options to either use the proxy or add the xgdsAuth to the xhr value
+ * @function patchOptionsForRemote
+ * @param options
+ * @returns {*}
+ */
+const patchOptionsForRemote = function(options) {
+    if (!options.url.includes(config.server.name)){
+        if (!_.isUndefined(config.xgds)) {
+            if (!options.url.includes(config.xgds.name)) {
+                options.proxy = new Cesium.DefaultProxy('/proxy/');
+            } else {
+                options.xhr = xgdsAuth({});
+            }
+        }  else {
+            options.proxy = new Cesium.DefaultProxy('/proxy/');
+        }
+    }
+    return options;
+}
+
+const prefixUrl = function(theUrl){
+    let result = theUrl;
+    // if this is not a fully qualified url, patch it.
+    const test = url.parse(theUrl);
+    if (test.hostname === null) {
+        try {
+            result = config.urlPrefix + theUrl;
+        } catch (e) {
+            console.log(e);
+        }
+    }
+    return result;
+}
+
+export {xgdsAuth, getRestUrl, patchOptionsForRemote, prefixUrl}

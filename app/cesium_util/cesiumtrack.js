@@ -15,7 +15,8 @@
 //__END_LICENSE__
 
 import {config} from 'config_loader';
-import * as moment from 'moment';
+//import * as moment from 'moment';
+const moment = require('moment');
 import {buildPath} from 'cesium_util/cesiumlib';
 import {xgdsAuth} from 'util/xgdsUtils';
 

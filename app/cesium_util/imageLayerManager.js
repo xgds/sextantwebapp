@@ -20,7 +20,7 @@ const url = require('url');
 import {ElementManager} from "cesium_util/elementManager";
 import {projectionManager} from "cesium_util/projectionManager";
 import {UrlXHRTemplateImageryProvider} from 'cesium_util/UrlXHRTemplateImageryProvider';
-import {xgdsAuth} from 'util/xgdsUtils';
+import {patchOptionsForRemote, prefixUrl} from 'util/xgdsUtils';
 import * as _ from "lodash";
 
 
@@ -87,27 +87,11 @@ class ImageLayerManager extends ElementManager{
         let theUrl = String(options.url);
         options.ellipsoid = this.viewerWrapper.ellipsoid;
         if ('url' in options) {
-            const test = url.parse(options.url);
-            if (test.hostname === null) {
-                try {
-                    options.url = config.urlPrefix + options.url;
-                    console.log('Loading imagery from: ' + options.url);
-                } catch (e) {
-                    console.log(e);
-                }
-            }
-            if (!options.url.includes(config.server.name)){
-                if (!_.isUndefined(config.xgds)) {
-                    if (!options.url.includes(config.xgds.name)) {
-                        //TODO probably don't need the proxy as xgds does support CORS
-                        options.proxy = new Cesium.DefaultProxy('/proxy/');
-                    } else {
-                        options.xhr = xgdsAuth({});
-                    }
-                }  else {
-                    options.proxy = new Cesium.DefaultProxy('/proxy/');
-                }
-            }
+
+            options.url = prefixUrl(options.url);
+
+            options = patchOptionsForRemote(options);
+
             if (options.projectionName !== undefined) {
                 let tilingScheme = projectionManager.getTilingScheme(options.projectionName, options.bounds);
                 if (tilingScheme !== undefined) {
@@ -115,11 +99,8 @@ class ImageLayerManager extends ElementManager{
                     options.rectangle = tilingScheme.rectangle;
                     options.url = options.url + '/{z}/{x}/{y}.png';
                 }
-
                 newImagery = new UrlXHRTemplateImageryProvider(options);
-
             } else {
-                //TODO have this return one that supports xhr options
                 let tempImagery = Cesium.createTileMapServiceImageryProvider(options);
                 options.url = tempImagery.url;
                 options.rectangle = tempImagery.rectangle;
