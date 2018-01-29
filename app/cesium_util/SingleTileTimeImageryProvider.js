@@ -61,30 +61,40 @@ class SingleTileTimeImageryProvider  {
 
         //>>includeStart('debug', pragmas.debug);
         if (_.isUndefined(url)) {
-            throw new DeveloperError('url is required.');
+            throw new Cesium.DeveloperError('url is required.');
         }
         if (!_.isUndefined(options.times) && _.isUndefined(options.clock)) {
-            throw new DeveloperError('options.times was specified, so options.clock is required.');
+            throw new Cesium.DeveloperError('options.times was specified, so options.clock is required.');
         }
 
         //>>includeEnd('debug');
 
         this._url = url;
 
-        let proxy = options.proxy;
-        this._proxy = proxy;
+        this._proxy = options.proxy;
+        this._tileDiscardPolicy = options.tileDiscardPolicy;
 
-        let rectangle = Cesium.defaultValue(options.rectangle, Cesium.Rectangle.MAX_VALUE);
+
+        this._rectangle = Cesium.Rectangle.MAX_VALUE;
+        if ('rectangle' in options){
+            this._rectangle = options.rectangle;
+        } else if ('bounds' in options){
+            this._rectangle = Cesium.Rectangle.fromDegrees(options.bounds.minx, options.bounds.miny,
+                options.bounds.maxx, options.bounds.maxy);
+        }
         let tilingScheme = options.tilingScheme;
         if (_.isUndefined(tilingScheme)) {
             tilingScheme = new Cesium.GeographicTilingScheme({
-                rectangle : rectangle,
+                rectangle : this._rectangle,
                 numberOfLevelZeroTilesX : 1,
                 numberOfLevelZeroTilesY : 1,
                 ellipsoid : options.ellipsoid
             });
         }
         this._tilingScheme = tilingScheme;
+        this._tileWidth = Cesium.defaultValue(options.width, 0);
+        this._tileHeight = Cesium.defaultValue(options.height, 0);
+
 
         let that = this;
         
@@ -105,17 +115,14 @@ class SingleTileTimeImageryProvider  {
 
         this._image = undefined;
         this._texture = undefined;
-        this._tileWidth = 0;
-        this._tileHeight = 0;
 
-        //this._errorEvent = new Event();
+        this._errorEvent = new Cesium.Event();
 
-        //this._ready = false;
-        //this._readyPromise = when.defer();
+        this._readyPromise = Cesium.when.resolve(true);
 
         let imageUrl = url;
-        if (!_.isUndefined(proxy)) {
-            imageUrl = proxy.getURL(imageUrl);
+        if (!_.isUndefined(this._proxy)) {
+            imageUrl = this._proxy.getURL(imageUrl);
         }
 
         let credit = options.credit;
@@ -159,12 +166,6 @@ class SingleTileTimeImageryProvider  {
          */
         tileWidth : {
             get : function() {
-                //>>includeStart('debug', pragmas.debug);
-                if (!this._ready) {
-                    throw new DeveloperError('tileWidth must not be called before the imagery provider is ready.');
-                }
-                //>>includeEnd('debug');
-
                 return this._tileWidth;
             }
         },
@@ -178,12 +179,6 @@ class SingleTileTimeImageryProvider  {
          */
         tileHeight: {
             get : function() {
-                //>>includeStart('debug', pragmas.debug);
-                if (!this._ready) {
-                    throw new DeveloperError('tileHeight must not be called before the imagery provider is ready.');
-                }
-                //>>includeEnd('debug');
-
                 return this._tileHeight;
             }
         },
@@ -197,12 +192,6 @@ class SingleTileTimeImageryProvider  {
          */
         maximumLevel : {
             get : function() {
-                //>>includeStart('debug', pragmas.debug);
-                if (!this._ready) {
-                    throw new DeveloperError('maximumLevel must not be called before the imagery provider is ready.');
-                }
-                //>>includeEnd('debug');
-
                 return 0;
             }
         },
@@ -216,12 +205,6 @@ class SingleTileTimeImageryProvider  {
          */
         minimumLevel : {
             get : function() {
-                //>>includeStart('debug', pragmas.debug);
-                if (!this._ready) {
-                    throw new DeveloperError('minimumLevel must not be called before the imagery provider is ready.');
-                }
-                //>>includeEnd('debug');
-
                 return 0;
             }
         },
@@ -235,12 +218,6 @@ class SingleTileTimeImageryProvider  {
          */
         tilingScheme : {
             get : function() {
-                //>>includeStart('debug', pragmas.debug);
-                if (!this._ready) {
-                    throw new DeveloperError('tilingScheme must not be called before the imagery provider is ready.');
-                }
-                //>>includeEnd('debug');
-
                 return this._tilingScheme;
             }
         },
@@ -254,7 +231,7 @@ class SingleTileTimeImageryProvider  {
          */
         rectangle : {
             get : function() {
-                return this._tilingScheme.rectangle;
+                return this._rectangle;
             }
         },
 
@@ -269,13 +246,7 @@ class SingleTileTimeImageryProvider  {
          */
         tileDiscardPolicy : {
             get : function() {
-                //>>includeStart('debug', pragmas.debug);
-                if (!this._ready) {
-                    throw new DeveloperError('tileDiscardPolicy must not be called before the imagery provider is ready.');
-                }
-                //>>includeEnd('debug');
-
-                return undefined;
+                return this._tileDiscardPolicy;
             }
         },
 
@@ -300,9 +271,7 @@ class SingleTileTimeImageryProvider  {
          * @readonly
          */
         ready : {
-            get : function() {
-                return this._ready;
-            }
+            value: true
         },
 
         /**
@@ -344,11 +313,54 @@ class SingleTileTimeImageryProvider  {
             get : function() {
                 return true;
             }
+        },
+
+        /**
+         * Gets or sets a clock that is used to get keep the time used for time dynamic parameters.
+         * @memberof WebMapTileServiceImageryProvider.prototype
+         * @type {Clock}
+         */
+        clock : {
+            get : function() {
+                return this._timeDynamicImagery.clock;
+            },
+            set : function(value) {
+                this._timeDynamicImagery.clock = value;
+            }
+        },
+        /**
+         * Gets or sets a time interval collection that is used to get time dynamic parameters. The data of each
+         * TimeInterval is an object containing the keys and values of the properties that are used during
+         * tile requests.
+         * @memberof WebMapTileServiceImageryProvider.prototype
+         * @type {TimeIntervalCollection}
+         */
+        times : {
+            get : function() {
+                return this._timeDynamicImagery.times;
+            },
+            set : function(value) {
+                this._timeDynamicImagery.times = value;
+            }
         }
     });
 
     };
 
+    /**
+     * Requests the image for a given tile.  This uses the clock and the time dynamic imagery.
+     *
+     * @param {Number} x The tile X coordinate.
+     * @param {Number} y The tile Y coordinate.
+     * @param {Number} level The tile level.
+     * @param {Request} [request] The request object. Intended for internal use only.
+     * @returns {Promise.<Image|Canvas>|undefined} A promise for the image that will resolve when the image is available, or
+     *          undefined if there are too many active requests to the server, and the request
+     *          should be retried later.  The resolved image may be either an
+     *          Image or a Canvas DOM object.
+     *
+     * @exception {DeveloperError} <code>requestImage</code> must not be called before the imagery provider is ready.
+     */
     requestImage(x, y, level, request) {
         let result;
         let timeDynamicImagery = this._timeDynamicImagery;
@@ -374,12 +386,8 @@ class SingleTileTimeImageryProvider  {
     };
 
     requestIntervalImage(col, row, level, request, interval) {
-        let labels = this._tileMatrixLabels;
-        let tileMatrix = !_.isUndefined(labels) ? labels[level] : level.toString();
-        let subdomains = this._subdomains;
         let url;
         let key;
-        let staticDimensions = this._dimensions;
         let dynamicIntervalData = !_.isUndefined(interval) ? interval.data : undefined;
 
         if (this._url.indexOf('{') >= 0) {
@@ -387,9 +395,13 @@ class SingleTileTimeImageryProvider  {
             url = this._url;
 
             if (!_.isUndefined(dynamicIntervalData)) {
-                for (key in dynamicIntervalData) {
-                    if (dynamicIntervalData.hasOwnProperty(key)) {
-                        url = url.replace('{' + key + '}', dynamicIntervalData[key]);
+                if (_.isNumber(dynamicIntervalData)){
+                    url = url.replace('{Time}', interval.start.toString());
+                } else {
+                    for (key in dynamicIntervalData) {
+                        if (dynamicIntervalData.hasOwnProperty(key)) {
+                            url = url.replace('{' + key + '}', dynamicIntervalData[key]);
+                        }
                     }
                 }
             }
@@ -423,9 +435,25 @@ class SingleTileTimeImageryProvider  {
         if ('headers' in this._xhr) {
             headers = this._xhr.headers;
         }
+        //console.log(url);
         return Cesium.ImageryProvider.loadImage(this, url, request, headers);
 
-    }
+    };
+
+        /**
+        * Unsupported
+        * @param x
+        * @param y
+        * @param level
+        * @param longitude
+        * @param latitude
+        * @returns {undefined}
+        */
+    pickFeatures(x, y, level, longitude, latitude) {
+        return undefined;
+    };
 }
+
+
 
 export {SingleTileTimeImageryProvider}

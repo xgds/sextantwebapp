@@ -118,7 +118,7 @@ class ViewerWrapper{
         };
 
         if ('showTimeline' in config) {
-            viewerOptions.showTimeline = config.showTimeline;
+            viewerOptions.timeline = config.showTimeline;
         }
 
         if ('ellipsoid' in config){

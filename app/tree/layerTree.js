@@ -295,7 +295,7 @@ class LayerTree {
 
     buildGroundOverlayTimeOptions(data) {
         let options = data.node.data;
-        options.url = data.node.data.imageUrl;
+        options.url = getRestUrl(data.node.data.imageUrl);
         options.id = data.node.key;
 
         this.buildProjectionBounds(data, options,

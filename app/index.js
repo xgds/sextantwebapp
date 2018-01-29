@@ -93,6 +93,7 @@ function addGPSLocation(data){
 // });
 
 module.exports = {
+    'config': config,
 	'camera': viewerWrapper.viewer.scene.camera,
 	'viewerWrapper': viewerWrapper,
 	'addGPSLocation': addGPSLocation,

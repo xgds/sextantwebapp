@@ -94,3 +94,9 @@ function handleSave(){ //TODO rather redundant. Also, will break if user names t
 		savePlan($('#saveAsName').val(),$('#saveAsVersion').val(),$('#saveAsNotes').val()); //Returns array with [Name,Version]
 	}
 };
+
+function hideFooterMenu() {
+	if ('hideFooter' in sextant.config && sextant.config.hideFooter){
+		$('.footer-menu').hide();
+	}
+}

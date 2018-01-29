@@ -102,7 +102,7 @@
 
 
 <!-- Regular Mode toolbar -->
-<div data-role="footer" data-position="fixed" data-tap-toggle="false" style="text-align:center;" id="viewModeToolbar">
+<div data-role="footer" data-position="fixed" data-tap-toggle="false" class="footer-menu" id="viewModeToolbar">
   <div data-role="controlgroup" data-type="horizontal">
     <a href="#" class="ui-btn" onclick="reloadPlan();">Reload Plan</a>
     <!-- Calls toggleEdit from sextant_caller and switches toolbars-->
@@ -117,7 +117,7 @@
 </div>
 
 <!-- Edit Mode toolbar -->
-<div data-role="footer" data-position="fixed" data-tap-toggle="false" style="text-align:center; display:none;" id="editModeToolbar">
+<div data-role="footer" data-position="fixed" data-tap-toggle="false" class="footer-menu" id="editModeToolbar">
   <div data-role="controlgroup" data-type="horizontal" id="editControl">
     <a href="#" class="ui-btn" onclick="sendPlanToSextant()">Calculate Path</a>
     <a href="#" class="ui-btn" onclick="reloadPlan();">Reload Plan</a>
@@ -127,7 +127,6 @@
     <a href="#" class="ui-btn" onclick="toggleEditMode(); toggleMode(); followPosition($('#follow_checkbox').prop('checked'));">Done Editing</a>
   </div>
 </div>
-
 
 <script src="/wristApp/jquery/jquery.min.js"></script>
 <!--<script src="/wristApp/jquery-ui/jquery-ui.js"></script> -->
@@ -145,7 +144,8 @@
                     $('#submit').attr('disabled', false);            
                 else
                     $('#submit').attr('disabled',true);
-            })
+            });
+            hideFooterMenu();
         });
         
 

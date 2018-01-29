@@ -27,17 +27,16 @@ const moment = require('moment');
  * @param interval the interval in seconds between start and end
  */
 const buildTimeIntervalCollection = function(start, end, interval){
-
-    let intervals = new Array();
+    let jdates = [];
     let theNow = moment(start);
     let theEnd = moment(end);
     while(theNow.isSameOrBefore(theEnd)) {
         let julianNow = Cesium.JulianDate.fromIso8601(theNow.format());
-        intervals.push(new Cesium.TimeInterval({start: julianNow, stop: julianNow}));
+        jdates.push(julianNow);
         theNow.add(interval, 's');
     }
 
-    return new Cesium.TimeIntervalCollection({intervals:intervals});
+    return Cesium.TimeIntervalCollection.fromJulianDateArray({julianDates:jdates});
 
 }
 
