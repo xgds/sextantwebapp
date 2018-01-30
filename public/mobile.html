@@ -69,9 +69,27 @@
 <!-- Symbol that shows whether we're connected to container in top right of screen -->
 <div id="containerConnected_div">   
     <span class="btn alert-danger" id="connected_div" style="visibility: visible;">
-        <span class="fa" id="connected" style="min-width:1rem;">
+        <span class="fa nav-btn" id="connected" >
         </span>
     </span>
+    <div id="nav_div" style="display:none;">
+        <span class="btn fa fa-arrow-left nav-btn camera-btn" id="arrow_left" value="left">
+        </span>
+        <span class="btn fa fa-arrow-up nav-btn camera-btn" id="arrow_up" value="up">
+        </span>
+        <span class="btn fa fa-arrow-down nav-btn camera-btn" id="arrow_down" value="down">
+        </span>
+        <span class="btn fa fa-arrow-right nav-btn camera-btn" id="arrow_right" value="right">
+        </span>
+        <br/>
+        <span class="btn fa fa-search-plus nav-btn camera-btn" id="zoom_in" value="forward">
+        </span>
+        <span class="btn fa fa-search-minus nav-btn camera-btn" id="zoom_out" value="backward">
+        </span>
+        <span class="btn fa fa-home nav-btn camera-btn" id="fly_home" value="home">
+        </span>
+    </div>
+
 </div>
 
 
@@ -146,6 +164,9 @@
                     $('#submit').attr('disabled',true);
             });
             hideFooterMenu();
+            hideConnected();
+            showNav();
+            hookCameraButtons();
         });
         
 

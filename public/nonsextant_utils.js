@@ -99,4 +99,27 @@ function hideFooterMenu() {
 	if ('hideFooter' in sextant.config && sextant.config.hideFooter){
 		$('.footer-menu').hide();
 	}
+};
+
+function hideConnected() {
+	if ('hideConnected' in sextant.config && sextant.config.hideConnected){
+		$('#connected_div').hide();
+	}
+};
+
+function showNav() {
+	if ('showNav' in sextant.config && sextant.config.showNav){
+		$('#nav_div').show();
+	}
+};
+
+function hookCameraButtons() {
+	$(".camera-btn").mousedown(function(event) {
+		let thisval = $(this).attr("value");
+		setCameraControl(thisval, true);
+	});
+	$(".camera-btn").mouseup(function(event) {
+		let thisval = $(this).attr("value");
+		setCameraControl(thisval, false);
+	});
 }

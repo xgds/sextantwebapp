@@ -70,15 +70,15 @@ class ViewerWrapper{
 
         // Set simple geometry for the full planet
 
-        const theRealOne = {topLeft: [24.070617695061806,87.90173269295278],
-            topRight: [49.598705282838125,87.04553528415659],
-            bottomRight:[34.373553362965566,86.015550572534],
-            bottomLeft: [14.570663006937881,86.60174704052636]};
-
-        const rectangle = new Cesium.Rectangle(Cesium.Math.toRadians(theRealOne.bottomLeft[0]),
-             Cesium.Math.toRadians(theRealOne.bottomLeft[1]),
-             Cesium.Math.toRadians(theRealOne.topRight[0]),
-             Cesium.Math.toRadians(theRealOne.topRight[1]));
+        // const theRealOne = {topLeft: [24.070617695061806,87.90173269295278],
+        //     topRight: [49.598705282838125,87.04553528415659],
+        //     bottomRight:[34.373553362965566,86.015550572534],
+        //     bottomLeft: [14.570663006937881,86.60174704052636]};
+        //
+        // const rectangle = new Cesium.Rectangle(Cesium.Math.toRadians(theRealOne.bottomLeft[0]),
+        //      Cesium.Math.toRadians(theRealOne.bottomLeft[1]),
+        //      Cesium.Math.toRadians(theRealOne.topRight[0]),
+        //      Cesium.Math.toRadians(theRealOne.topRight[1]));
 
         // may need to create geometry that matches the projection
         //const terrainProvider = new Cesium.EllipsoidTerrainProvider({tilingScheme:projectionManager.getTilingScheme('NP_STEREO', rectangle)});
@@ -167,6 +167,13 @@ class ViewerWrapper{
 
         //this.scene.preRender.addEventListener(this.getViewRange.bind(this));
 
+        // set the navigation controls
+        if ('mouseControls' in config){
+            if (config.mouseControls == 'flatPan'){
+                this.setFlatPanControls();
+            }
+        }
+
     }
 
     getViewRange(){
@@ -241,10 +248,6 @@ class ViewerWrapper{
             }
         }.bind(this), Cesium.ScreenSpaceEventType.MOUSE_MOVE);
     };
-
-
-
-
 
     addTerrain(folder_location, image_address) {
         //if(_.isUndefined(image_address)) {
@@ -404,6 +407,76 @@ class ViewerWrapper{
 	            });
 	    }.bind(this));
     };
+
+    /**
+     * @function toggleNavigation
+     * turn on or off ability to move around the scene
+     * @param value
+     */
+    toggleNavigation(value){
+		this.viewer.scene.screenSpaceCameraController.enableRotate = value;
+		this.viewer.scene.screenSpaceCameraController.enableTranslate = value;
+		this.viewer.scene.screenSpaceCameraController.enableZoom = value;
+		this.viewer.scene.screenSpaceCameraController.enableTilt = value;
+		this.viewer.scene.screenSpaceCameraController.enableLook = value;
+	};
+
+    setCameraFlag(key, value){
+        this.cameraFlags[key] = value;
+    };
+
+    /**
+     * @function setFlatPanControls
+     * Set up the viewer controls to pan east west north south instead of rotating around the globe
+     */
+    setFlatPanControls(){
+        this.cameraFlags = {forward: false,
+                            backward: false,
+                            up: false,
+                            down: false,
+                            left: false,
+                            right: false,
+                            home: false};
+
+        this.toggleNavigation(false);
+
+        let context = this;
+
+        this.viewer.clock.onTick.addEventListener(function(clock) {
+            let camera = context.viewer.camera;
+
+            if (context.cameraFlags.home) {
+                camera.flyTo({
+                    destination: config.destination,
+                    duration: 3,
+                });
+                return;
+            }
+            // Change movement speed based on the distance of the camera to the surface of the ellipsoid.
+            let cameraHeight = context.ellipsoid.cartesianToCartographic(camera.position).height;
+            let moveRate = cameraHeight / 100.0;
+
+            if (context.cameraFlags.forward) {
+                camera.moveForward(moveRate);
+            }
+            if (context.cameraFlags.backward) {
+                camera.moveBackward(moveRate);
+            }
+            if (context.cameraFlags.up) {
+                camera.moveUp(moveRate);
+            }
+            if (context.cameraFlags.down) {
+                camera.moveDown(moveRate);
+            }
+            if (context.cameraFlags.left) {
+                camera.moveLeft(moveRate);
+            }
+            if (context.cameraFlags.right) {
+                camera.moveRight(moveRate);
+            }
+
+        });
+    }
 }
 
 // We are no longer using this class, we are using path instead.
@@ -486,7 +559,9 @@ class DynamicLines{
 	
 	zoomTo(){
 		this.viewerWrapper.viewer.zoomTo(this.entity);
-	}
+	};
+
+
 };
 
 const zoom = function(camera){

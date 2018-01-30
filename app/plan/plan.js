@@ -46,14 +46,7 @@ class PlanManager {
 		this.initializedPextant = false;
 	};
 	
-	toggleNavigation(value){
-		// turn on or off ability to move around the scene
-		this.viewerWrapper.viewer.scene.screenSpaceCameraController.enableRotate = value;
-		this.viewerWrapper.viewer.scene.screenSpaceCameraController.enableTranslate = value;
-		this.viewerWrapper.viewer.scene.screenSpaceCameraController.enableZoom = value;
-		this.viewerWrapper.viewer.scene.screenSpaceCameraController.enableTilt = value;
-		this.viewerWrapper.viewer.scene.screenSpaceCameraController.enableLook = value;
-	};
+
 	
 	setupEditing() {
 		this.editStationHandler = new Cesium.ScreenSpaceEventHandler(this.viewerWrapper.viewer.scene.canvas);
@@ -64,7 +57,7 @@ class PlanManager {
 				if (defined(pickedObject)) {
 					if (pickedObject.id.id in this.stationElements){
 						this.selectedStation = pickedObject.id;
-						this.toggleNavigation(false);
+						this.viewerWrapper.toggleNavigation(false);
 					}
 				}
 			}
@@ -89,7 +82,7 @@ class PlanManager {
 						let llh = this.viewerWrapper.toLongLatHeight(this.selectedStation.position._value);
 						let newPosition = [llh[0], llh[1]];
 						this.updateStationPosition(stationId, newPosition, this.selectedStation.position._value);
-						this.toggleNavigation(true);
+						this.viewerWrapper.toggleNavigation(true);
 						this.selectedStation = undefined;
 					}
 				}.bind(this),

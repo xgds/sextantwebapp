@@ -180,3 +180,13 @@
             }
 		}
 	}
+
+/**
+ * @function setCameraControl
+ * Set the camera control to move or stop moving the camera
+ * @param name  The name to set, ie forward, backward, up, down, left, right
+ * @param value true|false
+ */
+function setCameraControl(name, value) {
+		sextant.viewerWrapper.setCameraFlag(name, value);
+	}
