@@ -119,6 +119,7 @@ class ViewerWrapper{
 
         if ('showTimeline' in config) {
             viewerOptions.timeline = config.showTimeline;
+            viewerOptions.animation = true;
         }
 
         if ('ellipsoid' in config){
