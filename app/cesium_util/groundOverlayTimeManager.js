@@ -94,6 +94,9 @@ class GroundOverlayTimeManager extends ElementManager{
             newImagery = new SingleTileTimeImageryProvider(options);
             if (newImagery !== undefined){
                 newImageryLayer = this.viewerWrapper.viewer.imageryLayers.addImageryProvider(newImagery);
+                if ('alpha' in options){
+                   newImageryLayer.alpha = options.alpha;
+                }
                 this.elementMap[options.id] = newImageryLayer;
                 if (callback !== undefined) {
                     callback(newImageryLayer);

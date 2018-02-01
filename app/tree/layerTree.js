@@ -312,6 +312,10 @@ class LayerTree {
         this.buildProjectionBounds(data, options,
             data.node.data.minLon, data.node.data.minLat,
             data.node.data.maxLon, data.node.data.maxLat);
+
+        if (!_.isUndefined(data.node.data.transparency) && data.node.data.transparency > 0){
+            options.alpha = this.calculateAlpha(data.node.data.transparency);
+        }
         return options;
     };
 
