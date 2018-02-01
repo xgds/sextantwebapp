@@ -37,4 +37,9 @@
     height: .8em !important;
 }
 
+.transparency_slider {
+    width:100px;
+    float:right;
+    margin-left: 10px;
+}
 

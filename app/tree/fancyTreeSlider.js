@@ -41,7 +41,7 @@
             if (node.data.transparency != undefined)
             {
                 let sliderID =  node.key + '_slider';
-                let sliderHtml = '<div id="' + sliderID + '" class="transparency_slider" style="width:100px;float:right;margin-left: 10px;" value=' + node.data.transparency + '></div>'
+                let sliderHtml = '<div id="' + sliderID + '" class="transparency_slider" value=' + node.data.transparency + '></div>'
                 $("span.fancytree-title", node.span).append(' ').append( $(sliderHtml) );
             }
         }

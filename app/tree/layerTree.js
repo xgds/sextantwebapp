@@ -236,6 +236,7 @@ class LayerTree {
                 }
             });
             this.tree = fancytree.getTree(layertreeNode);  //TODO see if this differs from mytree
+            this.updateNodesFromCookies();
             this.connectFilter(this);
             //this.setupContextMenu(layertreeNode); //TODO see about integrating context menu, need to make it flexible.
         }
@@ -297,6 +298,9 @@ class LayerTree {
             options.flipXY = false;
             // options.url = options.url + '/{z}/{x}/{y}.png';
         }
+        if (!_.isUndefined(data.node.data.transparency) && data.node.data.transparency > 0){
+            options.alpha = this.calculateAlpha(data.node.data.transparency);
+        }
         return options;
     };
 
@@ -334,6 +338,46 @@ class LayerTree {
     };
 
     /**
+     * @function updatePreselectedFromCookies
+     * If some of the nodes were marked preselected, they may be rendered before the tree.
+     * Update their transparency values from the cookied transparency values.
+     * @param preselected the JSON data from the server for these nodes, in list form.
+     */
+    updatePreselectedFromCookies(preselected) {
+       let theCookies = Cookies.getJSON();
+        for (let key in theCookies) {
+            if (theCookies.hasOwnProperty(key)) {
+                if (theCookies[key].transparency != undefined){
+                    for (let i=0; i<preselected.length; i++) {
+                        let node = preselected[i];
+                        if (node.key === key){
+                            node.data.transparency = theCookies[key].transparency;
+                        }
+                    }
+                }
+            }
+        }
+    };
+
+    /**
+     * @function updateNodesFromCookies
+     * Update the tree nodes with the cookied values, currently just transparency
+     */
+    updateNodesFromCookies() {
+        let theCookies = Cookies.getJSON();
+        for (let key in theCookies) {
+            if (theCookies.hasOwnProperty(key)) {
+                if (theCookies[key].transparency != undefined){
+                    let node =  this.tree.getNodeByKey(key, this.tree.getRootNode());
+                    if (node != undefined) {
+                        node.data.transparency = theCookies[key].transparency;
+                    }
+                }
+            }
+        }
+    };
+
+    /**
      * @function refresh
      * Refresh the fancy tree with data from its url
      *
@@ -341,15 +385,7 @@ class LayerTree {
     refresh() {
         if (!_.isUndefined(this.tree)){
             let context = this;
-
             this.loadTreeData(function(data) { context.tree.reload(data)});
-            //this.tree.reload(this.treeData);
-            // this.tree.reload({
-            //     url: config.layer_tree_url
-            // }).done(function(){
-            //     console.log('RELOADED');
-            //     //app.vent.trigger('layerView:reloadLayers');
-            // });
         }
     };
 
@@ -403,6 +439,7 @@ class LayerTree {
                     data: {'uuids':selected_uuids},
                     success: $.proxy(function(data) {
                         if (data != null){
+                            this.updatePreselectedFromCookies(data);
                             this.selectNodes(data);
                         }
                     }, this),

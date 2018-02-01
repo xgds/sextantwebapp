@@ -144,6 +144,9 @@ class ImageLayerManager extends ElementManager{
         }
         if (newImagery !== undefined){
             newImageryLayer = this.viewerWrapper.viewer.imageryLayers.addImageryProvider(newImagery);
+            if ('alpha' in options){
+                newImageryLayer.alpha = options.alpha;
+            }
             this.elementMap[theUrl] = newImageryLayer;
             if (callback !== undefined) {
                 callback(newImageryLayer);
