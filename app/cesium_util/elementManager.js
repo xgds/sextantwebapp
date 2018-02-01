@@ -131,6 +131,24 @@ class ElementManager {
             }
         }
     };
+
+    /**
+     * Set the alpha value of the element with the given key.
+     * @param key
+     * @param value
+     */
+    setAlpha(key, value){
+        try {
+            let found = this.elementMap[key];
+            if (!_.isUndefined(found)) {
+                found.alpha = value;
+                return true;
+            }
+        } catch (err) {
+            // ulp
+        }
+        return false;
+    };
 }
 
 export {ElementManager}

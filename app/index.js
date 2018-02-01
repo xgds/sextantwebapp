@@ -69,6 +69,7 @@ groundOverlayTimeManager = new GroundOverlayTimeManager(viewerWrapper);
 
 if (config.layer_tree_url !== undefined){
     layerTree = new LayerTree(viewerWrapper, 'layersPopup', kmlManager, imageLayerManager, groundOverlayTimeManager);
+
 }
 
 

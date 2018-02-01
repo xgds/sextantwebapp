@@ -21,6 +21,10 @@ import {config} from 'config_loader';
 import {xgdsAuth, getRestUrl, patchOptionsForRemote} from 'util/xgdsUtils';
 
 import 'jquery.fancytree/dist/skin-lion/ui.fancytree.css';
+require('jquery-ui/themes/base/core.css');
+require('jquery-ui/themes/base/slider.css');
+require('jquery-ui/themes/base/theme.css');
+
 
 const $ = require('jquery');
 
@@ -31,7 +35,7 @@ require('jquery.fancytree/dist/modules/jquery.fancytree.select');
 require('jquery.fancytree/dist/modules/jquery.fancytree.ui-deps');
 
 require('jquery.fancytree/dist/modules/jquery.fancytree.persist');
-//require('jquery.slider');
+const slider = require('jquery-ui/ui/widgets/slider');
 require('tree/fancyTreeSlider');
 
 
@@ -48,8 +52,6 @@ require('tree/fancyTreeSlider');
  * -Plans
  *
  * @todo refactor so that this is not so xGDS specific
- * @todo persist & use cookies
- * @todo test filtering
  * @todo customize tree styling
  *
  */
@@ -79,6 +81,11 @@ class LayerTree {
         this.layersInitialized = false;
         this.transparencySlidersVisible = false;
         this.initializeMapData();
+        if (global.layerTree === undefined){
+            global.layerTree = this;
+        } else {
+            console.log('WARNING we are not yet set up to run more than one layer tree');
+        }
     };
 
     /**
@@ -421,13 +428,46 @@ class LayerTree {
         }
     };
 
+    /**
+     * @function calculateAlpha
+     * Convert 0-100 transparency to 1.0-0.0 alpha
+     * @param transparency
+     * @returns {number}
+     */
+    calculateAlpha(transparency){
+        if (transparency == undefined || transparency == 0){
+            return 1;
+        }
+        let t = transparency/100.0;
+        return 1.0 - t;
+    };
+
+    /**
+     * @function setAlpha
+     * Set the alpha value of the rendered node in cesium
+     * @param node the tree node
+     * @param value the transparency value
+     */
+    setAlpha(node, value) {
+        let scaledValue = this.calculateAlpha(value);
+        let kmlUrl = this.getKmlUrl({node:node});
+        if (kmlUrl !== undefined) {
+            this.kmlManager.setAlpha(node.key, scaledValue);
+        } else if (node.data.type == 'MapTile' || node.data.type == 'MapDataTile') {
+            let imageLayerUrl = this.getImageLayerUrl({node:node});
+            this.imageLayerManager.setAlpha(imageLayerUrl, scaledValue);
+        } else if (node.data.type == "GroundOverlayTime") {
+            this.groundOverlayTimeManager.setAlpha(node.key, scaledValue);
+        }
+    };
+
     handleTransparencySliderChange(event, ui) {
         let newValue = ui.value;
         let node_id = ui.handle.parentElement.id.substring(0, ui.handle.parentElement.id.length - 7);
-        let node = app.tree.getNodeByKey(node_id);
-        if (node.mapView != undefined) {
-            node.mapView.setTransparency(newValue);
-        }
+        let context = layerTree;
+        let node = context.tree.getNodeByKey(node_id);
+        context.setAlpha(node, newValue);
+
         // set the printed value
         let transparencyValueID = '#' + node_id + '_transparencyValue';
         let transparencyValueSpan = $(ui.handle.parentElement.parentElement).find(transparencyValueID);

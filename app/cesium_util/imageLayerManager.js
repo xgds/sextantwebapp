@@ -72,7 +72,25 @@ class ImageLayerManager extends ElementManager{
             //ulp
         }
         return result;
-    }
+    };
+
+    /**
+     * @function buildRectangle
+     * Build a rectangle from bounds using the projection in the tiling scheme
+     * @param tilingScheme
+     * @param boundsUTM must contain minx, miny, maxx, maxy in meters
+     */
+    buildRectangle(tilingScheme, boundsUTM) {
+        let projection = tilingScheme.projection;
+        let rectangleSouthwestInMeters = new Cesium.Cartesian2(boundsUTM.minx, boundsUTM.miny);
+        let rectangleNortheastInMeters = new Cesium.Cartesian2(boundsUTM.maxx, boundsUTM.maxy);
+
+        let southwest = projection.unproject(rectangleSouthwestInMeters);
+        let northeast = projection.unproject(rectangleNortheastInMeters);
+        let rectangle = new Cesium.Rectangle(southwest.longitude, southwest.latitude,
+            northeast.longitude, northeast.latitude);
+        return rectangle;
+    };
 
     /**
       * @function loadImageLayer
@@ -89,15 +107,26 @@ class ImageLayerManager extends ElementManager{
         if ('url' in options) {
 
             options.url = prefixUrl(options.url);
-
+            console.log(options.url);
             options = patchOptionsForRemote(options);
 
             if (options.projectionName !== undefined) {
                 let tilingScheme = projectionManager.getTilingScheme(options.projectionName, options.bounds);
                 if (tilingScheme !== undefined) {
                     options.tilingScheme = tilingScheme;
+                    // if ('bounds' in options){
+                    //     options.rectangle = this.buildRectangle(tilingScheme, options.bounds);
+                    // } else {
+                    //     options.rectangle = tilingScheme.rectangle;
+                    // }
+                    if ('bounds' in options) {
+                        console.log(this.buildRectangle(tilingScheme, options.bounds));
+                    }
+
                     options.rectangle = tilingScheme.rectangle;
-                    options.url = options.url + '/{z}/{x}/{y}.png';
+                    console.log(options.rectangle);
+
+                    options.url = options.url + '/{z}/{x}/{y}.png';  //TODO might be reverseY, see if flipXY is passed in
                 }
                 newImagery = new UrlXHRTemplateImageryProvider(options);
             } else {

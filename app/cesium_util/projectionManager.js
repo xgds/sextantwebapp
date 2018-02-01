@@ -95,7 +95,7 @@ class ProjectionManager {
        let rectangleSouthwestInMeters = undefined;
        let rectangleNortheastInMeters = undefined;
        if (boundsUTM !== undefined){
-           console.log(boundsUTM);
+           //console.log(boundsUTM);
            rectangleSouthwestInMeters = new Cesium.Cartesian2(boundsUTM.minx, boundsUTM.miny);
            rectangleNortheastInMeters = new Cesium.Cartesian2(boundsUTM.maxx, boundsUTM.maxy);
 
@@ -107,10 +107,17 @@ class ProjectionManager {
             // console.log(theMax);
 
            //rectangle = new Cesium.Rectangle(theMin.longitude, theMin.latitude, theMax.longitude, theMax.latitude);
+       } else {
+//           let semimajorAxisTimesPi = this.ellipsoid.maximumRadius * Math.PI;
+           if (key == 'NP_STEREO') {
+               rectangle = Cesium.Rectangle.fromDegrees(-180.0, 0.0, 180.0, 90.0);
+           } else if (key === 'SP_STEREO'){
+               rectangle = Cesium.Rectangle.fromDegrees(-180.0, -90, 180.0, 0.0);
+           }
        }
 
        let options = {ellipsoid:this.ellipsoid,
-                      //rectangle:rectangle,
+                      rectangle: rectangle,
                       projection: projection,
                       rectangleSouthwestInMeters: rectangleSouthwestInMeters,
                       rectangleNortheastInMeters: rectangleNortheastInMeters

@@ -17,6 +17,8 @@
 const Cesium = require('cesium/Cesium');
 import * as _ from 'lodash';
 
+const HALF_PI = Math.PI/2.0;
+const TWICE_PI = Math.PI*2.0;
 
 /**
  * @class NorthPoleStereo  Map Projection to handle north pole stereographic projections.
@@ -39,7 +41,7 @@ class NorthPoleStereo {
      * @returns {number}
      */
     getTheta(longitudeRadians){
-        return longitudeRadians - (Math.PI / 2.0);
+        return longitudeRadians - HALF_PI;
     }
 
     /**
@@ -48,7 +50,18 @@ class NorthPoleStereo {
      * @returns {number}
      */
     getRadsAwayFromPoleForProject(latitudeRadians){
-        return (Math.PI / 2.0 - latitudeRadians);
+        return (HALF_PI - latitudeRadians);
+    }
+
+    /**
+     * Correct longitude if it has wrapped over to be between -PI and PI
+     * @param lon
+     * @returns {*}
+     */
+    fixLongitude(lon) {
+        while (lon > Math.PI) lon -= TWICE_PI;
+        while (lon < -Math.PI) lon += TWICE_PI;
+        return lon;
     }
 
     /**
@@ -60,11 +73,13 @@ class NorthPoleStereo {
     project(cartographic, result) {
         let longitude = cartographic.longitude;
         let latitude = cartographic.latitude;
-        // assume Cesium is giving us good values
-        // longitude = this.valid_longitude(longitude);
-        // if (latitude > 90 || latitude < -90){
-        //     return [NaN, NaN];
-        // }
+
+        longitude = this.fixLongitude(longitude);
+        if (latitude > HALF_PI || latitude < -HALF_PI){
+            console.log('BAD LATITUDE VALUE: ' + latitude);
+            //TODO throw exception
+            return Cesium.Cartesian3.ZERO;
+        }
 
         let x, y;
         let radiansAwayFromPole = this.getRadsAwayFromPoleForProject(latitude);
@@ -92,7 +107,7 @@ class NorthPoleStereo {
      * @returns {number}
      */
     getUnprojectLatitude(radiansAwayFromPole){
-        return ( Math.PI / 2.0 - radiansAwayFromPole);
+        return ( HALF_PI - radiansAwayFromPole);
     }
 
     /**
@@ -102,7 +117,7 @@ class NorthPoleStereo {
      * @returns {number}
      */
     getUnprojectLongitude(y, x){
-        return Math.atan2(y, x) + (Math.PI / 2.0);
+        return Math.atan2(y, x) + HALF_PI;
     }
 
 
@@ -149,7 +164,7 @@ class SouthPoleStereo extends NorthPoleStereo {
      * @returns {number}
      */
     getTheta(longitudeRadians){
-        return longitudeRadians - ( - Math.PI / 2.0);
+        return longitudeRadians - ( - HALF_PI);
     }
 
     /**
@@ -158,7 +173,7 @@ class SouthPoleStereo extends NorthPoleStereo {
      * @returns {number}
      */
     getRadsAwayFromPoleForProject(latitudeRadians){
-        return (Math.PI / 2.0 + latitudeRadians);
+        return (HALF_PI + latitudeRadians);
     }
 
     /**
@@ -167,7 +182,7 @@ class SouthPoleStereo extends NorthPoleStereo {
      * @returns {number}
      */
     getUnprojectLatitude(radiansAwayFromPole){
-        return (- Math.PI / 2.0 + radiansAwayFromPole);
+        return (-HALF_PI + radiansAwayFromPole);
     }
 
     /**
@@ -177,7 +192,7 @@ class SouthPoleStereo extends NorthPoleStereo {
      * @returns {number}
      */
     getUnprojectLongitude(y, x){
-        let longitude = Math.atan2(y, x) + ( - Math.PI / 2.0);
+        let longitude = Math.atan2(y, x) + ( - HALF_PI);
         longitude = -longitude; // because this is a south pole projection
         return longitude;
 

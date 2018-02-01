@@ -30,7 +30,7 @@ const Cesium = require('cesium/Cesium');
 
 Cesium.BingMapsApi.defaultKey = global.config.bing_key;
 
-//import {projectionManager} from "cesium_util/projectionManager";
+import {projectionManager} from "cesium_util/projectionManager";
 
 
 // later when we have this provided from node module do this
@@ -38,7 +38,7 @@ Cesium.BingMapsApi.defaultKey = global.config.bing_key;
 
 
 if (!('destination' in config)) {
-	config.destination = Cesium.Cartesian3.fromDegrees(config.siteConfig.centerPoint[0], config.siteConfig.centerPoint[1], config.siteConfig.centerPoint[2]);
+    config.destination = Cesium.Cartesian3.fromDegrees(config.siteConfig.centerPoint[0], config.siteConfig.centerPoint[1], config.siteConfig.centerPoint[2]);
 }
 
 
@@ -79,11 +79,19 @@ class ViewerWrapper{
         //      Cesium.Math.toRadians(theRealOne.bottomLeft[1]),
         //      Cesium.Math.toRadians(theRealOne.topRight[0]),
         //      Cesium.Math.toRadians(theRealOne.topRight[1]));
+        //const terrainProvider = new Cesium.EllipsoidTerrainProvider({tilingScheme:projectionManager.getTilingScheme('NP_STEREO', rectangle)});
+
 
         // may need to create geometry that matches the projection
-        //const terrainProvider = new Cesium.EllipsoidTerrainProvider({tilingScheme:projectionManager.getTilingScheme('NP_STEREO', rectangle)});
-        const terrainProvider = new Cesium.EllipsoidTerrainProvider();
+        let terrainProvider = undefined;
+        if ('globeTilingScheme' in config) {
+            let tilingScheme = projectionManager.getTilingScheme(config.globeTilingScheme);
+            terrainProvider = new Cesium.EllipsoidTerrainProvider({tilingScheme: tilingScheme});
+        } else {
+            terrainProvider = new Cesium.EllipsoidTerrainProvider();
+        }
         this.terrainList['default'] = terrainProvider;
+
 
         let clockOptions = {clockRange: Cesium.ClockRange.UNBOUNDED};
         if ('startTime' in config){
@@ -100,7 +108,6 @@ class ViewerWrapper{
                 sceneMode = Cesium.SceneMode.COLUMBUS_VIEW;
             }
         }
-        console.log('scene mode is ' + sceneMode);
 
         const viewerOptions = {
             timeline : false,
@@ -153,9 +160,9 @@ class ViewerWrapper{
             console.log(e);
         }
 
-        
-        viewer.infoBox.frame.sandbox = 
-        	'allow-same-origin allow-top-navigation allow-pointer-lock allow-popups allow-forms allow-scripts';
+
+        viewer.infoBox.frame.sandbox =
+            'allow-same-origin allow-top-navigation allow-pointer-lock allow-popups allow-forms allow-scripts';
 
         /*this.hoverCoordHandler = new ScreenSpaceEventHandler(viewer.scene.canvas);
         this.hoverCoordHandler.setInputAction(function(movement) {
@@ -184,27 +191,27 @@ class ViewerWrapper{
         ));
         let position_ul = this.scene.globe.pick(upper_left, this.scene);
         if (position_ul === undefined){
-        		return;
+            return;
         }
         let position_lr = this.scene.globe.pick(lower_right, this.scene);
         let range = Cesium.Cartesian3.distance(position_ul, position_lr);
         this.globalrange =  range;
-	}
+    }
 
     serveraddress(){
-    		let result = this.host;
-    		if (this.port !== undefined){
-    			result +=  ':' + this.port;
-    		}
-    		if (this.urlPrefix !== undefined) {
-    			result += '/' + this.urlPrefix;
-    		}
-    		console.log('server address:' + result);
-    		return result;
+        let result = this.host;
+        if (this.port !== undefined){
+            result +=  ':' + this.port;
+        }
+        if (this.urlPrefix !== undefined) {
+            result += '/' + this.urlPrefix;
+        }
+        console.log('server address:' + result);
+        return result;
     };
-    
+
     toLongLatHeight(cartesian) {
-    		const cartographic = Cesium.Cartographic.fromCartesian(cartesian);
+        const cartographic = Cesium.Cartographic.fromCartesian(cartesian);
         const longitude = CesiumMath.toDegrees(cartographic.longitude);
         const latitude = CesiumMath.toDegrees(cartographic.latitude);
         const carto_WGS84 = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian);
@@ -226,14 +233,14 @@ class ViewerWrapper{
             const ray = viewer.camera.getPickRay(movement.endPosition);
             const cartesian= viewer.scene.globe.pick(ray, viewer.scene);
             if (cartesian) {
-            	const longLatHeight = this.toLongLatHeight(cartesian);
+                const longLatHeight = this.toLongLatHeight(cartesian);
                 const longitudeString = longLatHeight[0].toFixed(4);
                 const latitudeString = longLatHeight[1].toFixed(4);
                 const heightString = longLatHeight[2].toFixed(4)
 
                 entity.position = cartesian;
-            	entity.label.show = true;
-            	entity.label.text = '(' + longitudeString + ', ' + latitudeString + ', ' + heightString + ')';
+                entity.label.show = true;
+                entity.label.text = '(' + longitudeString + ', ' + latitudeString + ', ' + heightString + ')';
 
                 const object = {
                     'name': 'GeoPoint',
@@ -350,8 +357,8 @@ class ViewerWrapper{
 
                 entity.position = cartesian;
                 if (config.showCoordinates) {
-                	entity.label.show = true;
-                	entity.label.text = '(' + longitudeString + ', ' + latitudeString + ', ' + heightString + ')';
+                    entity.label.show = true;
+                    entity.label.text = '(' + longitudeString + ', ' + latitudeString + ', ' + heightString + ')';
                 }
             }
         }.bind(this), Cesium.ScreenSpaceEventType.MOUSE_MOVE);
@@ -360,31 +367,31 @@ class ViewerWrapper{
     // returns positions projected on the terrain in Cartesian3, required for entity creation
     // expecting data in dictionaries containing latitude and longitude as keys
     getRaisedPositions(latLongCoords) {
-	    	//console.log(latLongCoords);
-	    	if (latLongCoords.length == 0){
-	    		return;
-	    	}
-	    	const cartographicArray = [];
-	    	if (Array.isArray(latLongCoords)) {
-	    		if (!('latitude' in latLongCoords[0])){
-	    			return this.getRaisedPositionsFromArray(latLongCoords);
-	    		}
-	    		latLongCoords.forEach(function(p) {
-	    			let cartographicPoint = Cesium.Cartographic.fromDegrees(p.longitude, p.latitude);
-	    			cartographicArray.push(cartographicPoint);
-	    		});
-	    	} else {
-	    		let cartographicPoint = Cesium.Cartographic.fromDegrees(latLongCoords.longitude, latLongCoords.latitude);
-	    		cartographicArray.push(cartographicPoint);
-	    	}
-	
-	    	return this.getHeights(cartographicArray);
+        //console.log(latLongCoords);
+        if (latLongCoords.length == 0){
+            return;
+        }
+        const cartographicArray = [];
+        if (Array.isArray(latLongCoords)) {
+            if (!('latitude' in latLongCoords[0])){
+                return this.getRaisedPositionsFromArray(latLongCoords);
+            }
+            latLongCoords.forEach(function(p) {
+                let cartographicPoint = Cesium.Cartographic.fromDegrees(p.longitude, p.latitude);
+                cartographicArray.push(cartographicPoint);
+            });
+        } else {
+            let cartographicPoint = Cesium.Cartographic.fromDegrees(latLongCoords.longitude, latLongCoords.latitude);
+            cartographicArray.push(cartographicPoint);
+        }
+
+        return this.getHeights(cartographicArray);
     };
-    
+
     // returns positions projected on the terrain in Cartesian3, required for entity creation
     // expecting data in array of [[latitude, longitude],[latitude,longitude]]
     getRaisedPositionsFromArray(latLongCoords) {
-    		const cartographicArray = [];
+        const cartographicArray = [];
         latLongCoords.forEach(function(p) {
             let cartographicPoint = Cesium.Cartographic.fromDegrees(p[0], p[1]);
             cartographicArray.push(cartographicPoint);
@@ -393,19 +400,19 @@ class ViewerWrapper{
     };
 
     getHeights(cartographicArray) {
-    		return new Promise(function(resolve, reject) {
-	        const ellipsoid = this.viewer.scene.globe.ellipsoid;
-	        const terrainExaggeration = this.terrainExaggeration;
-	        // 18 is the level of detail
-	        Cesium.sampleTerrain(this.viewer.terrainProvider, 18, cartographicArray)
-	            .then(function (raisedPositionsCartograhpic) {
-	                raisedPositionsCartograhpic.forEach(function (coord, i) {
-	                    raisedPositionsCartograhpic[i].height *= terrainExaggeration;
-	                });
-	                let inter = ellipsoid.cartographicArrayToCartesianArray(raisedPositionsCartograhpic);
-	                resolve(inter);
-	            });
-	    }.bind(this));
+        return new Promise(function(resolve, reject) {
+            const ellipsoid = this.viewer.scene.globe.ellipsoid;
+            const terrainExaggeration = this.terrainExaggeration;
+            // 18 is the level of detail
+            Cesium.sampleTerrain(this.viewer.terrainProvider, 18, cartographicArray)
+                .then(function (raisedPositionsCartograhpic) {
+                    raisedPositionsCartograhpic.forEach(function (coord, i) {
+                        raisedPositionsCartograhpic[i].height *= terrainExaggeration;
+                    });
+                    let inter = ellipsoid.cartographicArrayToCartesianArray(raisedPositionsCartograhpic);
+                    resolve(inter);
+                });
+        }.bind(this));
     };
 
     /**
@@ -414,12 +421,12 @@ class ViewerWrapper{
      * @param value
      */
     toggleNavigation(value){
-		this.viewer.scene.screenSpaceCameraController.enableRotate = value;
-		this.viewer.scene.screenSpaceCameraController.enableTranslate = value;
-		this.viewer.scene.screenSpaceCameraController.enableZoom = value;
-		this.viewer.scene.screenSpaceCameraController.enableTilt = value;
-		this.viewer.scene.screenSpaceCameraController.enableLook = value;
-	};
+        this.viewer.scene.screenSpaceCameraController.enableRotate = value;
+        this.viewer.scene.screenSpaceCameraController.enableTranslate = value;
+        this.viewer.scene.screenSpaceCameraController.enableZoom = value;
+        this.viewer.scene.screenSpaceCameraController.enableTilt = value;
+        this.viewer.scene.screenSpaceCameraController.enableLook = value;
+    };
 
     setCameraFlag(key, value){
         this.cameraFlags[key] = value;
@@ -431,12 +438,12 @@ class ViewerWrapper{
      */
     setFlatPanControls(){
         this.cameraFlags = {forward: false,
-                            backward: false,
-                            up: false,
-                            down: false,
-                            left: false,
-                            right: false,
-                            home: false};
+            backward: false,
+            up: false,
+            down: false,
+            left: false,
+            right: false,
+            home: false};
 
         this.toggleNavigation(false);
 
@@ -481,93 +488,93 @@ class ViewerWrapper{
 
 // We are no longer using this class, we are using path instead.
 class DynamicLines{
-	
-	constructor(viewerWrapper, latLongPoints, name, styleOptions) {
-		this.name = name || 'GPS Coordinates';
-		this.freeze = false;
-		this.viewerWrapper = viewerWrapper;
-		this.points = [];
-		this.pointcounter = 0;
-		this.entity = undefined;
-		this.styleOptions = styleOptions || {};
-		if (latLongPoints !== undefined){
-			this.initialize(latLongPoints);
-		}
-	};
-    
-	getEntity() {
-		return this.entity;
-	};
-	
-	getPoints(){
+
+    constructor(viewerWrapper, latLongPoints, name, styleOptions) {
+        this.name = name || 'GPS Coordinates';
+        this.freeze = false;
+        this.viewerWrapper = viewerWrapper;
+        this.points = [];
+        this.pointcounter = 0;
+        this.entity = undefined;
+        this.styleOptions = styleOptions || {};
+        if (latLongPoints !== undefined){
+            this.initialize(latLongPoints);
+        }
+    };
+
+    getEntity() {
+        return this.entity;
+    };
+
+    getPoints(){
         return this.points;
     };
-    
+
     initialize(latLongPoints) {
-    	this.viewerWrapper.getRaisedPositions(latLongPoints).then(function (raisedMidPoints) {
-    		this.points = raisedMidPoints;
-    		
+        this.viewerWrapper.getRaisedPositions(latLongPoints).then(function (raisedMidPoints) {
+            this.points = raisedMidPoints;
+
             const polylineArguments = Object.assign({positions: new CallbackProperty(this.getPoints.bind(this), false),
-            										 width: 2,
-            										 material : Color.GREEN}, 
-            										 this.styleOptions);
+                    width: 2,
+                    material : Color.GREEN},
+                this.styleOptions);
             this.entity = this.viewerWrapper.viewer.entities.add({
-            	name : this.name,
+                name : this.name,
                 polyline: polylineArguments
             });
 
-    	}.bind(this));
-    	
+        }.bind(this));
+
     };
 
     clearPoints(keepTwo=true) {
-    	this.freeze = true;
-    	if (keepTwo){
-    		if (this.points.length > 2){
-    			this.points.splice(0, this.points.length - 2);
-    		}
-    	} else {
-    		this.points = [];
-    	}
-    	this.freeze = false;
+        this.freeze = true;
+        if (keepTwo){
+            if (this.points.length > 2){
+                this.points.splice(0, this.points.length - 2);
+            }
+        } else {
+            this.points = [];
+        }
+        this.freeze = false;
     };
-    
+
     pushPoint(lat, lon){
         this. viewerWrapper.getRaisedPositions({latitude: [lat], longitude: [lon]}).then(function(raisedMidPoints){
             this.points.push(raisedMidPoints[0]);
         }.bind(this));
     };
-    
-	addPoint(lat, lon){
-		if (this.freeze) {
-			return; // drop
-		}
+
+    addPoint(lat, lon){
+        if (this.freeze) {
+            return; // drop
+        }
         this.pushPoint(lat, lon);
-		if(this.points.length === 2) {
-			if (this.entity === undefined) {
-				const polylineArguments = Object.assign({positions: new CallbackProperty(this.getPoints.bind(this), false),
-					 width: 2,
-					 material : Cesium.Color.GREEN}, this.styleOptions);
-				
-				this.entity = this.viewerWrapper.viewer.entities.add({
-				    name : this.name,
-				    polyline : polylineArguments
-				});
-			}
-		} 
-	};
-	
-	zoomTo(){
-		this.viewerWrapper.viewer.zoomTo(this.entity);
-	};
+        if(this.points.length === 2) {
+            if (this.entity === undefined) {
+                const polylineArguments = Object.assign({positions: new CallbackProperty(this.getPoints.bind(this), false),
+                    width: 2,
+                    material : Cesium.Color.GREEN}, this.styleOptions);
+
+                this.entity = this.viewerWrapper.viewer.entities.add({
+                    name : this.name,
+                    polyline : polylineArguments
+                });
+            }
+        }
+    };
+
+    zoomTo(){
+        this.viewerWrapper.viewer.zoomTo(this.entity);
+    };
 
 
 };
 
 const zoom = function(camera){
-	const zoomto = camera.setView({
-		destination: config.destination
-	});
+    const zoomto = camera.setView({
+        destination: config.destination
+    });
 };
 
 const heading = function(headingAngle, camera) {
@@ -598,45 +605,45 @@ const buildLineString = function(latlongPoints, styleOptions, id, viewerWrapper,
         });
 
         if (callback !== undefined){
-        	callback(entity);
+            callback(entity);
         }
     });
 };
 
 
 const buildCylinder = function(position, height, radius, slices, label, styleOptions, id, viewerWrapper, callback) {
-	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
-		let options = {
-				length: height,
-				topRadius: radius,
-				bottomRadius: radius,
-				slices: slices
-		};
+    viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
+        let options = {
+            length: height,
+            topRadius: radius,
+            bottomRadius: radius,
+            slices: slices
+        };
 
-		options = Object.assign(options, styleOptions);
-		
-		let cylinderOptions = {
-				position: raisedPoint[0],
-				cylinder: options,
-				id: id,
-			};
-		
-		if (label !== undefined && !_.isEmpty(label)){
-			cylinderOptions['label'] = {
-				text: label,
-				verticalOrigin: Cesium.VerticalOrigin.TOP,
-		        horizontalOrigin: Cesium.HorizontalOrigin.RIGHT,
-		        fillColor: Cesium.Color.YELLOW,
-		        outlineWidth: 3.0,
-		        eyeOffset: new Cesium.Cartesian3(radius + 2, 0, 1.0)
-			}
-		}
-		let cylinderEntity = viewerWrapper.viewer.entities.add(cylinderOptions);
+        options = Object.assign(options, styleOptions);
 
-		if (callback !== undefined){
-			callback(cylinderEntity);
-		}
-	});
+        let cylinderOptions = {
+            position: raisedPoint[0],
+            cylinder: options,
+            id: id,
+        };
+
+        if (label !== undefined && !_.isEmpty(label)){
+            cylinderOptions['label'] = {
+                text: label,
+                verticalOrigin: Cesium.VerticalOrigin.TOP,
+                horizontalOrigin: Cesium.HorizontalOrigin.RIGHT,
+                fillColor: Cesium.Color.YELLOW,
+                outlineWidth: 3.0,
+                eyeOffset: new Cesium.Cartesian3(radius + 2, 0, 1.0)
+            }
+        }
+        let cylinderEntity = viewerWrapper.viewer.entities.add(cylinderOptions);
+
+        if (callback !== undefined){
+            callback(cylinderEntity);
+        }
+    });
 
 };
 
@@ -657,28 +664,28 @@ const buildSurfaceCircle = function(position, radius, styleOptions, id, viewerWr
     viewerWrapper.scene.primitives.add(new GroundPrimitive({
         geometryInstances : ellipseInstance
     }));*/
-	viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
-		let options = {
-				semiMinorAxis: radius,
-				semiMajorAxis: radius,
-				height: 0,
-				extrudedHeight: 0
-		};
+    viewerWrapper.getRaisedPositions(position).then(function(raisedPoint) {
+        let options = {
+            semiMinorAxis: radius,
+            semiMajorAxis: radius,
+            height: 0,
+            extrudedHeight: 0
+        };
 
-		options = Object.assign(options, styleOptions);
-		
-		let surfaceCircleOptions = {
-				position: raisedPoint[0],
-				ellipse: options,
-				id: id,
-			};
-		
-		let entity = viewerWrapper.viewer.entities.add(surfaceCircleOptions);
+        options = Object.assign(options, styleOptions);
 
-		if (callback !== undefined){
-			callback(entity);
-		}
-	});
+        let surfaceCircleOptions = {
+            position: raisedPoint[0],
+            ellipse: options,
+            id: id,
+        };
+
+        let entity = viewerWrapper.viewer.entities.add(surfaceCircleOptions);
+
+        if (callback !== undefined){
+            callback(entity);
+        }
+    });
 
 };
 
@@ -755,62 +762,62 @@ const buildRectangleFromRadians = function(west, south, east, north, material, i
 
 //build a simple ellipse.  We will be using this as a trailing ellipse to have a smooth camera when following
 const buildEllipse = function(spp, color, viewerWrapper, callback) {
-	let entityEllipse = viewerWrapper.viewer.entities.add({
-	    position : spp,
-	    name : 'ellipse',
-		ellipse : {
-				semiMinorAxis: 2,
-				semiMajorAxis: 2,
-				height: 1,
-				extrudedHeight: 0,
-				material: color
-		}
-	});
-	
-	if (callback !== undefined){
-		callback(entityEllipse);
-	}
+    let entityEllipse = viewerWrapper.viewer.entities.add({
+        position : spp,
+        name : 'ellipse',
+        ellipse : {
+            semiMinorAxis: 2,
+            semiMajorAxis: 2,
+            height: 1,
+            extrudedHeight: 0,
+            material: color
+        }
+    });
+
+    if (callback !== undefined){
+        callback(entityEllipse);
+    }
 };
 
 // this is the main function we are using to render a path and an ellipse with the current position.
 const buildPath = function(spp, label, labelColor, ellipseColor, id, headingCallback, viewerWrapper, callback){
-	
-	let newEntities = {};
-	let entityPath = viewerWrapper.viewer.entities.add({
-	    position : spp,
-	    name : 'path',
-	    path : {
-	        resolution : 1,
-	        material : labelColor
-	    }
-	});
-	newEntities['path'] = entityPath;
-	
-	let entityEllipse = viewerWrapper.viewer.entities.add({
-	    position : spp,
-	    name : 'ellipse',
-	    label : {
-			text: label,
-			verticalOrigin: Cesium.VerticalOrigin.CENTER,
-	        horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
-	        eyeOffset: new Cesium.Cartesian3(2.0, 0, 1.0),  //TODO zoom this better so it stays same distance from ellipse
-	        fillColor: labelColor,
-	        outlineWidth: 3.0
-		},
-		ellipse : {
-				semiMinorAxis: 2,
-				semiMajorAxis: 2,
-				height: 1,
-				extrudedHeight: 0,
-				material: ellipseColor,
-				stRotation: headingCallback
-		}
-	});
-	newEntities['ellipse'] = entityEllipse;
-	
-	if (callback !== undefined){
-		callback(newEntities);
-	}
+
+    let newEntities = {};
+    let entityPath = viewerWrapper.viewer.entities.add({
+        position : spp,
+        name : 'path',
+        path : {
+            resolution : 1,
+            material : labelColor
+        }
+    });
+    newEntities['path'] = entityPath;
+
+    let entityEllipse = viewerWrapper.viewer.entities.add({
+        position : spp,
+        name : 'ellipse',
+        label : {
+            text: label,
+            verticalOrigin: Cesium.VerticalOrigin.CENTER,
+            horizontalOrigin: Cesium.HorizontalOrigin.CENTER,
+            eyeOffset: new Cesium.Cartesian3(2.0, 0, 1.0),  //TODO zoom this better so it stays same distance from ellipse
+            fillColor: labelColor,
+            outlineWidth: 3.0
+        },
+        ellipse : {
+            semiMinorAxis: 2,
+            semiMajorAxis: 2,
+            height: 1,
+            extrudedHeight: 0,
+            material: ellipseColor,
+            stRotation: headingCallback
+        }
+    });
+    newEntities['ellipse'] = entityEllipse;
+
+    if (callback !== undefined){
+        callback(newEntities);
+    }
 }
 
 
@@ -818,5 +825,5 @@ const buildPath = function(spp, label, labelColor, ellipseColor, id, headingCall
 
 
 
-export {ViewerWrapper, DynamicLines, zoom, heading, buildLineString, buildCylinder, buildRectangle, buildSurfaceCircle, 
-		buildPath, buildEllipse, buildRectangleFromRadians}
+export {ViewerWrapper, DynamicLines, zoom, heading, buildLineString, buildCylinder, buildRectangle, buildSurfaceCircle,
+    buildPath, buildEllipse, buildRectangleFromRadians}

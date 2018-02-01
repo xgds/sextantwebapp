@@ -37,10 +37,10 @@ class UrlXHRTemplateImageryProvider extends Cesium.UrlTemplateImageryProvider {
         this._xhr = Cesium.defaultValue(options.xhr, {});
         
         // extension of the parent class does not give access to locally defined things.
-        this.degreesScratchComputed = false;
-        this.degreesScratch = new Cesium.Rectangle();
-        this.projectedScratchComputed = false;
-        this.projectedScratch = new Cesium.Rectangle();
+        // this.degreesScratchComputed = false;
+        // this.degreesScratch = new Cesium.Rectangle();
+        // this.projectedScratchComputed = false;
+        // this.projectedScratch = new Cesium.Rectangle();
 
 
     };
@@ -114,8 +114,8 @@ class UrlXHRTemplateImageryProvider extends Cesium.UrlTemplateImageryProvider {
     }
     
     buildImageUrl(imageryProvider, x, y, level) {
-        this.degreesScratchComputed = false;
-        this.projectedScratchComputed = false;
+        // this.degreesScratchComputed = false;
+        // this.projectedScratchComputed = false;
 
         return this.buildUrl(imageryProvider, imageryProvider._urlParts, function(partFunction) {
             return partFunction(imageryProvider, x, y, level);

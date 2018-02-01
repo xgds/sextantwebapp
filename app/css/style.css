@@ -33,4 +33,8 @@
      left:35px;
  }
 
+.ui-slider {
+    height: .8em !important;
+}
+
 
