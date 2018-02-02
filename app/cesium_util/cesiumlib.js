@@ -132,6 +132,7 @@ class ViewerWrapper{
         if ('ellipsoid' in config){
             if (config.ellipsoid == 'MOON') {
                 this.ellipsoid = Cesium.Ellipsoid.MOON;
+                //Cesium.Ellipsoid.WGS84 = this.ellipsoid; // hopefully fix hardcoded Cesium issues with WGS84
                 viewerOptions['globe'] = new Cesium.Globe(this.ellipsoid);
             }
         } else {
@@ -181,6 +182,9 @@ class ViewerWrapper{
             }
         }
 
+        // add inspector for debugging
+        //viewer.extend(Cesium.viewerCesiumInspectorMixin);
+
     }
 
     getViewRange(){
@@ -214,7 +218,7 @@ class ViewerWrapper{
         const cartographic = Cesium.Cartographic.fromCartesian(cartesian);
         const longitude = CesiumMath.toDegrees(cartographic.longitude);
         const latitude = CesiumMath.toDegrees(cartographic.latitude);
-        const carto_WGS84 = Cesium.Ellipsoid.WGS84.cartesianToCartographic(cartesian);
+        const carto_WGS84 = this.ellipsoid.cartesianToCartographic(cartesian);
         const height = carto_WGS84.height/this.terrainExaggeration;  //TODO need to look up the height from the terrain
         return [longitude, latitude, height];
     };

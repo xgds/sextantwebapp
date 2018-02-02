@@ -19,7 +19,6 @@ const Cesium = require('cesium/Cesium');
 const url = require('url');
 import {ElementManager} from "cesium_util/elementManager";
 import {projectionManager} from "cesium_util/projectionManager";
-import {UrlXHRTemplateImageryProvider} from 'cesium_util/UrlXHRTemplateImageryProvider';
 import {patchOptionsForRemote, prefixUrl} from 'util/xgdsUtils';
 import * as _ from "lodash";
 
@@ -105,36 +104,35 @@ class ImageLayerManager extends ElementManager{
         let theUrl = String(options.url);
         options.ellipsoid = this.viewerWrapper.ellipsoid;
         if ('url' in options) {
-
-            options.url = prefixUrl(options.url);
-            console.log(options.url);
-            options = patchOptionsForRemote(options);
-
+            let resourceOptions = Object.assign({}, options);
+            resourceOptions.url = prefixUrl(resourceOptions.url);
+            resourceOptions = patchOptionsForRemote(resourceOptions);
+            
             if (options.projectionName !== undefined) {
                 let tilingScheme = projectionManager.getTilingScheme(options.projectionName, options.bounds);
                 if (tilingScheme !== undefined) {
                     options.tilingScheme = tilingScheme;
-                    // if ('bounds' in options){
-                    //     options.rectangle = this.buildRectangle(tilingScheme, options.bounds);
-                    // } else {
-                    //     options.rectangle = tilingScheme.rectangle;
-                    // }
-                    if ('bounds' in options) {
-                        console.log(this.buildRectangle(tilingScheme, options.bounds));
+                    if ('bounds' in options){
+                        options.rectangle = this.buildRectangle(tilingScheme, options.bounds);
+                    } else {
+                        options.rectangle = tilingScheme.rectangle;
                     }
-
-                    options.rectangle = tilingScheme.rectangle;
                     console.log(options.rectangle);
 
-                    options.url = options.url + '/{z}/{x}/{y}.png';  //TODO might be reverseY, see if flipXY is passed in
+                    resourceOptions.url = resourceOptions.url + '/{z}/{x}/{y}.png';  //TODO might be reverseY, see if flipXY is passed in
                 }
-                newImagery = new UrlXHRTemplateImageryProvider(options);
+                options.url = new Cesium.Resource(resourceOptions);
+                newImagery = new Cesium.UrlTemplateImageryProvider(options);
             } else {
+                options.url = new Cesium.Resource(resourceOptions);
+
                 let tempImagery = Cesium.createTileMapServiceImageryProvider(options);
-                options.url = tempImagery.url;
+
+                //TODO test
+                //options.url = tempImagery.url;
                 options.rectangle = tempImagery.rectangle;
                 options.tilingScheme = tempImagery.tilingScheme;
-                newImagery = new UrlXHRTemplateImageryProvider(options);
+                newImagery = new Cesium.UrlTemplateImageryProvider(options);
             }
 
 
@@ -144,6 +142,11 @@ class ImageLayerManager extends ElementManager{
         }
         if (newImagery !== undefined){
             newImageryLayer = this.viewerWrapper.viewer.imageryLayers.addImageryProvider(newImagery);
+
+            // for debugging imagery providers
+            //let debugImageryLayer = new Cesium.TileCoordinatesImageryProvider(options);
+            //this.viewerWrapper.viewer.imageryLayers.addImageryProvider(debugImageryLayer);
+
             if ('alpha' in options){
                 newImageryLayer.alpha = options.alpha;
             }

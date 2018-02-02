@@ -177,7 +177,7 @@ class ProjectionTilingScheme {
         let xTiles = this.getNumberOfXTilesAtLevel(level);
         let yTiles = this.getNumberOfYTilesAtLevel(level);
 
-        if (level == 0 && xTiles == 1 && yTiles == 1){
+        /*if (level == 0 && xTiles == 1 && yTiles == 1){
             if (_.isUndefined(result)) {
                 return new Cesium.Rectangle(this._rectangleSouthwestInMeters.x, this._rectangleSouthwestInMeters.y,
                     this._rectangleNortheastInMeters.x, this._rectangleNortheastInMeters.y);
@@ -188,7 +188,7 @@ class ProjectionTilingScheme {
                 result.north = this._rectangleNortheastInMeters.y;
                 return result;
             }
-        }
+        } */
 
         let xTileWidth = (this._rectangleNortheastInMeters.x - this._rectangleSouthwestInMeters.x) / xTiles;
         let west = this._rectangleSouthwestInMeters.x + x * xTileWidth;

@@ -84,8 +84,10 @@ class GroundOverlayTimeManager extends ElementManager{
                 Cesium.Math.toRadians(options.maxLon),
                 Cesium.Math.toRadians(options.maxLat));
 
-            options.url = prefixUrl(options.url);
-            options = patchOptionsForRemote(options);
+            let resourceOptions = Object.assign({}, options);
+            resourceOptions.url = prefixUrl(resourceOptions.url);
+            resourceOptions = patchOptionsForRemote(resourceOptions);
+            options.url = new Cesium.Resource(resourceOptions);
             if (options.projectionName !== undefined) {
                 options.tilingScheme = projectionManager.getTilingScheme(options.projectionName, options.bounds);
             }

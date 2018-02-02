@@ -61,7 +61,7 @@ const patchOptionsForRemote = function(options) {
             if (!options.url.includes(config.xgds.name)) {
                 options.proxy = new Cesium.DefaultProxy('/proxy/');
             } else {
-                options.xhr = xgdsAuth({});
+                xgdsAuth(options);
             }
         }  else {
             options.proxy = new Cesium.DefaultProxy('/proxy/');

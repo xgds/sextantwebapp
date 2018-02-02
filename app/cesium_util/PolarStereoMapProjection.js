@@ -17,8 +17,6 @@
 const Cesium = require('cesium/Cesium');
 import * as _ from 'lodash';
 
-const HALF_PI = Math.PI/2.0;
-const TWICE_PI = Math.PI*2.0;
 
 /**
  * @class NorthPoleStereo  Map Projection to handle north pole stereographic projections.
@@ -41,7 +39,7 @@ class NorthPoleStereo {
      * @returns {number}
      */
     getTheta(longitudeRadians){
-        return longitudeRadians - HALF_PI;
+        return longitudeRadians - Cesium.Math.PI_OVER_TWO;
     }
 
     /**
@@ -50,7 +48,7 @@ class NorthPoleStereo {
      * @returns {number}
      */
     getRadsAwayFromPoleForProject(latitudeRadians){
-        return (HALF_PI - latitudeRadians);
+        return (Cesium.Math.PI_OVER_TWO - latitudeRadians);
     }
 
     /**
@@ -59,8 +57,8 @@ class NorthPoleStereo {
      * @returns {*}
      */
     fixLongitude(lon) {
-        while (lon > Math.PI) lon -= TWICE_PI;
-        while (lon < -Math.PI) lon += TWICE_PI;
+        while (lon > Math.PI) lon -= Cesium.Math.TWO_PI;
+        while (lon < -Math.PI) lon += Cesium.Math.TWO_PI;
         return lon;
     }
 
@@ -75,7 +73,7 @@ class NorthPoleStereo {
         let latitude = cartographic.latitude;
 
         longitude = this.fixLongitude(longitude);
-        if (latitude > HALF_PI || latitude < -HALF_PI){
+        if (latitude > Cesium.Math.PI_OVER_TWO || latitude < -Cesium.Math.PI_OVER_TWO){
             console.log('BAD LATITUDE VALUE: ' + latitude);
             //TODO throw exception
             return Cesium.Cartesian3.ZERO;
@@ -107,7 +105,7 @@ class NorthPoleStereo {
      * @returns {number}
      */
     getUnprojectLatitude(radiansAwayFromPole){
-        return ( HALF_PI - radiansAwayFromPole);
+        return ( Cesium.Math.PI_OVER_TWO - radiansAwayFromPole);
     }
 
     /**
@@ -117,7 +115,7 @@ class NorthPoleStereo {
      * @returns {number}
      */
     getUnprojectLongitude(y, x){
-        return Math.atan2(y, x) + HALF_PI;
+        return Math.atan2(y, x) + Cesium.Math.PI_OVER_TWO;
     }
 
 
@@ -164,7 +162,7 @@ class SouthPoleStereo extends NorthPoleStereo {
      * @returns {number}
      */
     getTheta(longitudeRadians){
-        return longitudeRadians - ( - HALF_PI);
+        return longitudeRadians - ( - Cesium.Math.PI_OVER_TWO);
     }
 
     /**
@@ -173,7 +171,7 @@ class SouthPoleStereo extends NorthPoleStereo {
      * @returns {number}
      */
     getRadsAwayFromPoleForProject(latitudeRadians){
-        return (HALF_PI + latitudeRadians);
+        return (Cesium.Math.PI_OVER_TWO + latitudeRadians);
     }
 
     /**
@@ -182,7 +180,7 @@ class SouthPoleStereo extends NorthPoleStereo {
      * @returns {number}
      */
     getUnprojectLatitude(radiansAwayFromPole){
-        return (-HALF_PI + radiansAwayFromPole);
+        return (-Cesium.Math.PI_OVER_TWO + radiansAwayFromPole);
     }
 
     /**
@@ -192,7 +190,7 @@ class SouthPoleStereo extends NorthPoleStereo {
      * @returns {number}
      */
     getUnprojectLongitude(y, x){
-        let longitude = Math.atan2(y, x) + ( - HALF_PI);
+        let longitude = Math.atan2(y, x) + ( - Cesium.Math.PI_OVER_TWO);
         longitude = -longitude; // because this is a south pole projection
         return longitude;
 

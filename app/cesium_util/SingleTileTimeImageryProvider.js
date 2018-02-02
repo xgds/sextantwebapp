@@ -16,7 +16,6 @@
 
 const Cesium = require('cesium/Cesium');
 import * as _ from 'lodash';
-require('cesium_util/ImagePatch');
 
    /**
      * Provides a single, top-level imagery tile.
@@ -47,15 +46,12 @@ class SingleTileTimeImageryProvider  {
     /**
      * @constructor
      * @param options
-     * @param {String} options.xhr.headers the headers
      * @param {Clock} [options.clock] A Clock instance that is used when determining the value for the time dimension. Required when options.times is specified.
      * @param {TimeIntervalCollection} [options.times] TimeIntervalCollection with its data property being an object containing time dynamic dimension and their values.
      */
     constructor(options){
 
         options = Cesium.defaultValue(options, {});
-
-        this._xhr = Cesium.defaultValue(options.xhr, {});
 
         let url = options.url;
 
@@ -69,9 +65,10 @@ class SingleTileTimeImageryProvider  {
 
         //>>includeEnd('debug');
 
-        this._url = url;
+        this._resource = Cesium.Resource.createIfNeeded(options.url, {
+            proxy: options.proxy
+        });
 
-        this._proxy = options.proxy;
         this._tileDiscardPolicy = options.tileDiscardPolicy;
 
 
@@ -120,11 +117,6 @@ class SingleTileTimeImageryProvider  {
 
         this._readyPromise = Cesium.when.resolve(true);
 
-        let imageUrl = url;
-        if (!_.isUndefined(this._proxy)) {
-            imageUrl = this._proxy.getURL(imageUrl);
-        }
-
         let credit = options.credit;
         if (typeof credit === 'string') {
             credit = new Cesium.Credit({text: credit});
@@ -141,7 +133,7 @@ class SingleTileTimeImageryProvider  {
          */
         url : {
             get : function() {
-                return this._url;
+                return this._resource.url;
             }
         },
 
@@ -153,7 +145,7 @@ class SingleTileTimeImageryProvider  {
          */
         proxy : {
             get : function() {
-                return this._proxy;
+                return this._resource.proxy;
             }
         },
 
@@ -386,13 +378,13 @@ class SingleTileTimeImageryProvider  {
     };
 
     requestIntervalImage(col, row, level, request, interval) {
-        let url;
+        let resource = this._resource.getDerivedResource({request: request});
         let key;
         let dynamicIntervalData = !_.isUndefined(interval) ? interval.data : undefined;
 
-        if (this._url.indexOf('{') >= 0) {
+        if (resource.url.indexOf('{') >= 0) {
             // resolve tile-URL template
-            url = this._url;
+            let url = resource.url;
 
             if (!_.isUndefined(dynamicIntervalData)) {
                 if (_.isNumber(dynamicIntervalData)){
@@ -405,38 +397,11 @@ class SingleTileTimeImageryProvider  {
                     }
                 }
             }
-        }
-       /* else {
-            // build KVP request
-            let uri = new Cesium.Uri(this._url);
-            let queryOptions = queryToObject(Cesium.defaultValue(uri.query, ''));
+            resource.url = url;
 
-            queryOptions = Cesium.combine(defaultParameters, queryOptions);
-
-            if (!_.isUndefined(dynamicIntervalData)) {
-                for (key in dynamicIntervalData) {
-                    if (dynamicIntervalData.hasOwnProperty(key)) {
-                        queryOptions[key] = dynamicIntervalData[key];
-                    }
-                }
-            }
-
-            uri.query = Cesium.objectToQuery(queryOptions);
-
-            url = uri.toString();
-        } */
-
-        let proxy = this._proxy;
-        if (!_.isUndefined(proxy)) {
-            url = proxy.getURL(url);
         }
 
-        let headers = undefined;
-        if ('headers' in this._xhr) {
-            headers = this._xhr.headers;
-        }
-        //console.log(url);
-        return Cesium.ImageryProvider.loadImage(this, url, request, headers);
+        return Cesium.ImageryProvider.loadImage(this, resource);
 
     };
 
