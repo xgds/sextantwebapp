@@ -81,7 +81,8 @@ class KmlManager extends ElementManager {
                  let options = {
                      name: elementUrl,
                      camera: context.viewerWrapper.viewer.camera,
-                     canvas: context.viewerWrapper.viewer.canvas
+                     canvas: context.viewerWrapper.viewer.canvas,
+                     ellipsoid: this.viewerWrapper.ellipsoid
                  };
 
                  // load text from a URL, setting a custom header
@@ -94,7 +95,8 @@ class KmlManager extends ElementManager {
                      }
                  }
                  if ('headers' in settings) {
-                     Cesium.loadBlob(elementUrl, settings.headers).then(function (blob) {
+                     settings['url'] = elementUrl;
+                     Cesium.Resource.fetchBlob(settings).then(function (blob) {
                             context.viewerWrapper.viewer.dataSources.add(Cesium.KmlDataSource.load(blob, options)
                          ).then(function (dataSource) {
                              context.elementMap[elementUrl] = dataSource;

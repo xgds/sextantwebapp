@@ -110,9 +110,9 @@ class ProjectionManager {
        } else {
 //           let semimajorAxisTimesPi = this.ellipsoid.maximumRadius * Math.PI;
            if (key == 'NP_STEREO') {
-               rectangle = Cesium.Rectangle.fromDegrees(-180.0, 0.0, 180.0, 90.0);
+               rectangle = Cesium.Rectangle.fromDegrees(-180.0, -45.0, 180.0, 45.0);
            } else if (key === 'SP_STEREO'){
-               rectangle = Cesium.Rectangle.fromDegrees(-180.0, -90, 180.0, 0.0);
+               rectangle = Cesium.Rectangle.fromDegrees(180.0, 45, -180.0, -45.0);
            }
        }
 

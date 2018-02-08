@@ -132,7 +132,6 @@ class ViewerWrapper{
         if ('ellipsoid' in config){
             if (config.ellipsoid == 'MOON') {
                 this.ellipsoid = Cesium.Ellipsoid.MOON;
-                //Cesium.Ellipsoid.WGS84 = this.ellipsoid; // hopefully fix hardcoded Cesium issues with WGS84
                 viewerOptions['globe'] = new Cesium.Globe(this.ellipsoid);
             }
         } else {
