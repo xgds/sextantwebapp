@@ -322,7 +322,7 @@ class Tracker {
     updateSampledPositionProperty(channel, data) {
         // update the stored cesium position
         let property = this.cSampledPositionProperties[channel];;
-        if (_.isUndefined(property)){
+        if (!Cesium.defined(property)){
             property = new Cesium.SampledPositionProperty();
             property.forwardExtrapolationType = Cesium.ExtrapolationType.HOLD;
             this.cSampledPositionProperties[channel] = property;

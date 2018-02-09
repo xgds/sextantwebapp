@@ -61,7 +61,7 @@ class ViewerWrapper{
             Cesium.TrustedServers.add(config.xgds.name,  config.xgds.port);
         }
 
-        if (!_.isUndefined(config.trustedServers)){
+        if (Cesium.defined(config.trustedServers)){
             for (let ts of config.trustedServers) {
                 Cesium.TrustedServers.add(ts.name,  ts.port);
             }
@@ -101,7 +101,7 @@ class ViewerWrapper{
         this.clock = new Cesium.Clock(clockOptions);
 
         let sceneMode = Cesium.SceneMode.SCENE3D;
-        if (!_.isUndefined(config.sceneMode)){
+        if (Cesium.defined(config.sceneMode)){
             if (config.sceneMode == 'SCENE2D'){
                 sceneMode = Cesium.SceneMode.SCENE2D;
             } else if (config.sceneMode == 'COLUMBUS_VIEW'){
@@ -260,7 +260,7 @@ class ViewerWrapper{
     };
 
     addTerrain(folder_location, image_address) {
-        //if(_.isUndefined(image_address)) {
+        //if(Cesium.defined(image_address)) {
         //    image_address = this.serveraddress();
         //}
         //let theUrl = path.join(image_address, folder_location);

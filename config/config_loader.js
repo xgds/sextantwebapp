@@ -65,7 +65,6 @@ let until = (cond, time) =>
 // 	// https://medium.com/@bluepnume/even-with-async-await-you-probably-still-need-promises-9b259854c161
 // 	if (global.loadingConfig === undefined){
 // 		if (configPath !== undefined) {
-// 			debugger;
 // 			global.loadingConfig = true;
 //             console.log('FETCHING CONFIG FROM: ' + configPath);
 //             await until(async () => {

@@ -18,7 +18,7 @@ const Cesium = require('cesium/Cesium');
 import * as _ from 'lodash';
 import {Quadrilateral} from 'cesium_util/Quadrilateral';
 
-class ProjectionImageryLayer extends Cesium.ImageryLayer{
+class QuadrilateralImageryLayer extends Cesium.ImageryLayer{
 
     constructor(imageryProvider, options){
         super(imageryProvider, options);
@@ -34,9 +34,12 @@ class ProjectionImageryLayer extends Cesium.ImageryLayer{
             throw new Cesium.DeveloperError('Tiling scheme with projection is required.');
         }
 
-        this._quadrilateral = this._tilingScheme.rectangleToQuadrilateral();
+        this._quadrilateral = this._tilingScheme.imageryBounds;
     };
 
+    getViewableQuadrilateral(){
+        return this._quadrilateral;
+    }
 
 
     getViewableRectangle() {
@@ -49,28 +52,7 @@ class ProjectionImageryLayer extends Cesium.ImageryLayer{
         // });
     };
 
-    /**
-     * Gets the level with the specified world coordinate spacing between texels, or less.
-     *
-     * @param {ImageryLayer} layer The imagery layer to use.
-     * @param {Number} texelSpacing The texel spacing for which to find a corresponding level.
-     * @param {Number} latitudeClosestToEquator The latitude closest to the equator that we're concerned with.
-     * @returns {Number} The level with the specified texel spacing or less.
-     */
-    getLevelWithMaximumTexelSpacing(layer, texelSpacing, latitudeClosestToEquator) {
-        // PERFORMANCE_IDEA: factor out the stuff that doesn't change.
-        let imageryProvider = layer._imageryProvider;
-        let tilingScheme = imageryProvider.tilingScheme;
-        let ellipsoid = tilingScheme.ellipsoid;
-        let latitudeFactor = !(layer._imageryProvider.tilingScheme instanceof GeographicTilingScheme) ? Math.cos(latitudeClosestToEquator) : 1.0;
-        let tilingSchemeRectangle = tilingScheme.rectangle;
-        let levelZeroMaximumTexelSpacing = ellipsoid.maximumRadius * tilingSchemeRectangle.width * latitudeFactor / (imageryProvider.tileWidth * tilingScheme.getNumberOfXTilesAtLevel(0));
 
-        let twoToTheLevelPower = levelZeroMaximumTexelSpacing / texelSpacing;
-        let level = Math.log(twoToTheLevelPower) / Math.log(2);
-        let rounded = Math.round(level);
-        return rounded | 0;
-    }
 
     /**
      * Gets the level with the specified world coordinate spacing between texels, or less.
@@ -285,4 +267,4 @@ class ProjectionImageryLayer extends Cesium.ImageryLayer{
 
 }
 
-export {ProjectionImageryLayer}
+export {QuadrilateralImageryLayer}

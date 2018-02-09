@@ -16,6 +16,7 @@
 
 const Cesium = require('cesium/Cesium');
 import * as _ from 'lodash';
+import {Quadrilateral, Units} from 'cesium_util/Quadrilateral';
 
 
 /**
@@ -52,22 +53,23 @@ class ProjectionTilingScheme {
         this._numberOfLevelZeroTilesY = Cesium.defaultValue(options.numberOfLevelZeroTilesY, 1);
 
         this._projection = options.projection;
-        if (_.isUndefined(this._projection)) {
+        if (!Cesium.defined(this._projection)) {
             this._projection = new Cesium.WebMercatorProjection(this._ellipsoid);
         }
 
-        if (!_.isUndefined(options.rectangle)){
+        if (Cesium.defined(options.rectangle)){
             this._rectangle = options.rectangle;
             this._rectangleSouthwestInMeters = this._projection.project(Cesium.Rectangle.southwest(options.rectangle));
             this._rectangleNortheastInMeters = this._projection.project(Cesium.Rectangle.northeast(options.rectangle));
 
         } else {
-            if (!_.isUndefined(options.rectangleSouthwestInMeters) &&
-                !_.isUndefined(options.rectangleNortheastInMeters)) {
+            if (Cesium.defined(options.rectangleSouthwestInMeters) &&
+                Cesium.defined(options.rectangleNortheastInMeters)) {
                 this._rectangleSouthwestInMeters = options.rectangleSouthwestInMeters;
                 this._rectangleNortheastInMeters = options.rectangleNortheastInMeters;
             } else {
                 let semimajorAxisTimesPi = this._ellipsoid.maximumRadius * Math.PI;
+                // full bounds
                 this._rectangleSouthwestInMeters = new Cesium.Cartesian2(-semimajorAxisTimesPi, -semimajorAxisTimesPi);
                 this._rectangleNortheastInMeters = new Cesium.Cartesian2(semimajorAxisTimesPi, semimajorAxisTimesPi);
             }
@@ -150,7 +152,7 @@ class ProjectionTilingScheme {
         let southwest = projection.project(Cesium.Rectangle.southwest(rectangle));
         let northeast = projection.project(Cesium.Rectangle.northeast(rectangle));
 
-        if (!!_.isUndefined(result)) {
+        if (!Cesium.defined(result)) {
             return new Rectangle(southwest.x, southwest.y, northeast.x, northeast.y);
         }
 
@@ -177,19 +179,6 @@ class ProjectionTilingScheme {
         let xTiles = this.getNumberOfXTilesAtLevel(level);
         let yTiles = this.getNumberOfYTilesAtLevel(level);
 
-        /*if (level == 0 && xTiles == 1 && yTiles == 1){
-            if (_.isUndefined(result)) {
-                return new Cesium.Rectangle(this._rectangleSouthwestInMeters.x, this._rectangleSouthwestInMeters.y,
-                    this._rectangleNortheastInMeters.x, this._rectangleNortheastInMeters.y);
-            } else {
-                result.west = this._rectangleSouthwestInMeters.x;
-                result.south = this._rectangleSouthwestInMeters.y;
-                result.east = this._rectangleNortheastInMeters.x;
-                result.north = this._rectangleNortheastInMeters.y;
-                return result;
-            }
-        } */
-
         let xTileWidth = (this._rectangleNortheastInMeters.x - this._rectangleSouthwestInMeters.x) / xTiles;
         let west = this._rectangleSouthwestInMeters.x + x * xTileWidth;
         let east = this._rectangleSouthwestInMeters.x + (x + 1) * xTileWidth;
@@ -198,7 +187,7 @@ class ProjectionTilingScheme {
         let north = this._rectangleNortheastInMeters.y - y * yTileHeight;
         let south = this._rectangleNortheastInMeters.y - (y + 1) * yTileHeight;
 
-        if (_.isUndefined(result)) {
+        if (!Cesium.defined(result)) {
             return new Cesium.Rectangle(west, south, east, north);
         }
 
@@ -275,7 +264,7 @@ class ProjectionTilingScheme {
             yTileCoordinate = yTiles - 1;
         }
 
-        if (!!_.isUndefined(result)) {
+        if (!Cesium.defined(result)) {
             return new Cesium.Cartesian2(xTileCoordinate, yTileCoordinate);
         }
 

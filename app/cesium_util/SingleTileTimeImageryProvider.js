@@ -56,10 +56,10 @@ class SingleTileTimeImageryProvider  {
         let url = options.url;
 
         //>>includeStart('debug', pragmas.debug);
-        if (_.isUndefined(url)) {
+        if (!Cesium.defined(url)) {
             throw new Cesium.DeveloperError('url is required.');
         }
-        if (!_.isUndefined(options.times) && _.isUndefined(options.clock)) {
+        if (Cesium.defined(options.times) && !Cesium.defined(options.clock)) {
             throw new Cesium.DeveloperError('options.times was specified, so options.clock is required.');
         }
 
@@ -80,7 +80,7 @@ class SingleTileTimeImageryProvider  {
                 options.bounds.maxx, options.bounds.maxy);
         }
         let tilingScheme = options.tilingScheme;
-        if (_.isUndefined(tilingScheme)) {
+        if (!Cesium.defined(tilingScheme)) {
             tilingScheme = new Cesium.GeographicTilingScheme({
                 rectangle : this._rectangle,
                 numberOfLevelZeroTilesX : 1,
@@ -95,7 +95,7 @@ class SingleTileTimeImageryProvider  {
 
         let that = this;
         
-        if (!_.isUndefined(options.times)) {
+        if (Cesium.defined(options.times)) {
             this._timeDynamicImagery = new Cesium.TimeDynamicImagery({
                 clock : options.clock,
                 times : options.times,
@@ -103,7 +103,7 @@ class SingleTileTimeImageryProvider  {
                     return that.requestIntervalImage(x, y, level, request, interval);
                 },
                 reloadFunction : function() {
-                    if (!_.isUndefined(that._reload)) {
+                    if (Cesium.defined(that._reload)) {
                         that._reload();
                     }
                 }
@@ -359,18 +359,18 @@ class SingleTileTimeImageryProvider  {
         let currentInterval;
 
         // Try and load from cache
-        if (!_.isUndefined(timeDynamicImagery)) {
+        if (Cesium.defined(timeDynamicImagery)) {
             currentInterval = timeDynamicImagery.currentInterval;
             result = timeDynamicImagery.getFromCache(x, y, level, request);
         }
 
         // Couldn't load from cache
-        if (_.isUndefined(result)) {
+        if (!Cesium.defined(result)) {
             result = this.requestIntervalImage(x, y, level, request, currentInterval);
         }
 
         // If we are approaching an interval, preload this tile in the next interval
-        if (!_.isUndefined(result) && _.isUndefined(timeDynamicImagery)) {
+        if (Cesium.defined(result) && !Cesium.defined(timeDynamicImagery)) {
             timeDynamicImagery.checkApproachingInterval(x, y, level, request);
         }
 
@@ -380,13 +380,13 @@ class SingleTileTimeImageryProvider  {
     requestIntervalImage(col, row, level, request, interval) {
         let resource = this._resource.getDerivedResource({request: request});
         let key;
-        let dynamicIntervalData = !_.isUndefined(interval) ? interval.data : undefined;
+        let dynamicIntervalData = Cesium.defined(interval) ? interval.data : undefined;
 
         if (resource.url.indexOf('{') >= 0) {
             // resolve tile-URL template
             let url = resource.url;
 
-            if (!_.isUndefined(dynamicIntervalData)) {
+            if (Cesium.defined(dynamicIntervalData)) {
                 if (_.isNumber(dynamicIntervalData)){
                     url = url.replace('{Time}', interval.start.toString());
                 } else {

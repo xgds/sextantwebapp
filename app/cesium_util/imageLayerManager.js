@@ -20,6 +20,7 @@ const url = require('url');
 import {ElementManager} from "cesium_util/elementManager";
 import {projectionManager} from "cesium_util/projectionManager";
 import {patchOptionsForRemote, prefixUrl} from 'util/xgdsUtils';
+import {QuadrilateralImageryLayer} from "cesium_util/QuadrilateralImageryLayer";
 import * as _ from "lodash";
 
 
@@ -141,15 +142,23 @@ class ImageLayerManager extends ElementManager{
             theUrl = String(options.wms);
         }
         if (newImagery !== undefined){
-            newImageryLayer = this.viewerWrapper.viewer.imageryLayers.addImageryProvider(newImagery);
+            //create new imagery layer
+            if (false) { //(options.projectionName !== undefined) {
+                options.rectangle = options.tilingScheme.rectangle;
+                newImageryLayer = new QuadrilateralImageryLayer(newImagery, options);
+                this.viewerWrapper.viewer.imageryLayers.add(newImageryLayer);
+            } else {
+                newImageryLayer = this.viewerWrapper.viewer.imageryLayers.addImageryProvider(newImagery);
+                if ('alpha' in options){
+                    newImageryLayer.alpha = options.alpha;
+                }
+            }
 
             // for debugging imagery providers
             //let debugImageryLayer = new Cesium.TileCoordinatesImageryProvider(options);
             //this.viewerWrapper.viewer.imageryLayers.addImageryProvider(debugImageryLayer);
 
-            if ('alpha' in options){
-                newImageryLayer.alpha = options.alpha;
-            }
+
             this.elementMap[theUrl] = newImageryLayer;
             if (callback !== undefined) {
                 callback(newImageryLayer);

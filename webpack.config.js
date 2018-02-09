@@ -11,6 +11,7 @@ const webpack = require("webpack");
 
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
+const CleanWebpackPlugin = require('clean-webpack-plugin');
 const ManifestRevisionPlugin = require("manifest-revision-webpack-plugin");
 
 const nodeModulesPath = path.resolve(__dirname, "node_modules");
@@ -62,6 +63,7 @@ module.exports = (env = ENV_DEFAULTS) => {
             // new webpack.DefinePlugin({
             //     "process.env.CONFIG_PATH": JSON.stringify(process.env.CONFIG_PATH || undefined)
             // }),
+            new CleanWebpackPlugin(['public/build']),
             new webpack.DefinePlugin({'DEFAULT_CONFIG_PATH': JSON.stringify('./standalone_config.js')
 //                                      'CONFIG_URL': env.CONFIG_URL
                                       }),

@@ -18,7 +18,7 @@ const Cesium = require('cesium/Cesium');
 import * as _ from 'lodash';
 
 import {config} from 'config_loader';
-import {ProjectionTilingScheme} from "cesium_util/ProjectionTilingScheme";
+import {QuadrilateralTilingScheme} from "cesium_util/QuadrilateralTilingScheme";
 import {NorthPoleStereo, SouthPoleStereo} from "cesium_util/PolarStereoMapProjection";
 
 /**
@@ -95,25 +95,15 @@ class ProjectionManager {
        let rectangleSouthwestInMeters = undefined;
        let rectangleNortheastInMeters = undefined;
        if (boundsUTM !== undefined){
-           //console.log(boundsUTM);
            rectangleSouthwestInMeters = new Cesium.Cartesian2(boundsUTM.minx, boundsUTM.miny);
            rectangleNortheastInMeters = new Cesium.Cartesian2(boundsUTM.maxx, boundsUTM.maxy);
 
             //let theMin = projection.unproject(rectangleSouthwestInMeters);
             //let theMax = projection.unproject(rectangleNortheastInMeters);
-            // console.log('min');
-            // console.log(theMin);
-            // console.log('max');
-            // console.log(theMax);
 
            //rectangle = new Cesium.Rectangle(theMin.longitude, theMin.latitude, theMax.longitude, theMax.latitude);
        } else {
-//           let semimajorAxisTimesPi = this.ellipsoid.maximumRadius * Math.PI;
-           if (key == 'NP_STEREO') {
-               rectangle = Cesium.Rectangle.fromDegrees(-180.0, -45.0, 180.0, 45.0);
-           } else if (key === 'SP_STEREO'){
-               rectangle = Cesium.Rectangle.fromDegrees(180.0, 45, -180.0, -45.0);
-           }
+           //TODO handle
        }
 
        let options = {ellipsoid:this.ellipsoid,
@@ -122,7 +112,7 @@ class ProjectionManager {
                       rectangleSouthwestInMeters: rectangleSouthwestInMeters,
                       rectangleNortheastInMeters: rectangleNortheastInMeters
        };
-       return new ProjectionTilingScheme(options);
+       return new QuadrilateralTilingScheme(options);
     }
 
 }

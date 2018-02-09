@@ -140,7 +140,7 @@ class ElementManager {
     setAlpha(key, value){
         try {
             let found = this.elementMap[key];
-            if (!_.isUndefined(found)) {
+            if (Cesium.defined(found)) {
                 found.alpha = value;
                 return true;
             }

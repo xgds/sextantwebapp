@@ -67,7 +67,7 @@ class GroundOverlayTimeManager extends ElementManager{
         let newImagery = undefined;
         options.ellipsoid = this.viewerWrapper.ellipsoid;
         options.clock = this.viewerWrapper.clock;
-        if (!_.isUndefined(options.start) && !_.isUndefined((options.end))) {
+        if (Cesium.defined(options.start) && Cesium.defined(options.end)) {
             //TODO this will call the server for every single tick.
             // instead support intervals, do we really need to iterate through each?
             // options.times = new Cesium.TimeInterval({
@@ -76,7 +76,7 @@ class GroundOverlayTimeManager extends ElementManager{
             // });
             options.times = buildTimeIntervalCollection(options.start, options.end, options.interval);
         }
-        if (options.minLon !== undefined){
+        if (Cesium.defined(options.minLon)){
             let context = this;
 
             let rectangle = new Cesium.Rectangle(Cesium.Math.toRadians(options.minLon),

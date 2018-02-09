@@ -88,7 +88,7 @@ class KmlManager extends ElementManager {
                  // load text from a URL, setting a custom header
                  let settings = {};
                  if (!elementUrl.includes(config.server.name)){
-                     if (!_.isUndefined(config.xgds)) {
+                     if (Cesium.defined(config.xgds)) {
                          if (elementUrl.includes(config.xgds.name)) {
                              settings = xgdsAuth(settings);
                          }
