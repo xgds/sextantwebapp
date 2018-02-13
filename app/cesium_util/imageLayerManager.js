@@ -20,7 +20,6 @@ const url = require('url');
 import {ElementManager} from "cesium_util/elementManager";
 import {projectionManager} from "cesium_util/projectionManager";
 import {patchOptionsForRemote, prefixUrl} from 'util/xgdsUtils';
-import {QuadrilateralImageryLayer} from "cesium_util/QuadrilateralImageryLayer";
 import * as _ from "lodash";
 
 
@@ -47,7 +46,7 @@ class ImageLayerManager extends ElementManager{
     initialize(){
         super.initialize();
         let initialElements = this.getInitialElementList();
-        if (initialElements !== undefined && !_.isEmpty(initialElements)) {
+        if (Cesium.defined(initialElements) && !_.isEmpty(initialElements)) {
             this.loadElements(initialElements);
         }
     };
@@ -104,22 +103,23 @@ class ImageLayerManager extends ElementManager{
         let newImagery = undefined;
         let theUrl = String(options.url);
         options.ellipsoid = this.viewerWrapper.ellipsoid;
-        if ('url' in options) {
+        if ('wms' in options && options.wms){
+            newImagery = new Cesium.WebMapServiceImageryProvider(options);
+            theUrl = options.url + '/' + options.layers;
+        } else if ('url' in options) {
             let resourceOptions = Object.assign({}, options);
             resourceOptions.url = prefixUrl(resourceOptions.url);
             resourceOptions = patchOptionsForRemote(resourceOptions);
             
-            if (options.projectionName !== undefined) {
+            if (Cesium.defined(options.projectionName)) {
                 let tilingScheme = projectionManager.getTilingScheme(options.projectionName, options.bounds);
-                if (tilingScheme !== undefined) {
+                if (Cesium.defined(tilingScheme)) {
                     options.tilingScheme = tilingScheme;
                     if ('bounds' in options){
                         options.rectangle = this.buildRectangle(tilingScheme, options.bounds);
                     } else {
                         options.rectangle = tilingScheme.rectangle;
                     }
-                    console.log(options.rectangle);
-
                     resourceOptions.url = resourceOptions.url + '/{z}/{x}/{y}.png';  //TODO might be reverseY, see if flipXY is passed in
                 }
                 options.url = new Cesium.Resource(resourceOptions);
@@ -135,24 +135,18 @@ class ImageLayerManager extends ElementManager{
                 options.tilingScheme = tempImagery.tilingScheme;
                 newImagery = new Cesium.UrlTemplateImageryProvider(options);
             }
-
-
-        } else if ('wms' in options){
-            newImagery = new Cesium.WebMapServiceImageryProvider(options.wms);
-            theUrl = String(options.wms);
         }
         if (newImagery !== undefined){
             //create new imagery layer
-            if (false) { //(options.projectionName !== undefined) {
-                options.rectangle = options.tilingScheme.rectangle;
-                newImageryLayer = new QuadrilateralImageryLayer(newImagery, options);
-                this.viewerWrapper.viewer.imageryLayers.add(newImageryLayer);
-            } else {
+            // if (options.projectionName !== undefined) {
+            //     newImageryLayer = new Cesium.ImageryLayer(newImagery, options);
+            //     this.viewerWrapper.viewer.imageryLayers.add(newImageryLayer);
+            // } else {
                 newImageryLayer = this.viewerWrapper.viewer.imageryLayers.addImageryProvider(newImagery);
                 if ('alpha' in options){
                     newImageryLayer.alpha = options.alpha;
                 }
-            }
+            //}
 
             // for debugging imagery providers
             //let debugImageryLayer = new Cesium.TileCoordinatesImageryProvider(options);
@@ -176,12 +170,12 @@ class ImageLayerManager extends ElementManager{
      */
     show(options) {
         let theUrl = undefined;
-        if ('url' in options) {
+        if ('wms' in options){
+            theUrl = options.url + '/' + options.layers;
+        } else if ('url' in options) {
             theUrl = options.url;
-        } else if ('wms' in options){
-            theUrl = options.wms;
         }
-        if (theUrl !== undefined) {
+        if (Cesium.defined(theUrl)) {
             if (theUrl in this.elementMap){
                 if (this.elementMap[theUrl].isDestroyed()) {
                     this.load(options);

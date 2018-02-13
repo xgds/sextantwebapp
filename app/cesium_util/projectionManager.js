@@ -18,7 +18,7 @@ const Cesium = require('cesium/Cesium');
 import * as _ from 'lodash';
 
 import {config} from 'config_loader';
-import {QuadrilateralTilingScheme} from "cesium_util/QuadrilateralTilingScheme";
+import {ProjectionTilingScheme} from "cesium_util/ProjectionTilingScheme";
 import {NorthPoleStereo, SouthPoleStereo} from "cesium_util/PolarStereoMapProjection";
 
 /**
@@ -112,7 +112,7 @@ class ProjectionManager {
                       rectangleSouthwestInMeters: rectangleSouthwestInMeters,
                       rectangleNortheastInMeters: rectangleNortheastInMeters
        };
-       return new QuadrilateralTilingScheme(options);
+       return new ProjectionTilingScheme(options);
     }
 
 }

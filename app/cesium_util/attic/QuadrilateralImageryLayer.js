@@ -147,6 +147,8 @@ class QuadrilateralImageryLayer extends Cesium.ImageryLayer{
         let northwestTileCoordinates = imageryTilingScheme.positionToTileXY(imageryBounds.northwest(), imageryLevel);
         let southeastTileCoordinates = imageryTilingScheme.positionToTileXY(imageryBounds.southeast(), imageryLevel);
 
+        //TODO the above coordinates can be undefined!
+
         // If the southeast corner of the rectangle lies very close to the north or west side
         // of the southeast tile, we don't actually need the southernmost or easternmost
         // tiles.

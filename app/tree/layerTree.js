@@ -110,6 +110,8 @@ class LayerTree {
      */
     getTreeIcon(key) {
         switch (key) {
+            case 'WMSTile':
+                return config.layer_tree_icon_url + 'wmstile.png';
             case 'MapLink':
                 return config.layer_tree_icon_url + 'link-16.png';
             case 'KmlMap':
@@ -152,6 +154,9 @@ class LayerTree {
             case 'MapTile':
             case 'MapDataTile':
                 return getRestUrl(data.node.data.tilePath);
+            case 'WMSTile':
+                //TODO handle auth
+                return data.node.data.tileURL + '/' + data.node.data.layers;
             default:
                 return undefined;
         }
@@ -300,6 +305,17 @@ class LayerTree {
         }
         if (!_.isUndefined(data.node.data.transparency) && data.node.data.transparency > 0){
             options.alpha = this.calculateAlpha(data.node.data.transparency);
+        }
+        if (data.node.data.type == 'WMSTile'){
+            options.wms = true;
+            options.url = data.node.data.tileURL;
+            options.layers = data.node.data.layers;
+            options.format = data.node.data.format;
+            if (_.isUndefined(options.format)){
+                options.format = 'image/png';
+            }
+            options.parameters = {format:options.format,
+                                  transparent: true};
         }
         return options;
     };
@@ -494,7 +510,7 @@ class LayerTree {
         let kmlUrl = this.getKmlUrl({node:node});
         if (kmlUrl !== undefined) {
             this.kmlManager.setAlpha(node.key, scaledValue);
-        } else if (node.data.type == 'MapTile' || node.data.type == 'MapDataTile') {
+        } else if (node.data.type == 'MapTile' || node.data.type == 'MapDataTile' || node.data.type == 'WMSTile') {
             let imageLayerUrl = this.getImageLayerUrl({node:node});
             this.imageLayerManager.setAlpha(imageLayerUrl, scaledValue);
         } else if (node.data.type == "GroundOverlayTime") {
@@ -526,7 +542,7 @@ class LayerTree {
             this.showTransparencySliders(rootNode);
         } else {
             $(".transparency_value").hide();
-            $(".transparency_slider").hide(); //.slider("destroy");
+            $(".transparency_slider").hide();
         }
     };
 

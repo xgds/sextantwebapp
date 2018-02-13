@@ -38,7 +38,7 @@ This should give some feedback and have built what you need in public/build/
 ## Run the server
 All server side code is written with ES6 syntax, however the regular javascript compiler can't handle that yet so we need to transpile it with babel. This is pretty straightforward:
 
-    ~$ babel-node server.js --presets es2015,stage-2
+    ~$ babel-node server.js --presets env,stage-0
 
 The console should say where it loaded the config, and that it's serving on localhost:3001
 

@@ -16,7 +16,6 @@
 
 const Cesium = require('cesium/Cesium');
 import * as _ from 'lodash';
-import {Quadrilateral, Units} from 'cesium_util/Quadrilateral';
 
 
 /**
@@ -235,6 +234,7 @@ class ProjectionTilingScheme {
      *          if 'result' is undefined.
      */
     positionToTileXY(position, level, result) {
+        debugger;
         let rectangle = this._rectangle;
         if (!Cesium.Rectangle.contains(rectangle, position)) {
             // outside the bounds of the tiling scheme

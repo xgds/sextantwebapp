@@ -17,7 +17,7 @@
 //const request = require('then-request');
 //const request = require('request');
 import * as _ from 'lodash';
-const configPath = (process.env.CONFIG_PATH || DEFAULT_CONFIG_PATH);
+const configPath = (process.env.CONFIG_PATH || './standalone_config.js');
 
 function populateConfig(result) {
 	result.urlPrefix = result.server.protocol + '://' + result.server.name;

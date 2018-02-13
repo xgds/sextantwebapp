@@ -64,9 +64,9 @@ module.exports = (env = ENV_DEFAULTS) => {
             //     "process.env.CONFIG_PATH": JSON.stringify(process.env.CONFIG_PATH || undefined)
             // }),
             new CleanWebpackPlugin(['public/build']),
-            new webpack.DefinePlugin({'DEFAULT_CONFIG_PATH': JSON.stringify('./standalone_config.js')
-//                                      'CONFIG_URL': env.CONFIG_URL
-                                      }),
+//             new webpack.DefinePlugin({//'DEFAULT_CONFIG_PATH': JSON.stringify('./standalone_config.js')
+// //                                      'CONFIG_URL': env.CONFIG_URL
+//                                       }),
             new webpack.EnvironmentPlugin({
                 'CONFIG_PATH': env.CONFIG_PATH
             }),

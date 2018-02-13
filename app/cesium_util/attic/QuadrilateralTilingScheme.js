@@ -39,7 +39,7 @@ class QuadrilateralTilingScheme extends ProjectionTilingScheme {
             this._imageryBoundsInMeters = this.quadrilateralToNativeQuadrilateral(this._imageryBounds);
         }
 
-        this.enlargeRectangle();
+        //this.enlargeRectangle();
 
          Object.defineProperties(this, {
              /**
