@@ -110,6 +110,8 @@ class LayerTree {
      */
     getTreeIcon(key) {
         switch (key) {
+            case 'WMTSTile':
+                return config.layer_tree_icon_url + 'wmts.png';
             case 'WMSTile':
                 return config.layer_tree_icon_url + 'wmstile.png';
             case 'MapLink':
@@ -155,7 +157,7 @@ class LayerTree {
             case 'MapDataTile':
                 return getRestUrl(data.node.data.tilePath);
             case 'WMSTile':
-                //TODO handle auth
+            case 'WMTSTile':
                 return data.node.data.tileURL + '/' + data.node.data.layers;
             default:
                 return undefined;
@@ -261,6 +263,9 @@ class LayerTree {
             if (imageLayerUrl !== undefined){
                 if (data.node.selected) {
                     let options = this.buildImageLayerOptions(data, imageLayerUrl);
+                    if ('style' in options && _.isEmpty(options.style)){
+                        options.style = "default"; //TODO this is baffling. it is set in the buildImageLayerOptions fumction
+                    }
                     context.imageLayerManager.show(options);
                 } else {
                     context.imageLayerManager.hide(imageLayerUrl);
@@ -294,8 +299,9 @@ class LayerTree {
     };
 
     buildImageLayerOptions(data, imageLayerUrl) {
-        let options = {url:imageLayerUrl,
-                       flipXY: true}; // we know that we want this set for layers we made
+        let options = {};
+        options.url = imageLayerUrl;
+        options.flipXY = true; // we know that we want this set for layers we made
         this.buildProjectionBounds(data, options,
             data.node.data.minx, data.node.data.miny,
             data.node.data.maxx, data.node.data.maxy);
@@ -307,15 +313,50 @@ class LayerTree {
             options.alpha = this.calculateAlpha(data.node.data.transparency);
         }
         if (data.node.data.type == 'WMSTile'){
+            options.flipXY = false;
             options.wms = true;
             options.url = data.node.data.tileURL;
             options.layers = data.node.data.layers;
             options.format = data.node.data.format;
+            options.tileWidth = data.node.data.tileWidth;
+            options.tileHeight = data.node.data.tileHeight;
+            options.minimumLevel = data.node.data.minLevel;
+            options.maximumLevel = data.node.data.maxLevel;
+            let wmsVersion = data.node.data.wmsVersion;
+            if (wmsVersion == '1.1.1' || wmsVersion == '1.1.0') {
+                options.srs = data.node.data.srs;
+            } else {
+                options.crs = data.node.data.srs;
+            }
+
             if (_.isUndefined(options.format)){
                 options.format = 'image/png';
             }
             options.parameters = {format:options.format,
-                                  transparent: true};
+                                  transparent: true,
+                                  version: wmsVersion
+            };
+        } else if (data.node.data.type == 'WMTSTile'){
+            options.flipXY = false;
+            options.wmts = true;
+            options.url = data.node.data.tileURL;
+            options.format = data.node.data.format;
+            options.layer = data.node.data.layers;
+            options.style = !_.isEmpty(data.node.data.style) ? data.node.data.style : undefined;
+            options.tileMatrixSetID = data.node.data.tileMatrixSetID;
+            options.tileMatrixLabels = !_.isEmpty(data.node.data.tileMatrixLabels) ? data.node.data.tileMatrixLabels : undefined;
+            options.tileWidth = data.node.data.tileWidth;
+            options.tileHeight = data.node.data.tileHeight;
+            options.minimumLevel = data.node.data.minLevel;
+            options.maximumLevel = data.node.data.maxLevel;
+            options.subdomains = !_.isEmpty(data.node.data.subdomains) ? data.node.data.subdomains : undefined;
+            options.style = data.node.data.style;
+            options.start = data.node.data.start;
+            options.end = data.node.data.end;
+            options.interval = data.node.data.interval;
+            if (_.isUndefined(options.format)){
+                options.format = 'image/png';
+            }
         }
         return options;
     };
@@ -510,7 +551,7 @@ class LayerTree {
         let kmlUrl = this.getKmlUrl({node:node});
         if (kmlUrl !== undefined) {
             this.kmlManager.setAlpha(node.key, scaledValue);
-        } else if (node.data.type == 'MapTile' || node.data.type == 'MapDataTile' || node.data.type == 'WMSTile') {
+        } else if (node.data.type == 'MapTile' || node.data.type == 'MapDataTile' || node.data.type == 'WMSTile' || node.data.type == 'WMTSTile') {
             let imageLayerUrl = this.getImageLayerUrl({node:node});
             this.imageLayerManager.setAlpha(imageLayerUrl, scaledValue);
         } else if (node.data.type == "GroundOverlayTime") {

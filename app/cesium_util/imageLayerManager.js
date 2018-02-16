@@ -20,6 +20,8 @@ const url = require('url');
 import {ElementManager} from "cesium_util/elementManager";
 import {projectionManager} from "cesium_util/projectionManager";
 import {patchOptionsForRemote, prefixUrl} from 'util/xgdsUtils';
+import {buildTimeIntervalCollection} from "cesium_util/TimeUtils";
+
 import * as _ from "lodash";
 
 
@@ -106,6 +108,11 @@ class ImageLayerManager extends ElementManager{
         if ('wms' in options && options.wms){
             newImagery = new Cesium.WebMapServiceImageryProvider(options);
             theUrl = options.url + '/' + options.layers;
+        } else if ('wmts' in options && options.wmts) {
+            options.times = buildTimeIntervalCollection(options.start, options.end, options.interval);
+            options.clock = this.viewerWrapper.clock;
+            newImagery = new Cesium.WebMapTileServiceImageryProvider(options);
+            theUrl = options.url + '/' + options.layer;
         } else if ('url' in options) {
             let resourceOptions = Object.assign({}, options);
             resourceOptions.url = prefixUrl(resourceOptions.url);
@@ -172,6 +179,8 @@ class ImageLayerManager extends ElementManager{
         let theUrl = undefined;
         if ('wms' in options){
             theUrl = options.url + '/' + options.layers;
+        } else if ('wmts' in options) {
+            theUrl = options.url + '/' + options.layer;
         } else if ('url' in options) {
             theUrl = options.url;
         }
