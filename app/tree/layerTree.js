@@ -263,9 +263,6 @@ class LayerTree {
             if (imageLayerUrl !== undefined){
                 if (data.node.selected) {
                     let options = this.buildImageLayerOptions(data, imageLayerUrl);
-                    if ('style' in options && _.isEmpty(options.style)){
-                        options.style = "default"; //TODO this is baffling. it is set in the buildImageLayerOptions fumction
-                    }
                     context.imageLayerManager.show(options);
                 } else {
                     context.imageLayerManager.hide(imageLayerUrl);
@@ -342,7 +339,7 @@ class LayerTree {
             options.url = data.node.data.tileURL;
             options.format = data.node.data.format;
             options.layer = data.node.data.layers;
-            options.style = !_.isEmpty(data.node.data.style) ? data.node.data.style : undefined;
+            options.style = !_.isEmpty(data.node.data.style) ? data.node.data.style : "default";
             options.tileMatrixSetID = data.node.data.tileMatrixSetID;
             options.tileMatrixLabels = !_.isEmpty(data.node.data.tileMatrixLabels) ? data.node.data.tileMatrixLabels : undefined;
             options.tileWidth = data.node.data.tileWidth;
@@ -350,7 +347,6 @@ class LayerTree {
             options.minimumLevel = data.node.data.minLevel;
             options.maximumLevel = data.node.data.maxLevel;
             options.subdomains = !_.isEmpty(data.node.data.subdomains) ? data.node.data.subdomains : undefined;
-            options.style = data.node.data.style;
             options.start = data.node.data.start;
             options.end = data.node.data.end;
             options.interval = data.node.data.interval;
