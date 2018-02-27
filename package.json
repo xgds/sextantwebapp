@@ -1,7 +1,7 @@
 {
-  "name": "webapp",
+  "name": "sextantwebapp",
   "version": "1.0.0",
-  "description": "pextant webapp",
+  "description": "Cesium web application, supporting map layers, live rendering of position & tracks, path planning, and integration with xGDS.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
