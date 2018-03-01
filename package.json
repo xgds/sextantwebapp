@@ -2,7 +2,7 @@
   "name": "sextantwebapp",
   "version": "1.0.0",
   "description": "Cesium web application, supporting map layers, live rendering of position & tracks, path planning, and integration with xGDS.",
-  "main": "index.js",
+  "main": "public/build/sextant.bundle.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "node_modules/.bin/webpack --config webpack.config.js",

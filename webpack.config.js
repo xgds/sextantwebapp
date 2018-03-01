@@ -1,10 +1,5 @@
 const path = require("path");
 const webpack = require("webpack");
-//const HtmlWebpackPlugin = require("html-webpack-plugin");
-
-//npm WARN bootstrap-loader@2.2.0 requires a peer of extract-text-webpack-plugin@>=2.1.0 but none was installed.
-//npm WARN extract-text-webpack-plugin@1.0.1 requires a peer of webpack@^1.9.11 but none was installed.
-//npm WARN sass-loader@4.1.1 requires a peer of webpack@^2 || ^2.2.0-rc.0 || ^2.1.0-beta || ^1.12.6 but none was installed.
 
 // use webpack --watch to watch code to recompile
 // use express in server.js (ie use debug flag)
@@ -12,7 +7,6 @@ const webpack = require("webpack");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const CleanWebpackPlugin = require('clean-webpack-plugin');
-const ManifestRevisionPlugin = require("manifest-revision-webpack-plugin");
 
 const nodeModulesPath = path.resolve(__dirname, "node_modules");
 const buildPath = path.resolve(__dirname, "public", "build");
@@ -51,9 +45,8 @@ module.exports = (env = ENV_DEFAULTS) => {
             path: buildPath,
             publicPath: "/build/",
             filename: "sextant.bundle.js",
-            //libraryTarget: "var",
-            library: "sextant" // the name of the library we refer to
-            //sourcePrefix: "" // required for cesium
+            library: "sextant", // the name of the library we refer to
+            libraryTarget: "umd"
         },
         amd: {
             // Enable webpack-friendly use of require in Cesium
@@ -64,9 +57,6 @@ module.exports = (env = ENV_DEFAULTS) => {
             //     "process.env.CONFIG_PATH": JSON.stringify(process.env.CONFIG_PATH || undefined)
             // }),
             new CleanWebpackPlugin(['public/build']),
-//             new webpack.DefinePlugin({//'DEFAULT_CONFIG_PATH': JSON.stringify('./standalone_config.js')
-// //                                      'CONFIG_URL': env.CONFIG_URL
-//                                       }),
             new webpack.EnvironmentPlugin({
                 'CONFIG_PATH': env.CONFIG_PATH
             }),
@@ -76,12 +66,6 @@ module.exports = (env = ENV_DEFAULTS) => {
             //         warnings: true
             //     }
             // }),
-            // new webpack.LoaderOptionsPlugin({
-            //     minimize: true
-            // }),
-            // new HtmlWebpackPlugin({
-            //    template: "src/index.html"
-            // }),
             // Copy Cesium Assets, Widgets, and Workers to a static directory
             new CopyWebpackPlugin([{from: path.join(cesiumSource, cesiumWorkers), to: "Workers"}]),
             new CopyWebpackPlugin([{from: path.join(cesiumSource, "Assets"), to: "Assets"}]),
@@ -90,7 +74,6 @@ module.exports = (env = ENV_DEFAULTS) => {
               // Make jQuery / $ available in every module:
               $: 'jquery',
               jQuery: 'jquery',
-              // NOTE: Required to load jQuery Plugins into the *global* jQuery instance:
               jquery: 'jquery'
             }),
             new ExtractTextPlugin({filename:"styles.css",
@@ -190,17 +173,13 @@ module.exports = (env = ENV_DEFAULTS) => {
                               ]
                     })
                 },
-                //{test: /\.css$/, use: ["style-loader", "css-loader"]},
                 {test: /\.less$/, use: ["style-loader", "css-loader", "less-loader"]},
-                //{test: /\.(png|gif|jpg|jpeg|glsl)$/, use: ["file-loader"]},
-                //{test: /\.(glsl)$/, use: ["file-loader"]},
                 {
                     test: /\.(?:png|jpe?g|woff|woff2|eot|ttf|svg|gif|glsl)$/, use: [{
                         loader: "url-loader",
                         options: {limit: 10000}
                     }]
                 }
-                //{test: /node_modules/, use: ["ify-loader"]}
             ]
         },
         node: {
