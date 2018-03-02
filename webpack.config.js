@@ -44,8 +44,8 @@ module.exports = (env = ENV_DEFAULTS) => {
         output: {
             path: buildPath,
             publicPath: "/build/",
-            filename: "sextant.bundle.js",
-            library: "sextant", // the name of the library we refer to
+            filename: "xgds-3d-view.bundle.js",
+            library: "xgds3dview", // the name of the library we refer to
             libraryTarget: "umd"
         },
         amd: {

@@ -1,19 +1,19 @@
 {
-  "name": "sextantwebapp",
+  "name": "xgds-3d-view",
   "version": "1.0.0",
   "description": "Cesium web application, supporting map layers, live rendering of position & tracks, path planning, and integration with xGDS.",
-  "main": "public/build/sextant.bundle.js",
+  "main": "public/build/xgds-3d-view.bundle.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "node_modules/.bin/webpack --config webpack.config.js",
+    "build": "webpack --progress",
     "start": "babel-node server.js --presets es2015,stage-2",
     "postinstall": "echo \"cd node_modules/cesium-navigation && npm install && node build.js\" "
   },
   "repository": {
     "type": "git",
-    "url": "www.github.com/norheim/sextantwebapp"
+    "url": "www.github.com/xgds/xgds_3dview"
   },
-  "author": "Johannes Norheim",
+  "author": "Johannes Norheim & Tamar Cohen",
   "license": "ISC",
   "dependencies": {
     "babel-runtime": "^6.26.0",

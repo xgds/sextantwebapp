@@ -19,12 +19,12 @@ let deviceNames = "";
 //If the connected devices are defined, they will be loaded into a toolbar and the polling will be started
 //Otherwise, the entire connected devices functionality will not be started
 function loadDevices(){
-	if(sextant.connectedDevices !== undefined){
+	if(xgds3dview.connectedDevices !== undefined){
 
-		if (!_.isEmpty(sextant.connectedDevices)) {
+		if (!_.isEmpty(xgds3dview.connectedDevices)) {
 			$('#connectedDevices').show();
 		}
-		$.each(sextant.connectedDevices, function( key, value ) { //key here is the device name, and value is the displayName corresponding to it.
+		$.each(xgds3dview.connectedDevices, function( key, value ) { //key here is the device name, and value is the displayName corresponding to it.
 			let listEntry="<li "+"id='"+key+"'>"+value+"</li>";
 			$('#deviceList').append(listEntry); //Display all connected devices using their display names from config
 			deviceNames += key + " ";
@@ -51,7 +51,7 @@ function checkConnectedDevices(){
         dataType: 'json',
         data: {names:deviceNames},
         success: $.proxy(function(data, status) {
-            $.each(sextant.connectedDevices, function( key, value ) {
+            $.each(xgds3dview.connectedDevices, function( key, value ) {
                 for(let i=0;i<data.length;i++){
                     if ('statusColor' in data[i]){
                         let statusColor = data[i].statusColor;
@@ -96,19 +96,19 @@ function handleSave(){ //TODO rather redundant. Also, will break if user names t
 };
 
 function hideFooterMenu() {
-	if ('hideFooter' in sextant.config && sextant.config.hideFooter){
+	if ('hideFooter' in xgds3dview.config && xgds3dview.config.hideFooter){
 		$('.footer-menu').hide();
 	}
 };
 
 function hideConnected() {
-	if ('hideConnected' in sextant.config && sextant.config.hideConnected){
+	if ('hideConnected' in xgds3dview.config && xgds3dview.config.hideConnected){
 		$('#connected_div').hide();
 	}
 };
 
 function showNav() {
-	if ('showNav' in sextant.config && sextant.config.showNav){
+	if ('showNav' in xgds3dview.config && xgds3dview.config.showNav){
 		$('#nav_div').show();
 	}
 };
