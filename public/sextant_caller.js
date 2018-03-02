@@ -47,11 +47,11 @@
 	}
 	
 	function zoom(){
-		xgds3dview.zoom(xgds3dview.camera);
+		xgds3dview.zoom(xgds3dview.viewerWrapper.viewer.scene.camera);
 	}
 
 	function setHeading(){
-		xgds3dview.heading(90, xgds3dview.camera);
+		xgds3dview.heading(90, xgds3dview.viewerWrapper.viewer.scene.camera);
 	}
 
 	function zoomToTracks(){
