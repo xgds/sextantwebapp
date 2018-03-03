@@ -19,12 +19,12 @@ let deviceNames = "";
 //If the connected devices are defined, they will be loaded into a toolbar and the polling will be started
 //Otherwise, the entire connected devices functionality will not be started
 function loadDevices(){
-	if(xgds3dview.connectedDevices !== undefined){
+	if(xgds3dview.context.connectedDevices !== undefined){
 
-		if (!_.isEmpty(xgds3dview.connectedDevices)) {
+		if (!_.isEmpty(xgds3dview.context.connectedDevices)) {
 			$('#connectedDevices').show();
 		}
-		$.each(xgds3dview.connectedDevices, function( key, value ) { //key here is the device name, and value is the displayName corresponding to it.
+		$.each(xgds3dview.context.connectedDevices, function( key, value ) { //key here is the device name, and value is the displayName corresponding to it.
 			let listEntry="<li "+"id='"+key+"'>"+value+"</li>";
 			$('#deviceList').append(listEntry); //Display all connected devices using their display names from config
 			deviceNames += key + " ";
@@ -51,7 +51,7 @@ function checkConnectedDevices(){
         dataType: 'json',
         data: {names:deviceNames},
         success: $.proxy(function(data, status) {
-            $.each(xgds3dview.connectedDevices, function( key, value ) {
+            $.each(xgds3dview.context.connectedDevices, function( key, value ) {
                 for(let i=0;i<data.length;i++){
                     if ('statusColor' in data[i]){
                         let statusColor = data[i].statusColor;

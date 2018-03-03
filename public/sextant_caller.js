@@ -15,7 +15,7 @@
 // __END_LICENSE__
 
 	/*window.addEventListener("devicemotion", function (event){
-		xgds3dview.heading(event.alpha);
+		xgds3dview.context.heading(event.alpha);
 	}, true);*/
 
 	// now you can use the plan maanger to send points to sextant
@@ -47,96 +47,96 @@
 	}
 	
 	function zoom(){
-		xgds3dview.zoom(xgds3dview.viewerWrapper.viewer.scene.camera);
+		xgds3dview.context.zoom(xgds3dview.context.viewerWrapper.viewer.scene.camera);
 	}
 
 	function setHeading(){
-		xgds3dview.heading(90, xgds3dview.viewerWrapper.viewer.scene.camera);
+		xgds3dview.context.heading(90, xgds3dview.context.viewerWrapper.viewer.scene.camera);
 	}
 
 	function zoomToTracks(){
-		if (xgds3dview.gps_tracks !== undefined) {
-			xgds3dview.gps_tracks.zoomTo();
+		if (xgds3dview.context.gps_tracks !== undefined) {
+			xgds3dview.context.gps_tracks.zoomTo();
 		}
 	}
 	
 	function zoomToPlan(){
-		if (xgds3dview.planManager !== undefined) {
-			xgds3dview.planManager.zoomTo();
+		if (xgds3dview.context.planManager !== undefined) {
+			xgds3dview.context.planManager.zoomTo();
 		}
 	}
 	
 	function zoomToPosition(){
-		if (xgds3dview.tsse !== undefined) {
-			xgds3dview.tsse.zoomToPosition(config.xgds.follow_channel);
+		if (xgds3dview.context.tsse !== undefined) {
+			xgds3dview.context.tsse.zoomToPosition(config.xgds.follow_channel);
 		}
 	}
 	
 	
 	function followPosition(follow){
-		if (xgds3dview.tsse !== undefined) {
-			xgds3dview.tsse.setFollowPosition(follow);
+		if (xgds3dview.context.tsse !== undefined) {
+			xgds3dview.context.tsse.setFollowPosition(follow);
 		}
 	}
 	
 	function toggleTrack(show){
-		if (xgds3dview.tsse !== undefined) {
-			xgds3dview.tsse.toggleTrack(show);
+		if (xgds3dview.context.tsse !== undefined) {
+			xgds3dview.context.tsse.toggleTrack(show);
 		}
 	}
 
 	
 	function serialstatus(){
 		console.log('serialstatus0')
-		xgds3dview.serialrequest.connect();
-		xgds3dview.serialrequest.requestData();
+		xgds3dview.context.serialrequest.connect();
+		xgds3dview.context.serialrequest.requestData();
 	}
 	
 	function getwaypoints(){
 		console.log('getting waypoints');
-		xgds3dview.getwaypoints.connect();
-		xgds3dview.getwaypoints.requestData();
+		xgds3dview.context.getwaypoints.connect();
+		xgds3dview.context.getwaypoints.requestData();
 	}
 	
 	function drawpextant(){
-		xgds3dview.getwaypoints.send("bla")
+		xgds3dview.context.getwaypoints.send("bla")
 	}
 	
 	function getpextant(){
 		console.log('getting waypoints');
-		xgds3dview.getpextant.connect();
-		xgds3dview.getpextant.requestData();
+		xgds3dview.context.getpextant.connect();
+		xgds3dview.context.getpextant.requestData();
 	}
 	
 	function getpextantFromHere(){
 		console.log('pextant from here');
-		console.log(xgds3dview.globalpoint());
+		console.log(xgds3dview.context.globalpoint());
 
-		document.getElementById("globalpoint").innerHTML =JSON.stringify(xgds3dview.globalpoint());
+		document.getElementById("globalpoint").innerHTML =JSON.stringify(xgds3dview.context.globalpoint());
 
-		xgds3dview.getpextant.connect();
-		xgds3dview.getpextant.send(JSON.stringify(xgds3dview.globalpoint()));
+		xgds3dview.context.getpextant.connect();
+		xgds3dview.context.getpextant.send(JSON.stringify(xgds3dview.context.globalpoint()));
 	}
 
 	function calibrate(){
 		console.log('pextant from here');
-		console.log(xgds3dview.globalpoint());
+		console.log(xgds3dview.context.globalpoint());
 
-		document.getElementById("globalpoint").innerHTML =JSON.stringify(xgds3dview.globalpoint());
+		document.getElementById("globalpoint").innerHTML =JSON.stringify(xgds3dview.context.globalpoint());
 
-		xgds3dview.calibrate.connect();
-		xgds3dview.calibrate.send(JSON.stringify(xgds3dview.globalpoint()));
+		xgds3dview.context.calibrate.connect();
+		xgds3dview.context.calibrate.send(JSON.stringify(xgds3dview.context.globalpoint()));
 	}
 	
 	function reloadPlan() {
-		if (xgds3dview.planManager !== undefined){
-			xgds3dview.planManager.fetchPlan();
+		if (xgds3dview.context.planManager !== undefined){
+			xgds3dview.context.planManager.fetchPlan();
 		}
 	}
 	
 	function sendPlanToSextant() {
-		if (xgds3dview.planManager !== undefined){
-			xgds3dview.planManager.invokePextant();
+		if (xgds3dview.context.planManager !== undefined){
+			xgds3dview.context.planManager.invokePextant();
 		}
 	}
 	
@@ -148,35 +148,35 @@
 	}
 
 	function reOrient(){ 
-		xgds3dview.planManager.reOrient();
+		xgds3dview.context.planManager.reOrient();
 	}
 
 	function savePlan(newName,newVersion,newNotes){ 
-		return xgds3dview.planManager.savePlan(newName,newVersion,newNotes);
+		return xgds3dview.context.planManager.savePlan(newName,newVersion,newNotes);
 	}
 
 	function toggleLayerTree() {
-		if (xgds3dview.layerTree !== undefined){
-			if (!xgds3dview.layerTree.layersInitialized) {
+		if (xgds3dview.context.layerTree !== undefined){
+			if (!xgds3dview.context.layerTree.layersInitialized) {
 				alert('Layers not yet loaded.');
 			} else {
-                xgds3dview.layerTree.toggle();
+                xgds3dview.context.layerTree.toggle();
             }
 		}
 	}
 
 	function refreshLayerTree() {
-        if (xgds3dview.layerTree !== undefined){
-            xgds3dview.layerTree.refresh();
+        if (xgds3dview.context.layerTree !== undefined){
+            xgds3dview.context.layerTree.refresh();
         }
 	}
 
 	function toggleTransparencySliders() {
-		if (xgds3dview.layerTree !== undefined){
-			if (!xgds3dview.layerTree.layersInitialized) {
+		if (xgds3dview.context.layerTree !== undefined){
+			if (!xgds3dview.context.layerTree.layersInitialized) {
 				alert('Layers not yet loaded.');
 			} else {
-                xgds3dview.layerTree.toggleTransparencySliders();
+                xgds3dview.context.layerTree.toggleTransparencySliders();
             }
 		}
 	}
@@ -188,5 +188,5 @@
  * @param value true|false
  */
 function setCameraControl(name, value) {
-		xgds3dview.viewerWrapper.setCameraFlag(name, value);
+		xgds3dview.context.viewerWrapper.setCameraFlag(name, value);
 	}

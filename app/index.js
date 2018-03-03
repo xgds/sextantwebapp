@@ -19,9 +19,6 @@ import 'bootstrap-loader';
 import {config} from 'config_loader';
 import {ViewerWrapper, zoom, heading, DynamicLines} from 'cesium_util/cesiumlib';
 
-
-
-
 import {TrackSSE} from 'sse/trackSseUtils';
 import {PlanManager, xgdsPlanManager} from 'plan/plan';
 import {LayerTree} from 'tree/layerTree';
@@ -33,6 +30,7 @@ import {GroundOverlayTimeManager} from 'cesium_util/groundOverlayTimeManager';
 const hasSSE = ('mode' in config && config.mode == 'XGDS_SSE');
 const STANDALONE = ('mode' in config && config.mode == 'STANDALONE');
 
+const context = {};
 let viewerWrapper = undefined;
 let gps_tracks = undefined;
 let tsse = undefined;
@@ -50,7 +48,7 @@ function addGPSLocation(data){
         coordsContainer.innerHTML = wrappedCoords+coordsContainer.innerHTML;
         gps_tracks.addPoint(coords.latitude, coords.longitude);
     }
-}
+};
 
 /*
  * @function initialize
@@ -65,6 +63,7 @@ function initialize(container, terrainExaggeration) {
         terrainExaggeration = 1;
     }
     viewerWrapper = new ViewerWrapper(config.urlPrefix, config.server.cesium_port, config.server.nginx_prefix, terrainExaggeration, container);
+    context['viewerWrapper'] = viewerWrapper;
     viewerWrapper.scene.camera.flyTo({
         destination: config.destination,
         duration: 3,
@@ -74,38 +73,47 @@ function initialize(container, terrainExaggeration) {
 
     if (hasSSE) {
         tsse = new TrackSSE(viewerWrapper);
+        context['tsse'] = tsse;
         planManager = new xgdsPlanManager(viewerWrapper);
+        context['planManager'] = planManager;
     } else if (STANDALONE) {
         gps_tracks = new DynamicLines(viewerWrapper);
+        context['gps_tracks'] = gps_tracks;
         planManager = new PlanManager(viewerWrapper);
+        context['planManager'] =planManager;
     }
 
     // Load the kml configured if any
     kmlManager = new KmlManager(viewerWrapper);
+    context['kmlManager'] = kmlManager;
 
     // Load the image layers configured if any
     imageLayerManager = new ImageLayerManager(viewerWrapper);
+    context['imageLayerManager'] = imageLayerManager;
 
     // Set up the ground overlay time manager
     groundOverlayTimeManager = new GroundOverlayTimeManager(viewerWrapper);
+    context['groundOverlayTimeManager'] = groundOverlayTimeManager;
 
     if (config.layer_tree_url !== undefined){
         layerTree = new LayerTree(viewerWrapper, 'layersPopup', kmlManager, imageLayerManager, groundOverlayTimeManager);
+        context['layerTree'] = layerTree;
     }
 };
 
 module.exports = {
     'config': config,
-    'viewerWrapper': viewerWrapper,
+    // 'viewerWrapper': viewerWrapper,
     'addGPSLocation': addGPSLocation,
     'zoom': zoom,
     'heading': heading,
-    'tsse': tsse,
-    'planManager': planManager,
-    'gps_tracks': gps_tracks,
+    // 'tsse': tsse,
+    // 'planManager': planManager,
+    // 'gps_tracks': gps_tracks,
     'connectedDevices' : config.connectedDevices,
-    'layerTree': layerTree,
+    // 'layerTree': layerTree,
     '$':$,
-    'initialize': initialize
+    'initialize': initialize,
+    'context': context
 };
 
