@@ -103,15 +103,10 @@ function initialize(container, terrainExaggeration) {
 
 module.exports = {
     'config': config,
-    // 'viewerWrapper': viewerWrapper,
     'addGPSLocation': addGPSLocation,
     'zoom': zoom,
     'heading': heading,
-    // 'tsse': tsse,
-    // 'planManager': planManager,
-    // 'gps_tracks': gps_tracks,
     'connectedDevices' : config.connectedDevices,
-    // 'layerTree': layerTree,
     '$':$,
     'initialize': initialize,
     'context': context
