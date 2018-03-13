@@ -47,11 +47,11 @@
 	}
 	
 	function zoom(){
-		xgds3dview.context.zoom(xgds3dview.context.viewerWrapper.viewer.scene.camera);
+		xgds3dview.zoom(xgds3dview.context.viewerWrapper.viewer.scene.camera);
 	}
 
 	function setHeading(){
-		xgds3dview.context.heading(90, xgds3dview.context.viewerWrapper.viewer.scene.camera);
+		xgds3dview.heading(90, xgds3dview.context.viewerWrapper.viewer.scene.camera);
 	}
 
 	function zoomToTracks(){
@@ -85,49 +85,7 @@
 		}
 	}
 
-	
-	function serialstatus(){
-		console.log('serialstatus0')
-		xgds3dview.context.serialrequest.connect();
-		xgds3dview.context.serialrequest.requestData();
-	}
-	
-	function getwaypoints(){
-		console.log('getting waypoints');
-		xgds3dview.context.getwaypoints.connect();
-		xgds3dview.context.getwaypoints.requestData();
-	}
-	
-	function drawpextant(){
-		xgds3dview.context.getwaypoints.send("bla")
-	}
-	
-	function getpextant(){
-		console.log('getting waypoints');
-		xgds3dview.context.getpextant.connect();
-		xgds3dview.context.getpextant.requestData();
-	}
-	
-	function getpextantFromHere(){
-		console.log('pextant from here');
-		console.log(xgds3dview.context.globalpoint());
 
-		document.getElementById("globalpoint").innerHTML =JSON.stringify(xgds3dview.context.globalpoint());
-
-		xgds3dview.context.getpextant.connect();
-		xgds3dview.context.getpextant.send(JSON.stringify(xgds3dview.context.globalpoint()));
-	}
-
-	function calibrate(){
-		console.log('pextant from here');
-		console.log(xgds3dview.context.globalpoint());
-
-		document.getElementById("globalpoint").innerHTML =JSON.stringify(xgds3dview.context.globalpoint());
-
-		xgds3dview.context.calibrate.connect();
-		xgds3dview.context.calibrate.send(JSON.stringify(xgds3dview.context.globalpoint()));
-	}
-	
 	function reloadPlan() {
 		if (xgds3dview.context.planManager !== undefined){
 			xgds3dview.context.planManager.fetchPlan();
@@ -141,9 +99,6 @@
 	}
 	
 	function toggleEditMode(){
-		//let button = $("#editButton");
-		//let state = button.prop('checked');
-		//window.editMode = state;
          window.editMode ^= true;
 	}
 
