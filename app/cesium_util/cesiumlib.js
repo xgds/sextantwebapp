@@ -486,6 +486,15 @@ class ViewerWrapper{
             }
 
         });
+    };
+
+    /*
+     * @function setCurrentTime
+     * @param newTime in milliseconds
+     */
+    setCurrentTime(newTime) {
+        let julianTime = Cesium.JulianDate.fromDate(new Date(newTime));
+        this.clock.currentTime = julianTime;
     }
 }
 

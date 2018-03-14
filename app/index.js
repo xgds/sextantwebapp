@@ -99,6 +99,7 @@ function initialize(container, terrainExaggeration) {
         layerTree = new LayerTree(viewerWrapper, 'layersPopup', kmlManager, imageLayerManager, groundOverlayTimeManager);
         context['layerTree'] = layerTree;
     }
+    return context;
 };
 
 module.exports = {
