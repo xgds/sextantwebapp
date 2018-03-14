@@ -75,15 +75,14 @@ module.exports = (env = ENV_DEFAULTS) => {
               $: 'jquery',
               jQuery: 'jquery',
               jquery: 'jquery'
-            }),
-            new ExtractTextPlugin({filename:"styles.css",
-                                   allChunks: true})
+            })
+            // new ExtractTextPlugin({filename:"styles.css",
+            //                        allChunks: true})
         ],
         module: {
             // noParse: [
             //     /.pako_inflate.js/ //this module seems to cause some warning apparently
             // ],
-            //unknownContextCritical: false,
             rules: [
                 {
                     test: /\.jsx?$/,
@@ -91,17 +90,10 @@ module.exports = (env = ENV_DEFAULTS) => {
                         loader: "babel-loader",
                         options: {
                             plugins: ["transform-runtime"]
-                            //presets: ["@babel/preset-env", { "modules": false }]
-                            //presets: ["env", "react", "stage-0"]
                         }
                     }
                     ],
                     exclude: [nodeModulesPath]
-                    // query: {
-                    //     plugins: ["transform-runtime"], //Don"t know why needed, but recommended
-                    //     presets: ["es2015", "stage-0", "react"]
-                    // },
-
                 },
                 {
                     test: /\.js$/,
@@ -110,11 +102,7 @@ module.exports = (env = ENV_DEFAULTS) => {
                         loader: "babel-loader",
                         options: {
                             plugins: ["transform-runtime"]
-                            //presets: ["@babel/preset-env", { "modules": false }]
-                            //presets: ["env", "react", "stage-0"]
                         }
-                        //options: {presets: ["env", "react", "stage-0"] //, { "modules": false }
-                        //}
                     }]
                 },
                 // {
@@ -132,47 +120,72 @@ module.exports = (env = ENV_DEFAULTS) => {
                 //     }]
                 // },
                 {
-                    test: /\.css$/,
-                    use: ExtractTextPlugin.extract({
-                        fallback: "style-loader",
-                        use: [{
-                                    loader: 'css-loader'
-                            /*
-                                    options: {
-                                        // If you are having trouble with urls not resolving add this setting.
-                                        // See https://github.com/webpack-contrib/css-loader#url
-                                        url: false,
-                                        minimize: true,
-                                        sourceMap: true
-                                        // alias: { "./Viewer": path.join(cesiumSource, "Widgets", "Viewer"),
-                                        //          "./Animation": path.join(cesiumSource, "Widgets", "Animation"),
-                                        //          "./BaseLayerPicker": path.join(cesiumSource, "Widgets", "BaseLayerPicker"),
-                                        //          "./Cesium3DTilesInspector": path.join(cesiumSource, "Widgets", "Cesium3DTilesInspector"),
-                                        //          "./CesiumWidget": path.join(cesiumSource, "Widgets", "CesiumWidget"),
-                                        //          "./FullscreenButton": path.join(cesiumSource, "Widgets", "FullscreenButton"),
-                                        //          "./Geocoder": path.join(cesiumSource, "Widgets", "Geocoder"),
-                                        //          "./HomeButton": path.join(cesiumSource, "Widgets", "HomeButton"),
-                                        //          "./Images": path.join(cesiumSource, "Widgets", "Images"),
-                                        //          "./InfoBox": path.join(cesiumSource, "Widgets", "InfoBox"),
-                                        //          "./NavigationHelpButton": path.join(cesiumSource, "Widgets", "NavigationHelpButton"),
-                                        //          "./PerformanceWatchdog": path.join(cesiumSource, "Widgets", "PerformanceWatchdog"),
-                                        //          "./SceneModePicker": path.join(cesiumSource, "Widgets", "SceneModePicker"),
-                                        //          "./SelectionIndicator": path.join(cesiumSource, "Widgets", "SelectionIndicator"),
-                                        //          "./Timeline": path.join(cesiumSource, "Widgets", "Timeline"),
-                                        //          "./VRButton": path.join(cesiumSource, "Widgets", "VRButton")
-                                        // }
-                                    }
-                                    */
-                                },
-                                {
-                                    loader: 'sass-loader',
-                                    options: {
-                                        sourceMap: true
-                                    }
-                                }
-                              ]
-                    })
+                test: /\.css$/,
+                use: [
+                    {
+                        loader: "style-loader",
+                        options: {
+                            sourceMap: true,
+                            includePaths:['node_modules'],
+                        }
+                    },
+                    {
+                        loader: "css-loader",
+                        options: {
+                            sourceMap: true,
+                            includePaths:['node_modules'],
+                        }
+                    }
+                    // {
+                    //     loader: 'sass-loader',
+                    //     options: {
+                    //         sourceMap: true
+                    //     }
+                    // }
+                ]
                 },
+                // {
+                //     test: /\.css$/,
+                //     use: ExtractTextPlugin.extract({
+                //         fallback: "style-loader",
+                //         use: [{
+                //                     loader: 'css-loader'
+                //             /*
+                //                     options: {
+                //                         // If you are having trouble with urls not resolving add this setting.
+                //                         // See https://github.com/webpack-contrib/css-loader#url
+                //                         url: false,
+                //                         minimize: true,
+                //                         sourceMap: true
+                //                         // alias: { "./Viewer": path.join(cesiumSource, "Widgets", "Viewer"),
+                //                         //          "./Animation": path.join(cesiumSource, "Widgets", "Animation"),
+                //                         //          "./BaseLayerPicker": path.join(cesiumSource, "Widgets", "BaseLayerPicker"),
+                //                         //          "./Cesium3DTilesInspector": path.join(cesiumSource, "Widgets", "Cesium3DTilesInspector"),
+                //                         //          "./CesiumWidget": path.join(cesiumSource, "Widgets", "CesiumWidget"),
+                //                         //          "./FullscreenButton": path.join(cesiumSource, "Widgets", "FullscreenButton"),
+                //                         //          "./Geocoder": path.join(cesiumSource, "Widgets", "Geocoder"),
+                //                         //          "./HomeButton": path.join(cesiumSource, "Widgets", "HomeButton"),
+                //                         //          "./Images": path.join(cesiumSource, "Widgets", "Images"),
+                //                         //          "./InfoBox": path.join(cesiumSource, "Widgets", "InfoBox"),
+                //                         //          "./NavigationHelpButton": path.join(cesiumSource, "Widgets", "NavigationHelpButton"),
+                //                         //          "./PerformanceWatchdog": path.join(cesiumSource, "Widgets", "PerformanceWatchdog"),
+                //                         //          "./SceneModePicker": path.join(cesiumSource, "Widgets", "SceneModePicker"),
+                //                         //          "./SelectionIndicator": path.join(cesiumSource, "Widgets", "SelectionIndicator"),
+                //                         //          "./Timeline": path.join(cesiumSource, "Widgets", "Timeline"),
+                //                         //          "./VRButton": path.join(cesiumSource, "Widgets", "VRButton")
+                //                         // }
+                //                     }
+                //                     */
+                //                 },
+                //                 {
+                //                     loader: 'sass-loader',
+                //                     options: {
+                //                         sourceMap: true
+                //                     }
+                //                 }
+                //               ]
+                //     })
+                // },
                 {test: /\.less$/, use: ["style-loader", "css-loader", "less-loader"]},
                 {
                     test: /\.(?:png|jpe?g|woff|woff2|eot|ttf|svg|gif|glsl)$/, use: [{
