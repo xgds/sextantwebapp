@@ -319,6 +319,7 @@ class LayerTree {
             options.tileHeight = data.node.data.tileHeight;
             options.minimumLevel = data.node.data.minLevel;
             options.maximumLevel = data.node.data.maxLevel;
+
             let wmsVersion = data.node.data.wmsVersion;
             if (wmsVersion == '1.1.1' || wmsVersion == '1.1.0') {
                 options.srs = data.node.data.srs;
@@ -329,6 +330,11 @@ class LayerTree {
             if (_.isUndefined(options.format)){
                 options.format = 'image/png';
             }
+            options.hasTime = data.node.data.hasTime;
+            options.start = data.node.data.start;
+            options.end = data.node.data.end;
+            options.interval = data.node.data.interval;
+
             options.parameters = {format:options.format,
                                   transparent: true,
                                   version: wmsVersion

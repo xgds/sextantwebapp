@@ -68,12 +68,6 @@ class GroundOverlayTimeManager extends ElementManager{
         options.ellipsoid = this.viewerWrapper.ellipsoid;
         options.clock = this.viewerWrapper.clock;
         if (Cesium.defined(options.start) && Cesium.defined(options.end)) {
-            //TODO this will call the server for every single tick.
-            // instead support intervals, do we really need to iterate through each?
-            // options.times = new Cesium.TimeInterval({
-            //     start: Cesium.JulianDate.fromIso8601(options.start),
-            //     stop: Cesium.JulianDate.fromIso8601(options.end)
-            // });
             options.times = buildTimeIntervalCollection(options.start, options.end, options.interval);
         }
         if (Cesium.defined(options.minLon)){

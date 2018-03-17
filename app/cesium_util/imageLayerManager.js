@@ -106,8 +106,19 @@ class ImageLayerManager extends ElementManager{
         let theUrl = String(options.url);
         options.ellipsoid = this.viewerWrapper.ellipsoid;
         if ('wms' in options && options.wms){
-            newImagery = new Cesium.WebMapServiceImageryProvider(options);
             theUrl = options.url + '/' + options.layers;
+            // add time parameter just in case
+            if (!('parameters' in options)){
+                options.parameters = {};
+            }
+            if (!_.isUndefined(options.hasTime) && options.hasTime) {
+                options.clock = this.viewerWrapper.clock;
+                if (Cesium.defined(options.start) && Cesium.defined(options.end)) {
+                    options.times = buildTimeIntervalCollection(options.start, options.end, options.interval);
+                }
+            }
+            newImagery = new Cesium.WebMapServiceImageryProvider(options);
+
         } else if ('wmts' in options && options.wmts) {
             options.times = buildTimeIntervalCollection(options.start, options.end, options.interval);
             options.clock = this.viewerWrapper.clock;
