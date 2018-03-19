@@ -495,7 +495,26 @@ class ViewerWrapper{
     setCurrentTime(newTime) {
         let julianTime = Cesium.JulianDate.fromDate(new Date(newTime));
         this.clock.currentTime = julianTime;
+    };
+
+    /*
+     * @function setClock
+     * @param start in milliseconds
+     * @param end in milliseconds
+     * @param current in milliseconds (current time) (optional)
+     */
+    setClock(start, end, current) {
+        if (_.isUndefined(current)) {
+            current = end;
+        }
+        let julianTime = Cesium.JulianDate.fromDate(new Date(current));
+        this.clock.currentTime = julianTime;
+        this.clock.startTime = Cesium.JulianDate.fromDate(new Date(start));
+        this.clock.endTime = Cesium.JulianDate.fromDate(new Date(end));
+
     }
+
+
 }
 
 // We are no longer using this class, we are using path instead.

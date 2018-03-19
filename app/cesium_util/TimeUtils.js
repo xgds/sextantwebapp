@@ -24,7 +24,7 @@ const moment = require('moment');
  *
  * @param start Start time as iso8601 string
  * @param end end time as iso8601 string
- * @param interval the interval in seconds between start and end
+ * @param interval the interval in seconds between start and end, optional
  */
 const buildTimeIntervalCollection = function(start, end, interval){
     let jdates = [];
@@ -37,6 +37,34 @@ const buildTimeIntervalCollection = function(start, end, interval){
     }
 
     return Cesium.TimeIntervalCollection.fromJulianDateArray({julianDates:jdates});
+
+    /*
+    let lastTime = moment(start);
+    let julianLastTime = Cesium.JulianDate.fromIso8601(lastTime.format());
+    let theEnd = moment(end);
+    if (!_.isEmpty((interval))) {
+        let intervals = [];
+        while (lastTime.isSameOrBefore(theEnd)) {
+            let julianNextTime = Cesium.JulianDate.fromIso8601(lastTime.format());
+            let newInterval = new Cesium.TimeInterval({
+                start : julianLastTime,
+                stop : julianNextTime,
+                isStartIncluded : true,
+                isStopIncluded : false,
+                data : {'Time': julianLastTime}
+            });
+            intervals.push(newInterval);
+            julianLastTime = julianNextTime;
+        }
+        return new Cesium.TimeIntervalCollection(intervals);
+    } else {
+        let jdates = [];
+        jdates.push(lastTime);
+        jdates.push(theEnd);
+        return Cesium.TimeIntervalCollection.fromJulianDateArray({julianDates:jdates});
+    }
+
+    */
 
 }
 
