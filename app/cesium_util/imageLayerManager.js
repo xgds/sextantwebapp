@@ -146,15 +146,18 @@ class ImageLayerManager extends ElementManager{
                 options.url = new Cesium.Resource(resourceOptions);
 
                 let tempImagery = Cesium.createTileMapServiceImageryProvider(options);
+                console.log('using ready promise');
+                tempImagery.readyPromise.then(function() {
+                    //TODO test url
+                    //options.url = tempImagery.url;
+                    options.rectangle = tempImagery.rectangle;
+                    options.tilingScheme = tempImagery.tilingScheme;
+                    newImagery = new Cesium.UrlTemplateImageryProvider(options);
 
-                //TODO test
-                //options.url = tempImagery.url;
-                options.rectangle = tempImagery.rectangle;
-                options.tilingScheme = tempImagery.tilingScheme;
-                newImagery = new Cesium.UrlTemplateImageryProvider(options);
+                } );
             }
         }
-        if (newImagery !== undefined){
+        if (!_.isUndefined(newImagery)){
             //create new imagery layer
             // if (options.projectionName !== undefined) {
             //     newImageryLayer = new Cesium.ImageryLayer(newImagery, options);
@@ -172,9 +175,11 @@ class ImageLayerManager extends ElementManager{
 
 
             this.elementMap[theUrl] = newImageryLayer;
-            if (callback !== undefined) {
+            if (!_.isUndefined(callback)) {
                 callback(newImageryLayer);
             }
+        } else {
+            console.log('newImagery is undefined');
         }
         return newImageryLayer;
 
