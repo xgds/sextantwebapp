@@ -202,21 +202,18 @@ class LayerTree {
                     let settings = {
                         url: getRestUrl(data.node.data.childNodesUrl),
                         dataType: 'json',
-                        success: $.proxy(function (data) {
-                            if (!_.isUndefined(data) && data.length > 0) {
-                                $.each(data, function (index, datum) {
-                                    console.log(datum);
-                                    //app.vent.trigger('treeNode:loaded', datum);
-                                    //app.vent.trigger('mapNode:create', datum);
-                                    if (!_.isUndefined(datum.children)) {
-                                        $.each(datum.children, function (index, child) {
-                                            console.log(child);
-                                            //app.vent.trigger('mapNode:create', child);
-                                        });
-                                    }
-                                });
-                            }
-                        }, this),
+                        // success: $.proxy(function (data) {
+                        //     if (!_.isUndefined(data) && data.length > 0) {
+                        //         $.each(data, function (index, datum) {
+                        //             //console.log(datum);
+                        //             // if (!_.isUndefined(datum.children)) {
+                        //             //     $.each(datum.children, function (index, child) {
+                        //             //         //console.log(child);
+                        //             //     });
+                        //             // }
+                        //         });
+                        //     }
+                        // }, this),
                         error: $.proxy(function(xhr, textStatus, errorThrown) {
                             console.log(textStatus);
                         })

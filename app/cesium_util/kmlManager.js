@@ -82,11 +82,11 @@ class KmlManager extends ElementManager {
                      name: elementUrl,
                      camera: context.viewerWrapper.viewer.camera,
                      canvas: context.viewerWrapper.viewer.canvas,
-                     ellipsoid: this.viewerWrapper.ellipsoid
+                     //ellipsoid: this.viewerWrapper.ellipsoid   // it looks like my code change in cesiumjs only works for polygons now
                  };
 
                  // load text from a URL, setting a custom header
-                 let settings = {};
+                 let settings = {'url' : elementUrl};
                  if (!elementUrl.includes(config.server.name)){
                      if (Cesium.defined(config.xgds)) {
                          if (elementUrl.includes(config.xgds.name)) {
@@ -94,30 +94,18 @@ class KmlManager extends ElementManager {
                          }
                      }
                  }
-                 if ('headers' in settings) {
-                     settings['url'] = elementUrl;
-                     Cesium.Resource.fetchBlob(settings).then(function (blob) {
-                            context.viewerWrapper.viewer.dataSources.add(Cesium.KmlDataSource.load(blob, options)
-                         ).then(function (dataSource) {
-                             context.elementMap[elementUrl] = dataSource;
-                             if (callback !== undefined) {
-                                 callback(dataSource);
-                             }
-                         })
-                     }).otherwise(function (error) {
-                         console.log(error);
-                         alert('Problem loading kml: ' + elementUrl);
-                     });
-                 } else {
+                 let theResource = new Cesium.Resource(settings);
 
-                     this.viewerWrapper.viewer.dataSources.add(Cesium.KmlDataSource.load(elementUrl, options)
-                     ).then(function (dataSource) {
+                 Cesium.KmlDataSource.load(theResource, options).then(function(dataSource) {
+                         context.viewerWrapper.viewer.dataSources.add(dataSource);
                          context.elementMap[elementUrl] = dataSource;
-                         if (callback !== undefined) {
+                         if (!_.isUndefined(callback)) {
                              callback(dataSource);
                          }
-                     });
-                 }
+                     }).otherwise(function(error) {
+                        console.log(error);
+                        alert('Problem loading kml: ' + elementUrl);
+                    });
              } catch(err) {
                  console.log('Problem loading kml: ' + elementUrl);
                  console.log(err);
