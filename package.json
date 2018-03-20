@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack --progress",
     "start": "babel-node server.js --presets es2015,stage-2",
-    "postinstall": "cd node_modules/xgds-3d-view && cp temp/WebMapServiceImageryProvider.js node_modules/cesium/Source/Scene",
+    "postinstally": "cd node_modules/xgds-3d-view && cp temp/WebMapServiceImageryProvider.js node_modules/cesium/Source/Scene",
     "skip": "echo \"cd node_modules/cesium-navigation && npm install && node build.js\" "
   },
   "repository": {
