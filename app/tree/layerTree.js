@@ -303,6 +303,10 @@ class LayerTree {
             options.flipXY = false;
             // options.url = options.url + '/{z}/{x}/{y}.png';
         }
+        let presetTransparency = this.getTransparencyCookieValue(data.node.key);
+        if (!_.isUndefined(presetTransparency)){
+            data.node.data.transparency = presetTransparency;
+        }
         if (!_.isUndefined(data.node.data.transparency) && data.node.data.transparency > 0){
             options.alpha = this.calculateAlpha(data.node.data.transparency);
         }
@@ -558,6 +562,21 @@ class LayerTree {
         }
     };
 
+
+    getTransparencyCookieValue(node_id) {
+        let foundValue = Cookies.getJSON(node_id);
+        if (!_.isUndefined(foundValue)){
+            if ('transparency' in foundValue){
+                return foundValue.transparency;
+            }
+        }
+        return undefined;
+    };
+
+    setTransparencyCookieValue(node_id, value) {
+        Cookies.set(node_id, {transparency: value});
+    };
+
     handleTransparencySliderChange(event, ui) {
         let newValue = ui.value;
         let node_id = ui.handle.parentElement.id.substring(0, ui.handle.parentElement.id.length - 7);
@@ -570,7 +589,8 @@ class LayerTree {
         let transparencyValueSpan = $(ui.handle.parentElement.parentElement).find(transparencyValueID);
         $(transparencyValueSpan).html(newValue);
 
-        Cookies.set(node_id, {transparency: newValue});
+        context.setTransparencyCookieValue(node_id, newValue);
+
     };
 
     toggleTransparencySliders(rootNode) {

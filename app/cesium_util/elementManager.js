@@ -105,6 +105,18 @@ class ElementManager {
         }
     }
 
+     /**
+      * @function doShow
+      * @param elementUrl
+      * Add an element to the viewer if it was already loaded
+      * Otherwise, load it and then show it.
+      *
+      */
+    doShow(element){
+        console.log('DOSHOW FUNCTION UNDEFINED');
+        // pass
+    }
+
     /**
      * @function load
      * @param elementUrl
