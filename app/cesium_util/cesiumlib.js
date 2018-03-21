@@ -464,7 +464,7 @@ class ViewerWrapper{
             }
             // Change movement speed based on the distance of the camera to the surface of the ellipsoid.
             let cameraHeight = context.ellipsoid.cartesianToCartographic(camera.position).height;
-            let moveRate = cameraHeight / 100.0;
+            let moveRate = cameraHeight / 200.0;
 
             if (context.cameraFlags.forward) {
                 camera.moveForward(moveRate);
