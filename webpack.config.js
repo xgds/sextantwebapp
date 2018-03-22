@@ -13,6 +13,7 @@ const buildPath = path.resolve(__dirname, "public", "build");
 const indexPath = path.resolve(__dirname, "app", "index.js");
 const cesiumSource = path.resolve(__dirname,"node_modules", "cesium", "Source");
 const cesiumWorkers = "../Build/Cesium/Workers";
+const staticPath = path.resolve(__dirname, "static");
 
 // Cesium Navigation includes, this does not work the way cesium-navigation is packaged.
 // For now we have the files copied into our cesium_util directory.
@@ -70,6 +71,7 @@ module.exports = (env = ENV_DEFAULTS) => {
             new CopyWebpackPlugin([{from: path.join(cesiumSource, cesiumWorkers), to: "Workers"}]),
             new CopyWebpackPlugin([{from: path.join(cesiumSource, "Assets"), to: "Assets"}]),
             new CopyWebpackPlugin([{from: path.join(cesiumSource, "Widgets"), to: "Widgets"}]),
+            new CopyWebpackPlugin([{from: path.join(staticPath, "icons"), to: "icons"}]),
             new webpack.ProvidePlugin({
               // Make jQuery / $ available in every module:
               $: 'jquery',
