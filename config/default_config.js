@@ -79,13 +79,25 @@ module.exports = {
     showCoordinates : false,
     
     // TODO override with your key.
-    bing_key : '#TODO PUT IN YOUR BING KEY'
+    bing_key : '#TODO PUT IN YOUR BING KEY',
 
 	// if you want express to add cors headers because pages from this server will be included in other websites
     //cors: true,
 
 	// if you have other external websites that require authorization add them here
     //trustedServers: [{'name':'myhostname.com', 'port':80}]
+
+	showTimeline: true,
+
+	hideFooter: false,
+
+	showNav: true,
+
+	//mouseControls: 'flatPan',
+	panScale: 400,  // Divide camera height by this number when panning with mouseControls
+	zoomScale: 200 // Divide camera height by this number when zooming with mouseControls
+
+	//hideConnected: true
 
 
 }

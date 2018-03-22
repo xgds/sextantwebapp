@@ -81,7 +81,7 @@ class KmlManager extends ElementManager {
                  let options = {
                      name: elementUrl,
                      camera: context.viewerWrapper.viewer.camera,
-                     canvas: context.viewerWrapper.viewer.canvas,
+                     canvas: context.viewerWrapper.viewer.canvas
                      //ellipsoid: this.viewerWrapper.ellipsoid   // it looks like my code change in cesiumjs only works for polygons now
                  };
 

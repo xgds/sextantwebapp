@@ -451,6 +451,8 @@ class ViewerWrapper{
         this.toggleNavigation(false);
 
         let context = this;
+        const zoomScale = Cesium.defaultValue(config.zoomScale, 200);
+        const panScale = Cesium.defaultValue(config.panScale, 400);
 
         this.viewer.clock.onTick.addEventListener(function(clock) {
             let camera = context.viewer.camera;
@@ -464,25 +466,37 @@ class ViewerWrapper{
             }
             // Change movement speed based on the distance of the camera to the surface of the ellipsoid.
             let cameraHeight = context.ellipsoid.cartesianToCartographic(camera.position).height;
-            let moveRate = cameraHeight / 200.0;
+            let moveRate = camera.defaultMoveAmount;
 
             if (context.cameraFlags.forward) {
+                moveRate = cameraHeight / zoomScale;
                 camera.moveForward(moveRate);
+                return;
             }
             if (context.cameraFlags.backward) {
+                moveRate = cameraHeight / zoomScale;
                 camera.moveBackward(moveRate);
+                return;
             }
             if (context.cameraFlags.up) {
+                moveRate = cameraHeight / panScale;
                 camera.moveUp(moveRate);
+                return;
             }
             if (context.cameraFlags.down) {
+                moveRate = cameraHeight / panScale;
                 camera.moveDown(moveRate);
+                return;
             }
             if (context.cameraFlags.left) {
+                moveRate = cameraHeight / panScale;
                 camera.moveLeft(moveRate);
+                return;
             }
             if (context.cameraFlags.right) {
+                moveRate = cameraHeight / panScale;
                 camera.moveRight(moveRate);
+                return;
             }
 
         });
