@@ -31,7 +31,7 @@ const $ = require('jquery');
 
 const fancytree = require('jquery.fancytree');
 require('jquery.fancytree/dist/modules/jquery.fancytree.filter');
-require('jquery.fancytree/dist/modules/jquery.fancytree.select');
+//require('jquery.fancytree/dist/modules/jquery.fancytree.select');
 require('jquery.fancytree/dist/modules/jquery.fancytree.ui-deps');
 
 require('jquery.fancytree/dist/modules/jquery.fancytree.persist');
