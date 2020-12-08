@@ -28,7 +28,8 @@ if (config.server.nginx_prefix !== undefined) {
 
 const Cesium = require('cesium/Cesium');
 
-Cesium.BingMapsApi.defaultKey = global.config.bing_key;
+if (global.config.bing_key != null)
+    Cesium.BingMapsApi.defaultKey = global.config.bing_key;
 
 import {projectionManager} from "cesium_util/projectionManager";
 
