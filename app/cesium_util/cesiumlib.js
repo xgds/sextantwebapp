@@ -116,6 +116,7 @@ class ViewerWrapper{
             homeButton : false,
             navigationHelpButton : false,
             geocoder : false,
+	    imageryProvider : false,
             sceneModePicker : false,
             creditContainer : 'credits',
             terrainExaggeration : terrainExaggeration,
